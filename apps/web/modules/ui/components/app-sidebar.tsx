@@ -84,7 +84,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-             <UnifiedWorkspaceSwitcher />
+             <UnifiedWorkspaceSwitcher isSidebar />
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>

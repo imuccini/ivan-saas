@@ -9,11 +9,11 @@ import {
 	DropdownMenuGroup,
 	DropdownMenuItem,
 	DropdownMenuLabel,
-	DropdownMenuRadioGroup,
-	DropdownMenuRadioItem,
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
+	DropdownMenuCheckboxItem,
 } from "@ui/components/dropdown-menu";
+import { sidebarMenuButtonVariants } from "@ui/components/sidebar";
 import { cn } from "@ui/lib";
 import {
 	ArrowRightLeftIcon,
@@ -26,8 +26,10 @@ import { useRouter } from "next/navigation";
 
 export function UnifiedWorkspaceSwitcher({
 	className,
+	isSidebar,
 }: {
 	className?: string;
+	isSidebar?: boolean;
 }) {
 	const router = useRouter();
 	const { activeOrganization } = useActiveOrganization();
@@ -45,11 +47,24 @@ export function UnifiedWorkspaceSwitcher({
 			<DropdownMenuTrigger asChild>
 				<button
 					className={cn(
-						"flex items-center gap-2 rounded-md border p-2 text-left hover:bg-accent",
+						isSidebar
+							? sidebarMenuButtonVariants({
+									size: "lg",
+									variant: "default",
+								})
+							: "flex items-center gap-2 rounded-md border p-2 text-left hover:bg-accent",
+						"data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground",
 						className,
 					)}
 				>
-					<div className="flex size-8 items-center justify-center rounded-md border bg-background">
+					<div
+						className={cn(
+							"flex size-8 items-center justify-center rounded-lg",
+							isSidebar
+								? "bg-sidebar-primary text-sidebar-primary-foreground"
+								: "border bg-background",
+						)}
+					>
 						<LayoutGridIcon className="size-4" />
 					</div>
 					<div className="grid flex-1 text-left text-sm leading-tight">
@@ -74,25 +89,26 @@ export function UnifiedWorkspaceSwitcher({
 				<DropdownMenuLabel className="text-xs text-muted-foreground">
 					Workspaces
 				</DropdownMenuLabel>
-				<DropdownMenuRadioGroup
-					value={activeWorkspace?.slug ?? workspaces?.[0]?.slug}
-					onValueChange={(slug) => {
-						router.push(`/app/${activeOrganization.slug}/${slug}`);
-					}}
-				>
-					{workspaces?.map((workspace) => (
-						<DropdownMenuRadioItem
-							key={workspace.id}
-							value={workspace.slug}
-							className="gap-2 p-2"
-						>
-							<div className="flex size-6 items-center justify-center rounded-md border bg-background">
-								<LayoutGridIcon className="size-4" />
-							</div>
-							{workspace.name}
-						</DropdownMenuRadioItem>
-					))}
-				</DropdownMenuRadioGroup>
+				{workspaces?.map((workspace) => (
+					<DropdownMenuCheckboxItem
+						key={workspace.id}
+						checked={
+							workspace.slug ===
+							(activeWorkspace?.slug ?? workspaces?.[0]?.slug)
+						}
+						onCheckedChange={() => {
+							router.push(
+								`/app/${activeOrganization.slug}/${workspace.slug}`,
+							);
+						}}
+						className="gap-2 py-2 pr-2 pl-8"
+					>
+						<div className="flex size-6 items-center justify-center rounded-md border bg-background">
+							<LayoutGridIcon className="size-4" />
+						</div>
+						{workspace.name}
+					</DropdownMenuCheckboxItem>
+				))}
 				<DropdownMenuSeparator />
 				<DropdownMenuLabel className="text-xs text-muted-foreground">
 					{activeOrganization.name}
