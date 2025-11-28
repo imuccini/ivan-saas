@@ -22,6 +22,7 @@ import {
 	BookIcon,
 	HardDriveIcon,
 	HomeIcon,
+	LayoutGridIcon,
 	LogOutIcon,
 	MoonIcon,
 	MoreVerticalIcon,
@@ -142,6 +143,13 @@ export function UserMenu({ showUserName }: { showUserName?: boolean }) {
 				</DropdownMenuSub>
 
 				<DropdownMenuSeparator />
+
+				<DropdownMenuItem asChild>
+					<Link href="/app">
+						<LayoutGridIcon className="mr-2 size-4" />
+						Workspaces
+					</Link>
+				</DropdownMenuItem>
 
 				<DropdownMenuItem asChild>
 					<Link href="/app/settings/general">

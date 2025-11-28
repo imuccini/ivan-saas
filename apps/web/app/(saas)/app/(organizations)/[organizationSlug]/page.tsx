@@ -1,49 +1,37 @@
-import { getActiveOrganization } from "@saas/auth/lib/server";
-import OrganizationStart from "@saas/organizations/components/OrganizationStart";
-import { PageHeader } from "@saas/shared/components/PageHeader";
-import { notFound } from "next/navigation";
-import { getTranslations } from "next-intl/server";
+"use client";
 
-export async function generateMetadata({
-	params,
-}: {
-	params: Promise<{ organizationSlug: string }>;
-}) {
-	const { organizationSlug } = await params;
+import { useActiveOrganization } from "@saas/organizations/hooks/use-active-organization";
+import { useWorkspaceListQuery } from "@saas/workspaces/lib/api";
+import { Loader2Icon } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
-	const activeOrganization = await getActiveOrganization(
-		organizationSlug as string,
+export default function OrganizationPage() {
+	const { activeOrganization } = useActiveOrganization();
+	const { data: workspaces, isLoading } = useWorkspaceListQuery(
+		activeOrganization?.id ?? "",
 	);
+	const router = useRouter();
 
-	return {
-		title: activeOrganization?.name,
-	};
-}
+	useEffect(() => {
+		if (isLoading || !activeOrganization) {
+			return;
+		}
 
-export default async function OrganizationPage({
-	params,
-}: {
-	params: Promise<{ organizationSlug: string }>;
-}) {
-	const { organizationSlug } = await params;
-	const t = await getTranslations();
-
-	const activeOrganization = await getActiveOrganization(
-		organizationSlug as string,
-	);
-
-	if (!activeOrganization) {
-		return notFound();
-	}
+		if (workspaces && workspaces.length > 0) {
+			router.replace(
+				`/app/${activeOrganization.slug}/${workspaces[0].slug}`,
+			);
+		} else {
+			router.replace(
+				`/app/${activeOrganization.slug}/settings/workspaces`,
+			);
+		}
+	}, [activeOrganization, workspaces, isLoading, router]);
 
 	return (
-		<div>
-			<PageHeader
-				title={activeOrganization.name}
-				subtitle={t("organizations.start.subtitle")}
-			/>
-
-			<OrganizationStart />
+		<div className="flex h-full items-center justify-center">
+			<Loader2Icon className="size-8 animate-spin opacity-50" />
 		</div>
 	);
 }

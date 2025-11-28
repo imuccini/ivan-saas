@@ -103,6 +103,11 @@ export const useCreateOrganizationMutation = () => {
 				throw error;
 			}
 
+			await orpcClient.workspaces.create({
+				organizationId: data.id,
+				name: "Default Workspace",
+			});
+
 			return data;
 		},
 	});

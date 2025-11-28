@@ -2,6 +2,7 @@ import { config } from "@repo/config";
 import { getActiveOrganization } from "@saas/auth/lib/server";
 import { activeOrganizationQueryKey } from "@saas/organizations/lib/api";
 import { AppWrapper } from "@saas/shared/components/AppWrapper";
+import { ActiveWorkspaceProvider } from "@saas/workspaces/components/ActiveWorkspaceProvider";
 import { orpc } from "@shared/lib/orpc-query-utils";
 import { getServerQueryClient } from "@shared/lib/server";
 import { notFound } from "next/navigation";
@@ -40,5 +41,9 @@ export default async function OrganizationLayout({
 		);
 	}
 
-	return <AppWrapper>{children}</AppWrapper>;
+	return (
+		<ActiveWorkspaceProvider>
+			<AppWrapper>{children}</AppWrapper>
+		</ActiveWorkspaceProvider>
+	);
 }

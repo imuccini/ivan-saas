@@ -7,6 +7,7 @@ import { PageHeader } from "@saas/shared/components/PageHeader";
 import { SidebarContentLayout } from "@saas/shared/components/SidebarContentLayout";
 import {
 	CreditCardIcon,
+	LayoutGridIcon,
 	Settings2Icon,
 	TriangleAlertIcon,
 	Users2Icon,
@@ -51,6 +52,11 @@ export default async function SettingsLayout({
 					title: t("settings.menu.organization.general"),
 					href: `${organizationSettingsBasePath}/general`,
 					icon: <Settings2Icon className="size-4 opacity-50" />,
+				},
+				{
+					title: "Workspaces",
+					href: `${organizationSettingsBasePath}/workspaces`,
+					icon: <LayoutGridIcon className="size-4 opacity-50" />,
 				},
 				{
 					title: t("settings.menu.organization.members"),

@@ -137,9 +137,23 @@ model Organization {
     invitations        Invitation[]
     purchases          Purchase[]
     aiChats            AiChat[]
+    workspaces         Workspace[]
 
     @@unique([slug])
     @@map("organization")
+}
+
+model Workspace {
+    id             String       @id @default(cuid())
+    organizationId String
+    organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+    name           String
+    slug           String
+    createdAt      DateTime     @default(now())
+    updatedAt      DateTime     @updatedAt
+
+    @@unique([organizationId, slug])
+    @@map("workspace")
 }
 
 model Member {

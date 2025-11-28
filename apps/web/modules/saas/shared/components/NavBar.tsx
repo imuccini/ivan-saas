@@ -7,7 +7,6 @@ import { Logo } from "@shared/components/Logo";
 import { cn } from "@ui/lib";
 import {
 	BotMessageSquareIcon,
-	ChevronRightIcon,
 	HomeIcon,
 	SettingsIcon,
 	UserCog2Icon,
@@ -17,6 +16,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { OrganzationSelect } from "../../organizations/components/OrganizationSelect";
+import { UnifiedWorkspaceSwitcher } from "./UnifiedWorkspaceSwitcher";
 
 export function NavBar() {
 	const t = useTranslations();
@@ -100,23 +100,21 @@ export function NavBar() {
 						{config.organizations.enable &&
 							!config.organizations.hideOrganization && (
 								<>
-									<span
-										className={cn(
-											"hidden opacity-30 md:block",
-											{
-												"md:hidden": useSidebarLayout,
-											},
-										)}
-									>
-										<ChevronRightIcon className="size-4" />
-									</span>
-
-									<OrganzationSelect
-										className={cn({
-											"md:-mx-2 md:mt-2":
-												useSidebarLayout,
-										})}
-									/>
+									{activeOrganization ? (
+										<UnifiedWorkspaceSwitcher
+											className={cn({
+												"md:-mx-2 md:mt-2":
+													useSidebarLayout,
+											})}
+										/>
+									) : (
+										<OrganzationSelect
+											className={cn({
+												"md:-mx-2 md:mt-2":
+													useSidebarLayout,
+											})}
+										/>
+									)}
 								</>
 							)}
 					</div>

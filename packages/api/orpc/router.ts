@@ -6,6 +6,7 @@ import { newsletterRouter } from "../modules/newsletter/router";
 import { organizationsRouter } from "../modules/organizations/router";
 import { paymentsRouter } from "../modules/payments/router";
 import { usersRouter } from "../modules/users/router";
+import { workspacesRouter } from "../modules/workspaces/router";
 import { publicProcedure } from "./procedures";
 
 export const router = publicProcedure
@@ -16,9 +17,13 @@ export const router = publicProcedure
 		newsletter: newsletterRouter,
 		contact: contactRouter,
 		organizations: organizationsRouter,
+		workspaces: workspacesRouter,
 		users: usersRouter,
 		payments: paymentsRouter,
 		ai: aiRouter,
 	});
 
 export type ApiRouterClient = RouterClient<typeof router>;
+
+// Export type for inferring output types from the router
+export type RouterOutputs = ApiRouterClient;

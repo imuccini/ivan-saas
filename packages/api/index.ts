@@ -86,7 +86,7 @@ export const app = new Hono()
 			headers: c.req.raw.headers,
 		};
 
-		const isRpc = c.req.path.includes("/rpc/");
+		const isRpc = c.req.path.startsWith("/api/rpc");
 
 		const handler = isRpc ? rpcHandler : openApiHandler;
 
