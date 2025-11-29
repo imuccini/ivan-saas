@@ -3,9 +3,16 @@
 import * as CollapsiblePrimitive from "@radix-ui/react-collapsible"
 
 function Collapsible({
+  className,
   ...props
 }: React.ComponentProps<typeof CollapsiblePrimitive.Root>) {
-  return <CollapsiblePrimitive.Root data-slot="collapsible" {...props} />
+  return (
+    <CollapsiblePrimitive.Root
+      data-slot="collapsible"
+      className={className ? `group/collapsible ${className}` : "group/collapsible"}
+      {...props}
+    />
+  )
 }
 
 function CollapsibleTrigger({

@@ -59,13 +59,13 @@ export function UnifiedWorkspaceSwitcher({
 				>
 					<div
 						className={cn(
-							"flex size-8 items-center justify-center rounded-lg",
+							"flex aspect-square size-8 shrink-0 items-center justify-center rounded-lg",
 							isSidebar
 								? "bg-sidebar-primary text-sidebar-primary-foreground"
 								: "border bg-background",
 						)}
 					>
-						<LayoutGridIcon className="size-4" />
+						<LayoutGridIcon className="size-4 shrink-0" />
 					</div>
 					<div className="grid flex-1 text-left text-sm leading-tight">
 						<span className="truncate font-semibold">
