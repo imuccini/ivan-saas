@@ -57,8 +57,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     },
     {
       title: "Employees",
-      url: "#",
+      url: `${basePath}/employees`,
       icon: ShieldCheckIcon,
+      isActive: pathname.startsWith(`${basePath}/employees`),
       items: [
         { title: "Directory", url: `${basePath}/employees/directory`, isActive: pathname === `${basePath}/employees/directory` },
         { title: "Access Rules", url: `${basePath}/employees/access-rules`, isActive: pathname === `${basePath}/employees/access-rules` },

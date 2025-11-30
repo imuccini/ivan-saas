@@ -1,12 +1,207 @@
-export default function Page() {
+"use client";
+
+import { Alert, AlertDescription } from "@ui/components/alert";
+import { Badge } from "@ui/components/badge";
+import { Button } from "@ui/components/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@ui/components/card";
+import { 
+  Activity, 
+  AlertTriangle, 
+  ArrowRight, 
+  CheckCircle2, 
+  ChevronRight, 
+  Globe, 
+  Key,
+  Mail, 
+  Play,
+  Settings, 
+  Shield,
+  Sparkles, 
+  ThumbsUp,
+  Users,
+  Wifi, 
+  Zap 
+} from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+
+export default function GuestWifiPage() {
   return (
-    <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-      <div className="grid auto-rows-min gap-4 md:grid-cols-3">
-        <div className="aspect-video rounded-xl bg-muted/50" />
-        <div className="aspect-video rounded-xl bg-muted/50" />
-        <div className="aspect-video rounded-xl bg-muted/50" />
+    <div className="space-y-6">
+      {/* Status Card */}
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <div className="flex items-center gap-3">
+            <CardTitle className="text-xl font-bold">Service Status</CardTitle>
+            <Badge status="info" className="flex items-center gap-1">
+              <CheckCircle2 className="h-3 w-3" />
+              <span>Live in 4 Networks</span>
+            </Badge>
+          </div>
+          <Button size="sm" className="gap-2 bg-primary text-primary-foreground hover:bg-primary/90">
+            Deploy to Network <Play className="h-3 w-3" />
+          </Button>
+        </CardHeader>
+        <CardContent className="pt-6 space-y-6">
+          {/* Health Score + Alerts Row */}
+          <div className="flex flex-col gap-8 md:flex-row md:items-center">
+            {/* Health Score */}
+            <div className="relative flex h-24 w-24 flex-none items-center justify-center rounded-full border-4 border-muted border-t-green-500">
+              <div className="flex flex-col items-center">
+                <span className="text-2xl font-bold">98</span>
+                <span className="text-xs text-muted-foreground">Health</span>
+              </div>
+            </div>
+
+            {/* Alerts */}
+            <div className="flex-1 space-y-3">
+              {/* No Issues Alert */}
+              <Alert className="bg-background border">
+                <ThumbsUp className="h-4 w-4 text-green-500" />
+                <AlertDescription>
+                  You have <span className="font-bold">no</span> blocking issues
+                </AlertDescription>
+              </Alert>
+              
+              {/* Warning Alert */}
+              <Link href="#" className="block">
+                <Alert className="border-yellow-500/20 bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 [&>svg]:text-yellow-600 dark:[&>svg]:text-yellow-400 hover:bg-yellow-500/20 transition-colors cursor-pointer">
+                  <AlertTriangle className="h-4 w-4" />
+                  <AlertDescription className="flex items-center justify-between">
+                    <span>High latency detected on AP-North-01</span>
+                    <ChevronRight className="h-4 w-4 opacity-50 ml-2" />
+                  </AlertDescription>
+                </Alert>
+              </Link>
+            </div>
+          </div>
+
+          {/* Insights Row - 2 Columns */}
+          <div className="grid gap-4 md:grid-cols-2">
+            {/* Performance Insight */}
+            <div className="flex gap-3 rounded-lg border p-3">
+              <div className="flex h-8 w-8 flex-none items-center justify-center rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
+                <Zap className="h-4 w-4" />
+              </div>
+              <div>
+                <div className="text-sm font-medium">Performance</div>
+                <p className="text-sm text-muted-foreground">
+                  Network throughput is optimal. Peak usage observed at 2:00 PM.
+                </p>
+              </div>
+            </div>
+
+            {/* Configuration Insight */}
+            <div className="flex gap-3 rounded-lg border p-3">
+              <div className="flex h-8 w-8 flex-none items-center justify-center rounded-full bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400">
+                <Settings className="h-4 w-4" />
+              </div>
+              <div>
+                <div className="text-sm font-medium">Configuration</div>
+                <p className="text-sm text-muted-foreground">
+                  Guest portal active. Social login enabled.
+                </p>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Onboarding Section */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-bold">Onboarding</h2>
+          <Button size="sm" className="gap-2 bg-gradient-to-r from-indigo-500 to-purple-500 text-white hover:from-indigo-600 hover:to-purple-600 border-0">
+            <Sparkles className="h-3.5 w-3.5" />
+            AI Assisted Setup
+          </Button>
+        </div>
+
+        <div className="grid gap-6 md:grid-cols-2">
+          {/* Quick Actions */}
+          <div className="space-y-2">
+            <ActionRow 
+              icon={Settings} 
+              title="Onboarding Journey" 
+              description="Branding, Terms, Languages"
+              href="#" 
+            />
+            <ActionRow 
+              icon={Wifi} 
+              title="Guest WiFi SSID" 
+              description="Security, Bandwidth limits"
+              href="#" 
+            />
+            <ActionRow 
+              icon={Mail} 
+              title="Welcome Email" 
+              description="Template, Delivery settings"
+              href="#" 
+            />
+          </div>
+
+          {/* Portal Preview */}
+          <div className="relative h-[300px] rounded-lg border bg-muted/30 overflow-hidden">
+            <Image
+              src="/images/guest-wifi-onboarding.png"
+              alt="Onboarding Preview"
+              fill
+              className="object-cover"
+            />
+          </div>
+        </div>
       </div>
-      <div className="min-h-[100vh] flex-1 rounded-xl bg-muted/50 md:min-h-min" />
+
+      {/* Resources Section */}
+      <div className="space-y-3">
+        <h3 className="text-lg font-semibold">Related Resources</h3>
+        <div className="space-y-2">
+          <ActionRow 
+            icon={Users} 
+            title="Users" 
+            description="Manage guest user accounts and sessions."
+            href="#"
+          />
+          <ActionRow 
+            icon={Key} 
+            title="Access Codes" 
+            description="Generate and manage access codes."
+            href="#"
+          />
+          <ActionRow 
+            icon={Shield} 
+            title="Sponsors" 
+            description="Manage sponsor approvals and settings."
+            href="#"
+          />
+        </div>
+      </div>
     </div>
   );
+}
+
+function ActionRow({ icon: Icon, title, description, href }: { icon: any, title: string, description: string, href: string }) {
+  return (
+    <Link 
+      href={href}
+      className="flex items-center justify-between rounded-lg border p-3 transition-colors hover:bg-muted/50"
+    >
+      <div className="flex items-center gap-3">
+        <div className="flex h-8 w-8 flex-none items-center justify-center rounded-md bg-muted text-muted-foreground">
+          <Icon className="h-4 w-4" />
+        </div>
+        <div>
+          <div className="text-sm font-medium leading-none">{title}</div>
+          <div className="text-xs text-muted-foreground mt-1">{description}</div>
+        </div>
+      </div>
+      <ChevronRight className="h-4 w-4 text-muted-foreground" />
+    </Link>
+  )
 }

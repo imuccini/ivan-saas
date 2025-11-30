@@ -51,12 +51,23 @@ export function NavMain({
                 </CollapsibleTrigger>
               ) : (
                 <>
-                  <SidebarMenuButton asChild tooltip={item.title} isActive={item.isActive}>
-                    <a href={item.url}>
-                      <item.icon />
-                      <span>{item.title}</span>
-                    </a>
-                  </SidebarMenuButton>
+                  {item.items?.length ? (
+                    <CollapsibleTrigger asChild>
+                      <SidebarMenuButton asChild tooltip={item.title} isActive={item.isActive}>
+                        <a href={item.url}>
+                          <item.icon />
+                          <span>{item.title}</span>
+                        </a>
+                      </SidebarMenuButton>
+                    </CollapsibleTrigger>
+                  ) : (
+                    <SidebarMenuButton asChild tooltip={item.title} isActive={item.isActive}>
+                      <a href={item.url}>
+                        <item.icon />
+                        <span>{item.title}</span>
+                      </a>
+                    </SidebarMenuButton>
+                  )}
                   {item.items?.length ? (
                     <CollapsibleTrigger asChild>
                       <SidebarMenuAction className="data-[state=open]:rotate-90">
