@@ -39,13 +39,16 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     ? `/app/${activeOrganization.slug}/${workspaceSlug}`
     : "/app"
 
-  const navMain = [
+  const navLaunchpad = [
     {
-      title: "Status",
+      title: "Launchpad",
       url: basePath,
       icon: ActivityIcon,
       isActive: pathname === basePath,
     },
+  ]
+
+  const navMain = [
     {
       title: "Guest WiFi",
       url: `${basePath}/guest-wifi`,
@@ -57,10 +60,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       url: "#",
       icon: ShieldCheckIcon,
       items: [
-        { title: "Directory", url: `${basePath}/employees/directory` },
-        { title: "Access Rules", url: `${basePath}/employees/access-rules` },
-        { title: "BYOD", url: `${basePath}/employees/byod` },
-        { title: "Managed Devices", url: `${basePath}/employees/managed-devices` },
+        { title: "Directory", url: `${basePath}/employees/directory`, isActive: pathname === `${basePath}/employees/directory` },
+        { title: "Access Rules", url: `${basePath}/employees/access-rules`, isActive: pathname === `${basePath}/employees/access-rules` },
+        { title: "BYOD", url: `${basePath}/employees/byod`, isActive: pathname === `${basePath}/employees/byod` },
+        { title: "Managed Devices", url: `${basePath}/employees/managed-devices`, isActive: pathname === `${basePath}/employees/managed-devices` },
       ],
     },
     {
@@ -69,14 +72,17 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       icon: CpuIcon,
       isActive: pathname.startsWith(`${basePath}/iot`),
     },
+  ]
+
+  const navOperations = [
     {
       title: "Monitor",
       url: "#",
       icon: ClockIcon,
       items: [
-        { title: "Performances", url: `${basePath}/monitor/performances` },
-        { title: "Health", url: `${basePath}/monitor/health` },
-        { title: "Logs", url: `${basePath}/monitor/logs` },
+        { title: "Performances", url: `${basePath}/monitor/performances`, isActive: pathname === `${basePath}/monitor/performances` },
+        { title: "Health", url: `${basePath}/monitor/health`, isActive: pathname === `${basePath}/monitor/health` },
+        { title: "Logs", url: `${basePath}/monitor/logs`, isActive: pathname === `${basePath}/monitor/logs` },
       ],
     },
     {
@@ -84,9 +90,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       url: "#",
       icon: Settings2Icon,
       items: [
-        { title: "Users & Devices", url: `${basePath}/manage/users-devices` },
-        { title: "Networks", url: `${basePath}/manage/networks` },
-        { title: "Integrations", url: `${basePath}/manage/integrations` },
+        { title: "Users & Devices", url: `${basePath}/manage/users-devices`, isActive: pathname === `${basePath}/manage/users-devices` },
+        { title: "Networks", url: `${basePath}/manage/networks`, isActive: pathname === `${basePath}/manage/networks` },
+        { title: "Integrations", url: `${basePath}/manage/integrations`, isActive: pathname === `${basePath}/manage/integrations` },
       ],
     },
   ]
@@ -96,6 +102,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       title: "Upgrade to Pro",
       url: "#",
       icon: RocketIcon,
+      isActive: false,
     },
   ]
 
@@ -109,7 +116,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
+        <NavMain items={navLaunchpad} />
         <NavMain items={navMain} />
+        <NavMain items={navOperations} />
         <NavSecondary items={navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
