@@ -41,7 +41,7 @@ export function OnboardingJourneyWizard({
 
 	return (
 		<div
-			className="fixed inset-0 z-50"
+			className="fixed inset-0 z-40"
 			style={{ backgroundColor: "var(--sidebar)" }}
 		>
 			<div className="h-full w-full p-5">

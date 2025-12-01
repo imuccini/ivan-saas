@@ -14,8 +14,12 @@ import {
 import { Switch } from "@ui/components/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@ui/components/tabs";
 import { FileText } from "lucide-react";
+import { useState } from "react";
+import { ConfigureSignupFormDialog } from "../configure-signup-form-dialog";
 
 export function StepAuthentication() {
+	const [signupFormDialogOpen, setSignupFormDialogOpen] = useState(false);
+
 	return (
 		<div className="flex h-full">
 			{/* Left Panel - Configuration */}
@@ -63,10 +67,19 @@ export function StepAuthentication() {
 									variant="outline"
 									size="sm"
 									className="gap-2"
+									onClick={() =>
+										setSignupFormDialogOpen(true)
+									}
+									type="button"
 								>
 									<FileText className="h-4 w-4" />
 									Configure Sign-Up Form
 								</Button>
+
+								<ConfigureSignupFormDialog
+									open={signupFormDialogOpen}
+									onOpenChange={setSignupFormDialogOpen}
+								/>
 
 								<div className="flex items-center gap-2">
 									<Checkbox id="show-login" defaultChecked />
