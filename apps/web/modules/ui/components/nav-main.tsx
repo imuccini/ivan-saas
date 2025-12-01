@@ -20,6 +20,7 @@ import Link from "next/link";
 
 export function NavMain({
 	items,
+	collapsible = "auto",
 }: {
 	items: {
 		title: string;
@@ -32,12 +33,19 @@ export function NavMain({
 			isActive?: boolean;
 		}[];
 	}[];
+	collapsible?: "auto" | "manual";
 }) {
 	return (
 		<SidebarGroup>
 			<SidebarMenu>
 				{items.map((item) => (
-					<Collapsible key={item.title} asChild open={item.isActive}>
+					<Collapsible
+						key={item.title}
+						asChild
+						{...(collapsible === "auto"
+							? { open: item.isActive }
+							: { defaultOpen: item.isActive })}
+					>
 						<SidebarMenuItem>
 							{item.items?.length && item.url === "#" ? (
 								<CollapsibleTrigger asChild>

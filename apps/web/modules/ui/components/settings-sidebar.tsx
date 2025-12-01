@@ -55,10 +55,12 @@ export function SettingsSidebar(props: React.ComponentProps<typeof Sidebar>) {
 					items: [
 						{
 							title: "General",
-							url: `/app/${organizationSlug}/settings`,
+							url: `/app/${organizationSlug}/settings/general`,
 							isActive:
 								pathname ===
-								`/app/${organizationSlug}/settings`,
+									`/app/${organizationSlug}/settings` ||
+								pathname ===
+									`/app/${organizationSlug}/settings/general`,
 						},
 						{
 							title: "Billing",
@@ -144,7 +146,7 @@ export function SettingsSidebar(props: React.ComponentProps<typeof Sidebar>) {
 				</SidebarMenu>
 			</SidebarHeader>
 			<SidebarContent>
-				<NavMain items={navItems} />
+				<NavMain items={navItems} collapsible="manual" />
 			</SidebarContent>
 		</Sidebar>
 	);
