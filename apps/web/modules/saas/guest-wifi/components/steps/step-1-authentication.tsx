@@ -19,6 +19,8 @@ import { ConfigureSignupFormDialog } from "../configure-signup-form-dialog";
 
 export function StepAuthentication() {
 	const [signupFormDialogOpen, setSignupFormDialogOpen] = useState(false);
+	const [timeLimitEnabled, setTimeLimitEnabled] = useState(true);
+	const [sponsorshipEnabled, setSponsorshipEnabled] = useState(true);
 
 	return (
 		<div className="flex h-full">
@@ -206,33 +208,35 @@ export function StepAuthentication() {
 										for guest users
 									</p>
 								</div>
-								<Switch defaultChecked />
+								<Switch checked={timeLimitEnabled} onCheckedChange={setTimeLimitEnabled} />
 							</div>
 
-							<div className="space-y-2 pl-6">
-								<Select defaultValue="24">
-									<SelectTrigger>
-										<SelectValue />
-									</SelectTrigger>
-									<SelectContent>
-										<SelectItem value="1">
-											1 hour
-										</SelectItem>
-										<SelectItem value="6">
-											6 hours
-										</SelectItem>
-										<SelectItem value="12">
-											12 hours
-										</SelectItem>
-										<SelectItem value="24">
-											24 hours
-										</SelectItem>
-									</SelectContent>
-								</Select>
-								<p className="text-xs text-muted-foreground">
-									Limit per day
-								</p>
-							</div>
+							{timeLimitEnabled && (
+								<div className="space-y-2 pl-6">
+									<Select defaultValue="24">
+										<SelectTrigger>
+											<SelectValue />
+										</SelectTrigger>
+										<SelectContent>
+											<SelectItem value="1">
+												1 hour
+											</SelectItem>
+											<SelectItem value="6">
+												6 hours
+											</SelectItem>
+											<SelectItem value="12">
+												12 hours
+											</SelectItem>
+											<SelectItem value="24">
+												24 hours
+											</SelectItem>
+										</SelectContent>
+									</Select>
+									<p className="text-xs text-muted-foreground">
+										Limit per day
+									</p>
+								</div>
+							)}
 						</div>
 
 						{/* Sponsorship approval */}
@@ -246,85 +250,87 @@ export function StepAuthentication() {
 										Require guest to be approved by a host
 									</p>
 								</div>
-								<Switch defaultChecked />
+								<Switch checked={sponsorshipEnabled} onCheckedChange={setSponsorshipEnabled} />
 							</div>
 
-							<div className="space-y-4 pl-6">
-								<div className="space-y-3">
-									<Label>
-										Chose how sponsors are selected
-									</Label>
+							{sponsorshipEnabled && (
+								<div className="space-y-4 pl-6">
+									<div className="space-y-3">
+										<Label>
+											Chose how sponsors are selected
+										</Label>
+										<div className="space-y-2">
+											<div className="flex items-center gap-2">
+												<input
+													type="radio"
+													id="email-dropdown"
+													name="sponsor-selection"
+													defaultChecked
+												/>
+												<Label
+													htmlFor="email-dropdown"
+													className="font-normal"
+												>
+													Select email form dropdown
+												</Label>
+											</div>
+											<div className="flex items-center gap-2">
+												<input
+													type="radio"
+													id="type-email"
+													name="sponsor-selection"
+												/>
+												<Label
+													htmlFor="type-email"
+													className="font-normal"
+												>
+													Type email
+												</Label>
+											</div>
+										</div>
+									</div>
+
+									<Button
+										variant="outline"
+										size="sm"
+										className="gap-2"
+									>
+										<FileText className="h-4 w-4" />
+										Manage sponsors (0)
+									</Button>
+
 									<div className="space-y-2">
+										<Label>Visitor Access Duration</Label>
 										<div className="flex items-center gap-2">
-											<input
-												type="radio"
-												id="email-dropdown"
-												name="sponsor-selection"
-												defaultChecked
+											<Input
+												type="number"
+												defaultValue="24"
+												className="w-20"
 											/>
-											<Label
-												htmlFor="email-dropdown"
-												className="font-normal"
-											>
-												Select email form dropdown
-											</Label>
-										</div>
-										<div className="flex items-center gap-2">
-											<input
-												type="radio"
-												id="type-email"
-												name="sponsor-selection"
-											/>
-											<Label
-												htmlFor="type-email"
-												className="font-normal"
-											>
-												Type email
-											</Label>
+											<Select defaultValue="hours">
+												<SelectTrigger className="w-32">
+													<SelectValue />
+												</SelectTrigger>
+												<SelectContent>
+													<SelectItem value="hours">
+														Hours
+													</SelectItem>
+													<SelectItem value="days">
+														Days
+													</SelectItem>
+												</SelectContent>
+											</Select>
 										</div>
 									</div>
-								</div>
 
-								<Button
-									variant="outline"
-									size="sm"
-									className="gap-2"
-								>
-									<FileText className="h-4 w-4" />
-									Manage sponsors (0)
-								</Button>
-
-								<div className="space-y-2">
-									<Label>Visitor Access Duration</Label>
 									<div className="flex items-center gap-2">
-										<Input
-											type="number"
-											defaultValue="24"
-											className="w-20"
-										/>
-										<Select defaultValue="hours">
-											<SelectTrigger className="w-32">
-												<SelectValue />
-											</SelectTrigger>
-											<SelectContent>
-												<SelectItem value="hours">
-													Hours
-												</SelectItem>
-												<SelectItem value="days">
-													Days
-												</SelectItem>
-											</SelectContent>
-										</Select>
+										<Switch />
+										<Label className="font-normal">
+											Enable sponsor duration override
+										</Label>
 									</div>
 								</div>
-
-								<div className="flex items-center gap-2">
-									<Switch />
-									<Label className="font-normal">
-										Enable sponsor duration override
-									</Label>
-								</div>
-							</div>
+							)}
 						</div>
 
 						{/* Access Hours */}
