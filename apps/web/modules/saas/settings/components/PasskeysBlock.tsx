@@ -89,7 +89,7 @@ export function PasskeysBlock() {
 								</small>
 							</div>
 							<Button
-								variant="light"
+								variant="outline"
 								size="icon"
 								className="shrink-0"
 								onClick={() => deletePasskey(passkey.id)}
@@ -101,7 +101,7 @@ export function PasskeysBlock() {
 				)}
 
 				<div className="flex justify-start">
-					<Button variant="light" onClick={addPasskey}>
+					<Button variant="outline" onClick={addPasskey}>
 						<PlusIcon className="mr-1.5 size-4" />
 						Add passkey
 					</Button>

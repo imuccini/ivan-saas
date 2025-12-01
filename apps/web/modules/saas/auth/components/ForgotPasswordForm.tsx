@@ -89,7 +89,7 @@ export function ForgotPasswordForm() {
 						onSubmit={onSubmit}
 					>
 						{form.formState.errors.root && (
-							<Alert variant="error">
+							<Alert variant="destructive">
 								<AlertTriangleIcon />
 								<AlertTitle>
 									{form.formState.errors.root.message}

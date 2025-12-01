@@ -139,7 +139,7 @@ export function SignupForm({ prefillEmail }: { prefillEmail?: string }) {
 						>
 							{form.formState.isSubmitted &&
 								form.formState.errors.root && (
-									<Alert variant="error">
+									<Alert variant="destructive">
 										<AlertTriangleIcon />
 										<AlertDescription>
 											{form.formState.errors.root.message}

@@ -64,7 +64,7 @@ export function ContactForm() {
 						className="flex flex-col items-stretch gap-4"
 					>
 						{form.formState.errors.root?.message && (
-							<Alert variant="error">
+							<Alert variant="destructive">
 								<MailIcon />
 								<AlertTitle>
 									{form.formState.errors.root.message}

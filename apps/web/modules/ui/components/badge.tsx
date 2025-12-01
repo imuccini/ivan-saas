@@ -15,6 +15,11 @@ export const badge = cva(
 		"uppercase",
 		"font-semibold",
 		"leading-tight",
+		"transition-colors",
+		"focus:outline-none",
+		"focus:ring-2",
+		"focus:ring-ring",
+		"focus:ring-offset-2",
 	],
 	{
 		variants: {
@@ -24,25 +29,36 @@ export const badge = cva(
 				warning: ["bg-amber-500/10", "text-amber-500"],
 				error: ["bg-rose-500/10", "text-rose-500"],
 			},
-		},
-		defaultVariants: {
-			status: "info",
+			variant: {
+				default:
+					"border-transparent bg-primary text-primary-foreground hover:bg-primary/80",
+				secondary:
+					"border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80",
+				destructive:
+					"border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80",
+				outline: "text-foreground border",
+			},
 		},
 	},
 );
 
-export type BadgeProps = React.HtmlHTMLAttributes<HTMLDivElement> &
+export type BadgeProps = React.HTMLAttributes<HTMLDivElement> &
 	VariantProps<typeof badge>;
 
 export const Badge = ({
 	children,
 	className,
 	status,
+	variant,
 	...props
-}: BadgeProps) => (
-	<span className={cn(badge({ status }), className)} {...props}>
-		{children}
-	</span>
-);
+}: BadgeProps) => {
+	const badgeProps = variant ? { variant } : { status: status ?? "info" };
+
+	return (
+		<span className={cn(badge(badgeProps), className)} {...props}>
+			{children}
+		</span>
+	);
+};
 
 Badge.displayName = "Badge";
