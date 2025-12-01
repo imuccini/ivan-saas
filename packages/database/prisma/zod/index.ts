@@ -58,6 +58,12 @@ export const WorkspaceScalarFieldEnumSchema = z.enum(['id', 'organizationId', 'n
 
 export type WorkspaceScalarFieldEnum = z.infer<typeof WorkspaceScalarFieldEnumSchema>;
 
+// File: WorkspaceMemberScalarFieldEnum.schema.ts
+
+export const WorkspaceMemberScalarFieldEnumSchema = z.enum(['id', 'workspaceId', 'userId', 'createdAt'])
+
+export type WorkspaceMemberScalarFieldEnum = z.infer<typeof WorkspaceMemberScalarFieldEnumSchema>;
+
 // File: MemberScalarFieldEnum.schema.ts
 
 export const MemberScalarFieldEnumSchema = z.enum(['id', 'organizationId', 'userId', 'role', 'createdAt'])
@@ -253,6 +259,18 @@ export const WorkspaceSchema = z.object({
 });
 
 export type WorkspaceType = z.infer<typeof WorkspaceSchema>;
+
+
+// File: WorkspaceMember.schema.ts
+
+export const WorkspaceMemberSchema = z.object({
+  id: z.string(),
+  workspaceId: z.string(),
+  userId: z.string(),
+  createdAt: z.date(),
+});
+
+export type WorkspaceMemberType = z.infer<typeof WorkspaceMemberSchema>;
 
 
 // File: Member.schema.ts

@@ -40,6 +40,7 @@ model User {
     members            Member[]
     twofactors         TwoFactor[]
     aiChats            AiChat[]
+    workspaceMembers   WorkspaceMember[]
 
     @@unique([email])
     @@unique([username])
@@ -152,8 +153,22 @@ model Workspace {
     createdAt      DateTime     @default(now())
     updatedAt      DateTime     @updatedAt
 
+    workspaceMembers   WorkspaceMember[]
+
     @@unique([organizationId, slug])
     @@map("workspace")
+}
+
+model WorkspaceMember {
+    id          String    @id @default(cuid())
+    workspaceId String
+    workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+    userId      String
+    user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+    createdAt   DateTime  @default(now())
+
+    @@unique([workspaceId, userId])
+    @@map("workspace_member")
 }
 
 model Member {

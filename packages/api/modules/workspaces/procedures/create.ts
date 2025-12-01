@@ -80,5 +80,12 @@ export const createWorkspace = protectedProcedure
 			},
 		});
 
+		await db.workspaceMember.create({
+			data: {
+				workspaceId: workspace.id,
+				userId: user.id,
+			},
+		});
+
 		return workspace;
 	});

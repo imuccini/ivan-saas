@@ -1,3 +1,4 @@
+import { db } from "@repo/database";
 import { getOrganizationList, getSession } from "@saas/auth/lib/server";
 import { UserOrganizationList } from "@saas/organizations/components/UserOrganizationList";
 import { PageHeader } from "@saas/shared/components/PageHeader";
@@ -13,6 +14,46 @@ export default async function AppStartPage() {
 
 	const organizations = await getOrganizationList();
 	const t = await getTranslations();
+
+	if (organizations.length === 1) {
+		const organization = organizations[0];
+		const member = await db.member.findUnique({
+			where: {
+				organizationId_userId: {
+					organizationId: organization.id,
+					userId: session.user.id,
+				},
+			},
+		});
+
+		if (member) {
+			const isOrgAdmin = member.role === "owner" || member.role === "admin";
+
+			const workspace = await db.workspace.findFirst({
+				where: {
+					organizationId: organization.id,
+					...(isOrgAdmin
+						? {}
+						: {
+								workspaceMembers: {
+									some: {
+										userId: session.user.id,
+									},
+								},
+							}),
+				},
+				orderBy: {
+					createdAt: "asc",
+				},
+			});
+
+			if (workspace) {
+				redirect(`/app/${organization.slug}/${workspace.slug}`);
+			}
+
+			redirect(`/app/${organization.slug}/settings/workspaces`);
+		}
+	}
 
 	return (
 		<div className="container py-8">

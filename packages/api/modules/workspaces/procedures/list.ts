@@ -18,6 +18,7 @@ export const listWorkspaces = protectedProcedure
 	)
 	.handler(async ({ input, context }) => {
 		const { user } = context;
+		const isSuperAdmin = user.role === "admin";
 
 		// Verify user is member of organization
 		const member = await db.member.findUnique({
@@ -29,15 +30,26 @@ export const listWorkspaces = protectedProcedure
 			},
 		});
 
-		if (!member) {
+		if (!member && !isSuperAdmin) {
 			throw new ORPCError("FORBIDDEN", {
 				message: "You are not a member of this organization",
 			});
 		}
 
+		const isOrgAdmin = member?.role === "owner" || member?.role === "admin";
+
 		const workspaces = await db.workspace.findMany({
 			where: {
 				organizationId: input.organizationId,
+				...(isSuperAdmin || isOrgAdmin
+					? {}
+					: {
+							workspaceMembers: {
+								some: {
+									userId: user.id,
+								},
+							},
+						}),
 			},
 			orderBy: {
 				createdAt: "desc",

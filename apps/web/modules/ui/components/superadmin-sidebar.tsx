@@ -1,10 +1,15 @@
 "use client";
 
+import { useSession } from "@saas/auth/hooks/use-session";
+import { Logo } from "@shared/components/Logo";
+import { NavUser } from "@ui/components/nav-user";
 import {
 	Sidebar,
 	SidebarContent,
+	SidebarFooter,
 	SidebarGroup,
 	SidebarGroupContent,
+	SidebarHeader,
 	SidebarMenu,
 	SidebarMenuButton,
 	SidebarMenuItem,
@@ -16,12 +21,18 @@ import { UnifiedWorkspaceSwitcher } from "../../saas/shared/components/UnifiedWo
 
 export function SuperAdminSidebar(props: React.ComponentProps<typeof Sidebar>) {
 	const pathname = usePathname();
+	const { user } = useSession();
 
 	return (
 		<Sidebar collapsible="icon" {...props}>
-			<div className="flex h-12 items-center px-4">
-				<UnifiedWorkspaceSwitcher isSidebar />
-			</div>
+			<SidebarHeader>
+				<div className="flex h-12 items-center px-4">
+					<Logo />
+				</div>
+				<div className="px-2">
+					<UnifiedWorkspaceSwitcher isSidebar />
+				</div>
+			</SidebarHeader>
 			<SidebarContent>
 				<SidebarGroup>
 					<SidebarGroupContent>
@@ -47,6 +58,17 @@ export function SuperAdminSidebar(props: React.ComponentProps<typeof Sidebar>) {
 					</SidebarGroupContent>
 				</SidebarGroup>
 			</SidebarContent>
+			<SidebarFooter>
+				{user && (
+					<NavUser
+						user={{
+							name: user.name ?? "",
+							email: user.email ?? "",
+							avatar: user.image ?? "",
+						}}
+					/>
+				)}
+			</SidebarFooter>
 		</Sidebar>
 	);
 }

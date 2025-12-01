@@ -12,6 +12,7 @@ import {
 	FormField,
 	FormItem,
 	FormLabel,
+	FormMessage,
 } from "@ui/components/form";
 import { Input } from "@ui/components/input";
 import { ArrowRightIcon } from "lucide-react";
@@ -20,9 +21,12 @@ import { useEffect } from "react";
 import type { SubmitHandler } from "react-hook-form";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { useMutation } from "@tanstack/react-query";
+import { orpc } from "@shared/lib/orpc-query-utils";
 
 const formSchema = z.object({
-	name: z.string(),
+	name: z.string().min(1),
+	companyName: z.string().min(1),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -34,8 +38,13 @@ export function OnboardingStep1({ onCompleted }: { onCompleted: () => void }) {
 		resolver: zodResolver(formSchema),
 		defaultValues: {
 			name: user?.name ?? "",
+			companyName: "",
 		},
 	});
+
+	const createWorkspaceMutation = useMutation(
+		orpc.workspaces.create.mutationOptions(),
+	);
 
 	useEffect(() => {
 		if (user) {
@@ -43,7 +52,7 @@ export function OnboardingStep1({ onCompleted }: { onCompleted: () => void }) {
 		}
 	}, [user]);
 
-	const onSubmit: SubmitHandler<FormValues> = async ({ name }) => {
+	const onSubmit: SubmitHandler<FormValues> = async ({ name, companyName }) => {
 		form.clearErrors("root");
 
 		try {
@@ -51,8 +60,28 @@ export function OnboardingStep1({ onCompleted }: { onCompleted: () => void }) {
 				name,
 			});
 
+			const { data: orgData, error: orgError } = await authClient.organization.create({
+				name: companyName,
+				slug: companyName.toLowerCase().replace(/\s+/g, "-"),
+			});
+
+			if (orgError) {
+				throw new Error(orgError.message);
+			}
+
+			if (orgData) {
+				await createWorkspaceMutation.mutateAsync({
+					name: "Default Workspace",
+					organizationId: orgData.id,
+				});
+				
+				await authClient.organization.setActive({
+					organizationId: orgData.id,
+				});
+			}
+
 			onCompleted();
-		} catch {
+		} catch (e) {
 			form.setError("root", {
 				type: "server",
 				message: t("onboarding.notifications.accountSetupFailed"),
@@ -78,6 +107,23 @@ export function OnboardingStep1({ onCompleted }: { onCompleted: () => void }) {
 								<FormControl>
 									<Input {...field} />
 								</FormControl>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
+
+					<FormField
+						control={form.control}
+						name="companyName"
+						render={({ field }) => (
+							<FormItem>
+								<FormLabel>
+									Company Name
+								</FormLabel>
+								<FormControl>
+									<Input {...field} placeholder="Acme Inc." />
+								</FormControl>
+								<FormMessage />
 							</FormItem>
 						)}
 					/>
@@ -104,7 +150,7 @@ export function OnboardingStep1({ onCompleted }: { onCompleted: () => void }) {
 						</FormControl>
 					</FormItem>
 
-					<Button type="submit" loading={form.formState.isSubmitting}>
+					<Button type="submit" loading={form.formState.isSubmitting || createWorkspaceMutation.isPending}>
 						{t("onboarding.continue")}
 						<ArrowRightIcon className="ml-2 size-4" />
 					</Button>

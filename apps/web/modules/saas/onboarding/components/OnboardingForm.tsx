@@ -1,5 +1,6 @@
 "use client";
 import { authClient } from "@repo/auth/client";
+import { orpcClient } from "@shared/lib/orpc-client";
 import { useRouter } from "@shared/hooks/router";
 import { clearCache } from "@shared/lib/cache";
 import { Progress } from "@ui/components/progress";
@@ -34,6 +35,28 @@ export function OnboardingForm() {
 		});
 
 		await clearCache();
+
+		try {
+			const { data: organizations } = await authClient.listOrganizations();
+
+			if (organizations && organizations.length === 1) {
+				const organization = organizations[0];
+				const workspaces = await orpcClient.workspaces.listWorkspaces({
+					organizationId: organization.id,
+				});
+
+				if (workspaces && workspaces.length > 0) {
+					router.replace(`/app/${organization.slug}/${workspaces[0].slug}`);
+					return;
+				}
+
+				router.replace(`/app/${organization.slug}/settings/workspaces`);
+				return;
+			}
+		} catch (e) {
+			console.error(e);
+		}
+
 		router.replace(redirectTo ?? "/app");
 	};
 
