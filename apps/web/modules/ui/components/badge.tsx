@@ -5,7 +5,9 @@ import type React from "react";
 
 export const badge = cva(
 	[
-		"inline-block",
+		"inline-flex",
+		"items-center",
+		"gap-1",
 		"rounded-full",
 		"px-3",
 		"py-1",
