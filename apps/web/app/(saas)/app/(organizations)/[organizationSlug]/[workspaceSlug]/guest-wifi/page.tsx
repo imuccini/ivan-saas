@@ -21,8 +21,11 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useState } from "react";
+import { OnboardingJourneyWizard } from "../../../../../../../modules/saas/guest-wifi/components/onboarding-journey-wizard";
 
 export default function GuestWifiPage() {
+	const [wizardOpen, setWizardOpen] = useState(false);
 	return (
 		<div className="space-y-6">
 			{/* Status Card */}
@@ -141,12 +144,26 @@ export default function GuestWifiPage() {
 				<div className="grid gap-6 md:grid-cols-2">
 					{/* Quick Actions */}
 					<div className="space-y-2">
-						<ActionRow
-							icon={Settings}
-							title="Onboarding Journey"
-							description="Branding, Terms, Languages"
-							href="#"
-						/>
+						<button
+							type="button"
+							onClick={() => setWizardOpen(true)}
+							className="w-full flex items-center justify-between rounded-lg border p-3 transition-colors hover:bg-muted/50 text-left"
+						>
+							<div className="flex items-center gap-3">
+								<div className="flex h-8 w-8 flex-none items-center justify-center rounded-md bg-muted text-muted-foreground">
+									<Settings className="h-4 w-4" />
+								</div>
+								<div>
+									<div className="text-sm font-medium leading-none">
+										Onboarding Journey
+									</div>
+									<div className="text-xs text-muted-foreground mt-1">
+										Branding, Terms, Languages
+									</div>
+								</div>
+							</div>
+							<ChevronRight className="h-4 w-4 text-muted-foreground" />
+						</button>
 						<ActionRow
 							icon={Wifi}
 							title="Guest WiFi SSID"
@@ -197,6 +214,12 @@ export default function GuestWifiPage() {
 					/>
 				</div>
 			</div>
+
+			{/* Wizard */}
+			<OnboardingJourneyWizard
+				open={wizardOpen}
+				onClose={() => setWizardOpen(false)}
+			/>
 		</div>
 	);
 }

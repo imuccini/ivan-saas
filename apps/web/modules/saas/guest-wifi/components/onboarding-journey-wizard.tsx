@@ -1,0 +1,96 @@
+"use client";
+
+import { Button } from "@ui/components/button";
+import { ArrowRight } from "lucide-react";
+import { useState } from "react";
+import { StepAuthentication } from "./steps/step-1-authentication";
+import { StepContent } from "./steps/step-2-content";
+import { StepJourney } from "./steps/step-3-journey";
+
+interface OnboardingJourneyWizardProps {
+	open: boolean;
+	onClose: () => void;
+}
+
+const STEPS = [
+	{ id: 1, name: "Authentication", component: StepAuthentication },
+	{ id: 2, name: "Content", component: StepContent },
+	{ id: 3, name: "Journey", component: StepJourney },
+];
+
+export function OnboardingJourneyWizard({
+	open,
+	onClose,
+}: OnboardingJourneyWizardProps) {
+	const [currentStep, setCurrentStep] = useState(1);
+
+	if (!open) return null;
+
+	const CurrentStepComponent = STEPS.find(
+		(s) => s.id === currentStep,
+	)?.component;
+
+	const handleSaveAndContinue = () => {
+		if (currentStep < STEPS.length) {
+			setCurrentStep(currentStep + 1);
+		} else {
+			// Save and close
+			onClose();
+		}
+	};
+
+	return (
+		<div className="fixed inset-0 z-50 bg-background">
+			{/* Header */}
+			<div className="border-b">
+				<div className="flex items-center justify-between px-6 py-4">
+					{/* Breadcrumb Navigation */}
+					<div className="flex items-center gap-2">
+						{STEPS.map((step, index) => (
+							<div
+								key={step.id}
+								className="flex items-center gap-2"
+							>
+								<button
+									type="button"
+									onClick={() => setCurrentStep(step.id)}
+									className={`text-sm font-medium transition-colors ${
+										currentStep === step.id
+											? "text-foreground"
+											: "text-muted-foreground hover:text-foreground"
+									}`}
+								>
+									{step.name}
+								</button>
+								{index < STEPS.length - 1 && (
+									<span className="text-muted-foreground">
+										›
+									</span>
+								)}
+							</div>
+						))}
+					</div>
+
+					{/* Actions */}
+					<div className="flex items-center gap-2">
+						<Button variant="ghost" onClick={onClose}>
+							Exit
+						</Button>
+						<Button
+							onClick={handleSaveAndContinue}
+							className="gap-2"
+						>
+							Save & Continue
+							<ArrowRight className="h-4 w-4" />
+						</Button>
+					</div>
+				</div>
+			</div>
+
+			{/* Content */}
+			<div className="h-[calc(100vh-73px)] overflow-hidden">
+				{CurrentStepComponent && <CurrentStepComponent />}
+			</div>
+		</div>
+	);
+}
