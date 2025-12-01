@@ -5,13 +5,13 @@ import { useActiveWorkspace } from "@saas/workspaces/hooks/use-active-workspace"
 import { useWorkspaceListQuery } from "@saas/workspaces/lib/api";
 import {
 	DropdownMenu,
+	DropdownMenuCheckboxItem,
 	DropdownMenuContent,
 	DropdownMenuGroup,
 	DropdownMenuItem,
 	DropdownMenuLabel,
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
-	DropdownMenuCheckboxItem,
 } from "@ui/components/dropdown-menu";
 import { sidebarMenuButtonVariants } from "@ui/components/sidebar";
 import { cn } from "@ui/lib";
@@ -22,7 +22,6 @@ import {
 	SettingsIcon,
 } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 
 export function UnifiedWorkspaceSwitcher({
 	className,
@@ -31,7 +30,6 @@ export function UnifiedWorkspaceSwitcher({
 	className?: string;
 	isSidebar?: boolean;
 }) {
-	const router = useRouter();
 	const { activeOrganization } = useActiveOrganization();
 	const { activeWorkspace } = useActiveWorkspace();
 	const { data: workspaces } = useWorkspaceListQuery(
@@ -46,6 +44,7 @@ export function UnifiedWorkspaceSwitcher({
 		<DropdownMenu>
 			<DropdownMenuTrigger asChild>
 				<button
+					type="button"
 					className={cn(
 						isSidebar
 							? sidebarMenuButtonVariants({
@@ -90,24 +89,21 @@ export function UnifiedWorkspaceSwitcher({
 					Workspaces
 				</DropdownMenuLabel>
 				{workspaces?.map((workspace) => (
-					<DropdownMenuCheckboxItem
+					<Link
 						key={workspace.id}
-						checked={
-							workspace.slug ===
-							(activeWorkspace?.slug ?? workspaces?.[0]?.slug)
-						}
-						onCheckedChange={() => {
-							router.push(
-								`/app/${activeOrganization.slug}/${workspace.slug}`,
-							);
-						}}
-						className="gap-2 py-2 pr-2 pl-8"
+						href={`/app/${activeOrganization.slug}/${workspace.slug}`}
+						className="block"
 					>
-						<div className="flex size-6 items-center justify-center rounded-md border bg-background">
-							<LayoutGridIcon className="size-4" />
-						</div>
-						{workspace.name}
-					</DropdownMenuCheckboxItem>
+						<DropdownMenuCheckboxItem
+							checked={
+								workspace.slug ===
+								(activeWorkspace?.slug ?? workspaces?.[0]?.slug)
+							}
+							className="gap-2 py-2"
+						>
+							{workspace.name}
+						</DropdownMenuCheckboxItem>
+					</Link>
 				))}
 				<DropdownMenuSeparator />
 				<DropdownMenuLabel className="text-xs text-muted-foreground">
@@ -119,9 +115,7 @@ export function UnifiedWorkspaceSwitcher({
 							href={`/app/${activeOrganization.slug}/settings`}
 							className="gap-2 p-2"
 						>
-							<div className="flex size-6 items-center justify-center rounded-md border bg-background">
-								<SettingsIcon className="size-4" />
-							</div>
+							<SettingsIcon className="size-4" />
 							Organization Settings
 						</Link>
 					</DropdownMenuItem>
@@ -130,9 +124,7 @@ export function UnifiedWorkspaceSwitcher({
 							href={`/app/${activeOrganization.slug}/settings/workspaces`}
 							className="gap-2 p-2"
 						>
-							<div className="flex size-6 items-center justify-center rounded-md border bg-background">
-								<LayoutGridIcon className="size-4" />
-							</div>
+							<LayoutGridIcon className="size-4" />
 							Workspaces
 						</Link>
 					</DropdownMenuItem>
@@ -140,9 +132,7 @@ export function UnifiedWorkspaceSwitcher({
 				<DropdownMenuSeparator />
 				<DropdownMenuItem asChild>
 					<Link href="/app" className="gap-2 p-2">
-						<div className="flex size-6 items-center justify-center rounded-md border bg-background">
-							<ArrowRightLeftIcon className="size-4" />
-						</div>
+						<ArrowRightLeftIcon className="size-4" />
 						Switch Organization
 					</Link>
 				</DropdownMenuItem>

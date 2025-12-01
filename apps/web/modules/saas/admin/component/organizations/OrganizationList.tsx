@@ -120,14 +120,14 @@ export function OrganizationList() {
 				accessorFn: (row) => row.name,
 				cell: ({
 					row: {
-						original: { id, name, logo, membersCount },
+						original: { id, slug, name, logo, membersCount },
 					},
 				}) => (
 					<div className="flex items-center gap-2">
 						<OrganizationLogo name={name} logoUrl={logo} />
 						<div className="leading-tight">
 							<Link
-								href={getOrganizationEditPath(id)}
+								href={`/app/${slug}`}
 								className="block font-bold"
 							>
 								{name}

@@ -7,17 +7,8 @@ import {
 	TooltipProvider,
 	TooltipTrigger,
 } from "@ui/components/tooltip";
-import { cn } from "@ui/lib";
 import { AnimatePresence, motion } from "framer-motion";
-import {
-	BellIcon,
-	Brain,
-	MessageSquareIcon,
-	SettingsIcon,
-	Sparkles,
-	XIcon,
-} from "lucide-react";
-import { useState } from "react";
+import { BellIcon, BookIcon, Sparkles, XIcon } from "lucide-react";
 
 interface RightPanelProps {
 	isOpen: boolean;
@@ -54,10 +45,14 @@ export function RightPanel({ isOpen, onOpenChange }: RightPanelProps) {
 											onClick={() => onOpenChange(true)}
 										>
 											<Sparkles className="size-4" />
-											<span className="sr-only">AI Chat</span>
+											<span className="sr-only">
+												AI Chat
+											</span>
 										</Button>
 									</TooltipTrigger>
-									<TooltipContent side="left">AI Chat</TooltipContent>
+									<TooltipContent side="left">
+										AI Chat
+									</TooltipContent>
 								</Tooltip>
 
 								<Tooltip>
@@ -68,10 +63,33 @@ export function RightPanel({ isOpen, onOpenChange }: RightPanelProps) {
 											className="size-8 rounded-lg"
 										>
 											<BellIcon className="size-4" />
-											<span className="sr-only">Notifications</span>
+											<span className="sr-only">
+												Notifications
+											</span>
 										</Button>
 									</TooltipTrigger>
-									<TooltipContent side="left">Notifications</TooltipContent>
+									<TooltipContent side="left">
+										Notifications
+									</TooltipContent>
+								</Tooltip>
+
+								<Tooltip>
+									<TooltipTrigger asChild>
+										<a
+											href="https://supastarter.dev/docs/nextjs"
+											target="_blank"
+											rel="noopener noreferrer"
+											className="inline-flex items-center justify-center size-8 rounded-lg hover:bg-accent hover:text-accent-foreground"
+										>
+											<BookIcon className="size-4" />
+											<span className="sr-only">
+												Documentation
+											</span>
+										</a>
+									</TooltipTrigger>
+									<TooltipContent side="left">
+										Documentation
+									</TooltipContent>
 								</Tooltip>
 							</TooltipProvider>
 						</motion.div>

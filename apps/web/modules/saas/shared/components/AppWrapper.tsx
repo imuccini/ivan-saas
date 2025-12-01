@@ -4,12 +4,15 @@ import { config } from "@repo/config";
 import { NavBar } from "@saas/shared/components/NavBar";
 import { AppSidebar } from "@ui/components/app-sidebar";
 import { RightPanel } from "@ui/components/right-panel";
+import { SettingsSidebar } from "@ui/components/settings-sidebar";
 import {
 	SidebarInset,
 	SidebarProvider,
 	useSidebar,
 } from "@ui/components/sidebar";
+import { SuperAdminSidebar } from "@ui/components/superadmin-sidebar";
 import { cn } from "@ui/lib";
+import { usePathname } from "next/navigation";
 import * as React from "react";
 import { type PropsWithChildren, useEffect, useState } from "react";
 
@@ -97,10 +100,44 @@ function AppLayout({ children }: PropsWithChildren) {
 }
 
 export function AppWrapper({ children }: PropsWithChildren) {
+	const pathname = usePathname();
+
+	// Check if we're on a settings route
+	const isSettingsRoute = pathname.includes("/settings");
+
+	// Check if we're on the superadmin/organization list route
+	// This includes /app (exact) and /app/admin/*
+	const isSuperAdminRoute =
+		pathname === "/app" || pathname.startsWith("/app/admin");
+
+	// Store the return URL when entering settings
+	React.useEffect(() => {
+		const RETURN_URL_KEY = "settings-return-url";
+		const previousUrl = sessionStorage.getItem("previous-url");
+
+		if (
+			isSettingsRoute &&
+			previousUrl &&
+			!previousUrl.includes("/settings")
+		) {
+			// We just entered settings from a non-settings page
+			sessionStorage.setItem(RETURN_URL_KEY, previousUrl);
+		}
+
+		// Always store current URL as previous for next navigation
+		sessionStorage.setItem("previous-url", pathname);
+	}, [pathname, isSettingsRoute]);
+
 	if (config.ui.saas.useSidebarLayout) {
 		return (
 			<SidebarProvider storageKey="left_sidebar">
-				<AppSidebar />
+				{isSettingsRoute ? (
+					<SettingsSidebar />
+				) : isSuperAdminRoute ? (
+					<SuperAdminSidebar />
+				) : (
+					<AppSidebar />
+				)}
 				<AppLayout>{children}</AppLayout>
 			</SidebarProvider>
 		);
