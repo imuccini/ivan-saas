@@ -88,6 +88,36 @@ export const AiChatScalarFieldEnumSchema = z.enum(['id', 'organizationId', 'user
 
 export type AiChatScalarFieldEnum = z.infer<typeof AiChatScalarFieldEnumSchema>;
 
+// File: RoleScalarFieldEnum.schema.ts
+
+export const RoleScalarFieldEnumSchema = z.enum(['id', 'name', 'description', 'organizationId', 'createdAt', 'updatedAt'])
+
+export type RoleScalarFieldEnum = z.infer<typeof RoleScalarFieldEnumSchema>;
+
+// File: PermissionScalarFieldEnum.schema.ts
+
+export const PermissionScalarFieldEnumSchema = z.enum(['id', 'slug', 'description'])
+
+export type PermissionScalarFieldEnum = z.infer<typeof PermissionScalarFieldEnumSchema>;
+
+// File: RolePermissionScalarFieldEnum.schema.ts
+
+export const RolePermissionScalarFieldEnumSchema = z.enum(['roleId', 'permissionId'])
+
+export type RolePermissionScalarFieldEnum = z.infer<typeof RolePermissionScalarFieldEnumSchema>;
+
+// File: RoleAssignmentScalarFieldEnum.schema.ts
+
+export const RoleAssignmentScalarFieldEnumSchema = z.enum(['id', 'userId', 'roleId', 'resourceType', 'resourceId', 'createdAt', 'updatedAt'])
+
+export type RoleAssignmentScalarFieldEnum = z.infer<typeof RoleAssignmentScalarFieldEnumSchema>;
+
+// File: PartnerSettingsScalarFieldEnum.schema.ts
+
+export const PartnerSettingsScalarFieldEnumSchema = z.enum(['organizationId', 'whitelabelLogoUrl'])
+
+export type PartnerSettingsScalarFieldEnum = z.infer<typeof PartnerSettingsScalarFieldEnumSchema>;
+
 // File: SortOrder.schema.ts
 
 export const SortOrderSchema = z.enum(['asc', 'desc'])
@@ -332,4 +362,64 @@ export const AiChatSchema = z.object({
 });
 
 export type AiChatType = z.infer<typeof AiChatSchema>;
+
+
+// File: Role.schema.ts
+
+export const RoleSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  description: z.string().nullish(),
+  organizationId: z.string().nullish(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
+export type RoleType = z.infer<typeof RoleSchema>;
+
+
+// File: Permission.schema.ts
+
+export const PermissionSchema = z.object({
+  id: z.string(),
+  slug: z.string(),
+  description: z.string().nullish(),
+});
+
+export type PermissionType = z.infer<typeof PermissionSchema>;
+
+
+// File: RolePermission.schema.ts
+
+export const RolePermissionSchema = z.object({
+  roleId: z.string(),
+  permissionId: z.string(),
+});
+
+export type RolePermissionType = z.infer<typeof RolePermissionSchema>;
+
+
+// File: RoleAssignment.schema.ts
+
+export const RoleAssignmentSchema = z.object({
+  id: z.string(),
+  userId: z.string(),
+  roleId: z.string(),
+  resourceType: z.string(),
+  resourceId: z.string().nullish(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
+export type RoleAssignmentType = z.infer<typeof RoleAssignmentSchema>;
+
+
+// File: PartnerSettings.schema.ts
+
+export const PartnerSettingsSchema = z.object({
+  organizationId: z.string(),
+  whitelabelLogoUrl: z.string().nullish(),
+});
+
+export type PartnerSettingsType = z.infer<typeof PartnerSettingsSchema>;
 

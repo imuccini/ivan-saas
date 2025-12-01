@@ -36,7 +36,7 @@ export const listWorkspaces = protectedProcedure
 			});
 		}
 
-		const isOrgAdmin = member?.role === "owner" || member?.role === "admin";
+		const isOrgAdmin = isSuperAdmin || member?.role === "owner" || member?.role === "admin";
 
 		const workspaces = await db.workspace.findMany({
 			where: {

@@ -41,6 +41,7 @@ model User {
     twofactors         TwoFactor[]
     aiChats            AiChat[]
     workspaceMembers   WorkspaceMember[]
+    roleAssignments    RoleAssignment[]
 
     @@unique([email])
     @@unique([username])
@@ -139,6 +140,8 @@ model Organization {
     purchases          Purchase[]
     aiChats            AiChat[]
     workspaces         Workspace[]
+    roles              Role[]
+    partnerSettings    PartnerSettings?
 
     @@unique([slug])
     @@map("organization")
@@ -234,4 +237,66 @@ model AiChat {
     updatedAt      DateTime      @updatedAt
 
     @@map("ai_chat")
+}
+
+model Role {
+    id             String           @id @default(cuid())
+    name           String
+    description    String?
+    organizationId String? // NULL for system-wide/default roles
+    organization   Organization?    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+    permissions    RolePermission[]
+    assignments    RoleAssignment[]
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@unique([organizationId, name])
+    @@map("role")
+}
+
+model Permission {
+    id          String           @id @default(cuid())
+    slug        String           @unique // e.g., "workspace.settings.edit"
+    description String?
+    roles       RolePermission[]
+
+    @@map("permission")
+}
+
+model RolePermission {
+    roleId       String
+    role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+    permissionId String
+    permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+    @@id([roleId, permissionId])
+    @@map("role_permission")
+}
+
+model RoleAssignment {
+    id     String @id @default(cuid())
+    userId String
+    user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+    roleId String
+    role   Role   @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+    // Polymorphic-like association for scope
+    resourceType String // "ORGANIZATION", "WORKSPACE", "SYSTEM"
+    resourceId   String? // ID of the Org or Workspace. NULL for SYSTEM if we want global system roles.
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@index([userId])
+    @@index([resourceType, resourceId])
+    @@map("role_assignment")
+}
+
+model PartnerSettings {
+    organizationId    String       @id
+    organization      Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+    whitelabelLogoUrl String?
+
+    @@map("partner_settings")
 }

@@ -1,6 +1,8 @@
 "use client";
 
+import { useOrganizationListQuery } from "@saas/organizations/lib/api";
 import { useActiveOrganization } from "@saas/organizations/hooks/use-active-organization";
+import { useSession } from "@saas/auth/hooks/use-session";
 import { useActiveWorkspace } from "@saas/workspaces/hooks/use-active-workspace";
 import { useWorkspaceListQuery } from "@saas/workspaces/lib/api";
 import {
@@ -35,10 +37,15 @@ export function UnifiedWorkspaceSwitcher({
 	const { data: workspaces } = useWorkspaceListQuery(
 		activeOrganization?.id ?? "",
 	);
+	const { data: organizations } = useOrganizationListQuery();
+	const { user } = useSession();
 
 	if (!activeOrganization) {
 		return null;
 	}
+
+	const isSuperAdmin = user?.role === "admin";
+	const hasMultipleOrganizations = (organizations?.length ?? 0) > 1 || isSuperAdmin;
 
 	return (
 		<DropdownMenu>
@@ -129,13 +136,17 @@ export function UnifiedWorkspaceSwitcher({
 						</Link>
 					</DropdownMenuItem>
 				</DropdownMenuGroup>
-				<DropdownMenuSeparator />
-				<DropdownMenuItem asChild>
-					<Link href="/app" className="gap-2 p-2">
-						<ArrowRightLeftIcon className="size-4" />
-						Switch Organization
-					</Link>
-				</DropdownMenuItem>
+				{hasMultipleOrganizations && (
+					<>
+						<DropdownMenuSeparator />
+						<DropdownMenuItem asChild>
+							<Link href="/app" className="gap-2 p-2">
+								<ArrowRightLeftIcon className="size-4" />
+								Switch Organization
+							</Link>
+						</DropdownMenuItem>
+					</>
+				)}
 			</DropdownMenuContent>
 		</DropdownMenu>
 	);

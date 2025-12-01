@@ -21,6 +21,7 @@ import Link from "next/link";
 export function NavMain({
 	items,
 	collapsible = "auto",
+	onNavigate,
 }: {
 	items: {
 		title: string;
@@ -34,6 +35,7 @@ export function NavMain({
 		}[];
 	}[];
 	collapsible?: "auto" | "manual";
+	onNavigate?: (url: string) => void;
 }) {
 	return (
 		<SidebarGroup>
@@ -67,7 +69,12 @@ export function NavMain({
 												tooltip={item.title}
 												isActive={item.isActive}
 											>
-												<Link href={item.url}>
+												<Link
+													href={item.url}
+													onClick={() =>
+														onNavigate?.(item.url)
+													}
+												>
 													<item.icon />
 													<span>{item.title}</span>
 												</Link>
@@ -79,7 +86,12 @@ export function NavMain({
 											tooltip={item.title}
 											isActive={item.isActive}
 										>
-											<Link href={item.url}>
+											<Link
+												href={item.url}
+												onClick={() =>
+													onNavigate?.(item.url)
+												}
+											>
 												<item.icon />
 												<span>{item.title}</span>
 											</Link>
@@ -108,7 +120,14 @@ export function NavMain({
 													asChild
 													isActive={subItem.isActive}
 												>
-													<Link href={subItem.url}>
+													<Link
+														href={subItem.url}
+														onClick={() =>
+															onNavigate?.(
+																subItem.url,
+															)
+														}
+													>
 														<span>
 															{subItem.title}
 														</span>

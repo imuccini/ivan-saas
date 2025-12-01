@@ -1,6 +1,6 @@
 import "server-only";
 import { auth } from "@repo/auth";
-import { getInvitationById } from "@repo/database";
+import { db, getInvitationById } from "@repo/database";
 import { headers } from "next/headers";
 import { cache } from "react";
 
@@ -17,6 +17,29 @@ export const getSession = cache(async () => {
 
 export const getActiveOrganization = cache(async (slug: string) => {
 	try {
+		const session = await getSession();
+
+		if (session?.user.role === "admin") {
+			const organization = await db.organization.findUnique({
+				where: { slug },
+				include: {
+					members: {
+						include: {
+							user: {
+								select: {
+									id: true,
+									name: true,
+									email: true,
+									image: true,
+								},
+							},
+						},
+					},
+				},
+			});
+			return organization;
+		}
+
 		const activeOrganization = await auth.api.getFullOrganization({
 			query: {
 				organizationSlug: slug,
@@ -32,6 +55,15 @@ export const getActiveOrganization = cache(async (slug: string) => {
 
 export const getOrganizationList = cache(async () => {
 	try {
+		const session = await getSession();
+
+		if (session?.user.role === "admin") {
+			const allOrgs = await db.organization.findMany({
+				orderBy: { createdAt: "desc" },
+			});
+			return allOrgs;
+		}
+
 		const organizationList = await auth.api.listOrganizations({
 			headers: await headers(),
 		});

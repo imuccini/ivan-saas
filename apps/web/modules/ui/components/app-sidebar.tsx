@@ -32,6 +32,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 	const { user } = useSession();
 	const { activeOrganization } = useActiveOrganization();
 	const { activeWorkspace } = useActiveWorkspace();
+	const [pendingPath, setPendingPath] = React.useState<string | null>(null);
+
+	// Reset pending path when pathname changes (navigation complete)
+	React.useEffect(() => {
+		setPendingPath(null);
+	}, [pathname]);
+
+	const currentPath = pendingPath ?? pathname;
 
 	const workspaceSlug = activeWorkspace?.slug ?? "";
 	const basePath = activeOrganization
@@ -43,7 +51,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 			title: "Launchpad",
 			url: basePath,
 			icon: ActivityIcon,
-			isActive: pathname === basePath,
+			isActive: currentPath === basePath,
 		},
 	];
 
@@ -52,34 +60,34 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 			title: "Guest WiFi",
 			url: `${basePath}/guest-wifi`,
 			icon: WifiIcon,
-			isActive: pathname.startsWith(`${basePath}/guest-wifi`),
+			isActive: currentPath.startsWith(`${basePath}/guest-wifi`),
 		},
 		{
 			title: "Employees",
 			url: `${basePath}/employees`,
 			icon: ShieldCheckIcon,
-			isActive: pathname.startsWith(`${basePath}/employees`),
+			isActive: currentPath.startsWith(`${basePath}/employees`),
 			items: [
 				{
 					title: "Directory",
 					url: `${basePath}/employees/directory`,
-					isActive: pathname === `${basePath}/employees/directory`,
+					isActive: currentPath === `${basePath}/employees/directory`,
 				},
 				{
 					title: "Access Rules",
 					url: `${basePath}/employees/access-rules`,
-					isActive: pathname === `${basePath}/employees/access-rules`,
+					isActive: currentPath === `${basePath}/employees/access-rules`,
 				},
 				{
 					title: "Onboarding",
 					url: `${basePath}/employees/onboarding`,
-					isActive: pathname === `${basePath}/employees/onboarding`,
+					isActive: currentPath === `${basePath}/employees/onboarding`,
 				},
 				{
 					title: "Managed Devices",
 					url: `${basePath}/employees/managed-devices`,
 					isActive:
-						pathname === `${basePath}/employees/managed-devices`,
+						currentPath === `${basePath}/employees/managed-devices`,
 				},
 			],
 		},
@@ -87,7 +95,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 			title: "IoT",
 			url: `${basePath}/iot`,
 			icon: CpuIcon,
-			isActive: pathname.startsWith(`${basePath}/iot`),
+			isActive: currentPath.startsWith(`${basePath}/iot`),
 		},
 	];
 
@@ -100,17 +108,17 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 				{
 					title: "Performances",
 					url: `${basePath}/monitor/performances`,
-					isActive: pathname === `${basePath}/monitor/performances`,
+					isActive: currentPath === `${basePath}/monitor/performances`,
 				},
 				{
 					title: "Health",
 					url: `${basePath}/monitor/health`,
-					isActive: pathname === `${basePath}/monitor/health`,
+					isActive: currentPath === `${basePath}/monitor/health`,
 				},
 				{
 					title: "Logs",
 					url: `${basePath}/monitor/logs`,
-					isActive: pathname === `${basePath}/monitor/logs`,
+					isActive: currentPath === `${basePath}/monitor/logs`,
 				},
 			],
 		},
@@ -122,17 +130,17 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 				{
 					title: "Users & Devices",
 					url: `${basePath}/manage/users-devices`,
-					isActive: pathname === `${basePath}/manage/users-devices`,
+					isActive: currentPath === `${basePath}/manage/users-devices`,
 				},
 				{
 					title: "Networks",
 					url: `${basePath}/manage/networks`,
-					isActive: pathname === `${basePath}/manage/networks`,
+					isActive: currentPath === `${basePath}/manage/networks`,
 				},
 				{
 					title: "Integrations",
 					url: `${basePath}/manage/integrations`,
-					isActive: pathname === `${basePath}/manage/integrations`,
+					isActive: currentPath === `${basePath}/manage/integrations`,
 				},
 			],
 		},
@@ -157,9 +165,18 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 				</SidebarMenu>
 			</SidebarHeader>
 			<SidebarContent>
-				<NavMain items={navLaunchpad} />
-				<NavMain items={navMain} />
-				<NavMain items={navOperations} />
+				<NavMain
+					items={navLaunchpad}
+					onNavigate={(url) => setPendingPath(url)}
+				/>
+				<NavMain
+					items={navMain}
+					onNavigate={(url) => setPendingPath(url)}
+				/>
+				<NavMain
+					items={navOperations}
+					onNavigate={(url) => setPendingPath(url)}
+				/>
 				<NavSecondary items={navSecondary} className="mt-auto" />
 			</SidebarContent>
 			<SidebarFooter>

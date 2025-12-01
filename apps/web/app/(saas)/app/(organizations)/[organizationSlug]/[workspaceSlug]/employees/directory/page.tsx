@@ -18,6 +18,7 @@ import {
 	TableHeader,
 	TableRow,
 } from "@ui/components/table";
+import { Tabs, TabsList, TabsTrigger } from "@ui/components/tabs";
 import {
 	ChevronDown,
 	ChevronLeft,
@@ -220,43 +221,23 @@ export default function DirectoryPage() {
 			{/* Users Table Card */}
 			<Card>
 				<CardHeader className="border-b">
-					<div className="flex items-center justify-between">
-						<div className="flex items-center gap-2">
-							<button
-								type="button"
-								onClick={() => setActiveTab("users")}
-								className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
-									activeTab === "users"
-										? "bg-foreground text-background"
-										: "text-muted-foreground hover:text-foreground"
-								}`}
-							>
-								Users{" "}
-								<span className="ml-1 rounded-full bg-background/20 px-2 py-0.5 text-xs">
-									357
-								</span>
-							</button>
-							<button
-								type="button"
-								onClick={() => setActiveTab("groups")}
-								className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
-									activeTab === "groups"
-										? "bg-foreground text-background"
-										: "text-muted-foreground hover:text-foreground"
-								}`}
-							>
-								User Groups{" "}
-								<span className="ml-1 rounded-full bg-background/20 px-2 py-0.5 text-xs">
-									5
-								</span>
-							</button>
-						</div>
-						<Button className="gap-2">
-							<Plus className="h-4 w-4" />
-							Add User
-						</Button>
-					</div>
-				</CardHeader>
+				<div className="flex items-center justify-between">
+					<Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as "users" | "groups")}>
+						<TabsList>
+							<TabsTrigger value="users">
+								Users <Badge variant="secondary" className="ml-1.5">357</Badge>
+							</TabsTrigger>
+							<TabsTrigger value="groups">
+								User Groups <Badge variant="secondary" className="ml-1.5">5</Badge>
+							</TabsTrigger>
+						</TabsList>
+					</Tabs>
+					<Button className="gap-2">
+						<Plus className="h-4 w-4" />
+						Add User
+					</Button>
+				</div>
+			</CardHeader>
 				<CardContent className="pt-6">
 					{/* Toolbar */}
 					<div className="flex flex-col gap-4 md:flex-row md:items-center mb-6">

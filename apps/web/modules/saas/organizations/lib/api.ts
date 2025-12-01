@@ -32,20 +32,11 @@ export const useActiveOrganizationQuery = (
 	return useQuery({
 		queryKey: activeOrganizationQueryKey(slug),
 		queryFn: async () => {
-			const { data, error } =
-				await authClient.organization.getFullOrganization({
-					query: {
-						organizationSlug: slug,
-					},
-				});
+			const organization = await orpcClient.organizations.get({
+				slug,
+			});
 
-			if (error) {
-				throw new Error(
-					error.message || "Failed to fetch active organization",
-				);
-			}
-
-			return data;
+			return organization;
 		},
 		enabled: options?.enabled,
 	});
@@ -57,20 +48,11 @@ export const useFullOrganizationQuery = (id: string) => {
 	return useQuery({
 		queryKey: fullOrganizationQueryKey(id),
 		queryFn: async () => {
-			const { data, error } =
-				await authClient.organization.getFullOrganization({
-					query: {
-						organizationId: id,
-					},
-				});
+			const organization = await orpcClient.organizations.get({
+				id,
+			});
 
-			if (error) {
-				throw new Error(
-					error.message || "Failed to fetch full organization",
-				);
-			}
-
-			return data;
+			return organization;
 		},
 	});
 };
