@@ -6,6 +6,7 @@ import { Input } from "@ui/components/input";
 import { Label } from "@ui/components/label";
 import { RadioGroup, RadioGroupItem } from "@ui/components/radio-group";
 import { Switch } from "@ui/components/switch";
+import { Tabs, TabsList, TabsTrigger } from "@ui/components/tabs";
 import { Textarea } from "@ui/components/textarea";
 import { useState } from "react";
 
@@ -157,35 +158,22 @@ export function StepJourney() {
 				<div className="space-y-4">
 					{/* Preview Controls */}
 					<div className="flex items-center justify-end gap-2">
-						<Button
-							variant={
-								previewMode === "mobile" ? "default" : "outline"
+						<Tabs
+							value={previewMode}
+							onValueChange={(value) =>
+								setPreviewMode(
+									value as "mobile" | "tablet" | "desktop",
+								)
 							}
-							size="sm"
-							onClick={() => setPreviewMode("mobile")}
 						>
-							Mobile
-						</Button>
-						<Button
-							variant={
-								previewMode === "tablet" ? "default" : "outline"
-							}
-							size="sm"
-							onClick={() => setPreviewMode("tablet")}
-						>
-							Tablet
-						</Button>
-						<Button
-							variant={
-								previewMode === "desktop"
-									? "default"
-									: "outline"
-							}
-							size="sm"
-							onClick={() => setPreviewMode("desktop")}
-						>
-							Desktop
-						</Button>
+							<TabsList>
+								<TabsTrigger value="mobile">Mobile</TabsTrigger>
+								<TabsTrigger value="tablet">Tablet</TabsTrigger>
+								<TabsTrigger value="desktop">
+									Desktop
+								</TabsTrigger>
+							</TabsList>
+						</Tabs>
 					</div>
 
 					{/* Preview Frame */}

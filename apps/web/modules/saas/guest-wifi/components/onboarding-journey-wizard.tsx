@@ -40,56 +40,65 @@ export function OnboardingJourneyWizard({
 	};
 
 	return (
-		<div className="fixed inset-0 z-50 bg-background">
-			{/* Header */}
-			<div className="border-b">
-				<div className="flex items-center justify-between px-6 py-4">
-					{/* Breadcrumb Navigation */}
-					<div className="flex items-center gap-2">
-						{STEPS.map((step, index) => (
-							<div
-								key={step.id}
-								className="flex items-center gap-2"
-							>
-								<button
-									type="button"
-									onClick={() => setCurrentStep(step.id)}
-									className={`text-sm font-medium transition-colors ${
-										currentStep === step.id
-											? "text-foreground"
-											: "text-muted-foreground hover:text-foreground"
-									}`}
-								>
-									{step.name}
-								</button>
-								{index < STEPS.length - 1 && (
-									<span className="text-muted-foreground">
-										›
-									</span>
-								)}
+		<div
+			className="fixed inset-0 z-50"
+			style={{ backgroundColor: "var(--sidebar)" }}
+		>
+			<div className="h-full w-full p-5">
+				<div className="h-full flex flex-col">
+					{/* Header */}
+					<div className="rounded-t-2xl border bg-card text-card-foreground shadow-sm">
+						<div className="flex items-center justify-between px-6 py-4">
+							{/* Breadcrumb Navigation */}
+							<div className="flex items-center gap-2">
+								{STEPS.map((step, index) => (
+									<div
+										key={step.id}
+										className="flex items-center gap-2"
+									>
+										<button
+											type="button"
+											onClick={() =>
+												setCurrentStep(step.id)
+											}
+											className={`text-sm font-medium transition-colors ${
+												currentStep === step.id
+													? "text-foreground"
+													: "text-muted-foreground hover:text-foreground"
+											}`}
+										>
+											{step.name}
+										</button>
+										{index < STEPS.length - 1 && (
+											<span className="text-muted-foreground">
+												›
+											</span>
+										)}
+									</div>
+								))}
 							</div>
-						))}
+
+							{/* Actions */}
+							<div className="flex items-center gap-2">
+								<Button variant="ghost" onClick={onClose}>
+									Exit
+								</Button>
+								<Button
+									onClick={handleSaveAndContinue}
+									className="gap-2"
+								>
+									Save & Continue
+									<ArrowRight className="h-4 w-4" />
+								</Button>
+							</div>
+						</div>
 					</div>
 
-					{/* Actions */}
-					<div className="flex items-center gap-2">
-						<Button variant="ghost" onClick={onClose}>
-							Exit
-						</Button>
-						<Button
-							onClick={handleSaveAndContinue}
-							className="gap-2"
-						>
-							Save & Continue
-							<ArrowRight className="h-4 w-4" />
-						</Button>
+					{/* Content */}
+					<div className="flex-1 rounded-b-2xl border border-t-0 bg-card text-card-foreground shadow-sm overflow-hidden">
+						{CurrentStepComponent && <CurrentStepComponent />}
 					</div>
 				</div>
-			</div>
-
-			{/* Content */}
-			<div className="h-[calc(100vh-73px)] overflow-hidden">
-				{CurrentStepComponent && <CurrentStepComponent />}
 			</div>
 		</div>
 	);

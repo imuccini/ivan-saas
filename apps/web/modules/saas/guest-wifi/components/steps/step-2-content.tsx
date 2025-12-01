@@ -176,41 +176,22 @@ export function StepContent() {
 							</SelectContent>
 						</Select>
 
-						<div className="flex items-center gap-2">
-							<Button
-								variant={
-									previewMode === "mobile"
-										? "default"
-										: "outline"
-								}
-								size="sm"
-								onClick={() => setPreviewMode("mobile")}
-							>
-								Mobile
-							</Button>
-							<Button
-								variant={
-									previewMode === "tablet"
-										? "default"
-										: "outline"
-								}
-								size="sm"
-								onClick={() => setPreviewMode("tablet")}
-							>
-								Tablet
-							</Button>
-							<Button
-								variant={
-									previewMode === "desktop"
-										? "default"
-										: "outline"
-								}
-								size="sm"
-								onClick={() => setPreviewMode("desktop")}
-							>
-								Desktop
-							</Button>
-						</div>
+						<Tabs
+							value={previewMode}
+							onValueChange={(value) =>
+								setPreviewMode(
+									value as "mobile" | "tablet" | "desktop",
+								)
+							}
+						>
+							<TabsList>
+								<TabsTrigger value="mobile">Mobile</TabsTrigger>
+								<TabsTrigger value="tablet">Tablet</TabsTrigger>
+								<TabsTrigger value="desktop">
+									Desktop
+								</TabsTrigger>
+							</TabsList>
+						</Tabs>
 					</div>
 
 					{/* Preview Frame */}
