@@ -12,6 +12,16 @@ interface OnboardingJourneyWizardProps {
 	onClose: () => void;
 }
 
+interface FormField {
+	id: string;
+	label: string;
+	placeholder?: string;
+	required: boolean;
+	type: string;
+	isCustom?: boolean;
+	options?: string[];
+}
+
 const STEPS = [
 	{ id: 1, name: "Authentication", component: StepAuthentication },
 	{ id: 2, name: "Content", component: StepContent },
@@ -23,6 +33,22 @@ export function OnboardingJourneyWizard({
 	onClose,
 }: OnboardingJourneyWizardProps) {
 	const [currentStep, setCurrentStep] = useState(1);
+	const [registrationFields, setRegistrationFields] = useState<FormField[]>([
+		{
+			id: "1",
+			label: "First Name",
+			placeholder: "Enter your first name",
+			required: false,
+			type: "text",
+		},
+		{
+			id: "3",
+			label: "Email",
+			placeholder: "Enter your email address",
+			required: true,
+			type: "email",
+		},
+	]);
 
 	if (!open) return null;
 
@@ -96,7 +122,18 @@ export function OnboardingJourneyWizard({
 
 					{/* Content */}
 					<div className="flex-1 rounded-b-2xl border border-t-0 bg-card text-card-foreground shadow-sm overflow-hidden">
-						{CurrentStepComponent && <CurrentStepComponent />}
+						{currentStep === 1 && (
+							<StepAuthentication
+								registrationFields={registrationFields}
+								setRegistrationFields={setRegistrationFields}
+							/>
+						)}
+						{currentStep === 2 && (
+							<StepContent
+								registrationFields={registrationFields}
+							/>
+						)}
+						{currentStep === 3 && <StepJourney />}
 					</div>
 				</div>
 			</div>
