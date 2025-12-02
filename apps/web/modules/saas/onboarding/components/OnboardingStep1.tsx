@@ -97,13 +97,27 @@ export function OnboardingStep1({ onCompleted }: { onCompleted: () => void }) {
 		form.clearErrors("root");
 
 		try {
-			const { data: orgData, error: orgError } =
-				await authClient.organization.create({
+			let orgData = null;
+			let orgError = null;
+			const slug = slugify(companyName, { lower: true, strict: true });
+			let attempt = 0;
+
+			while (attempt < 5) {
+				const result = await authClient.organization.create({
 					name: companyName,
-					slug: slugify(companyName, { lower: true, strict: true }),
+					slug: attempt === 0 ? slug : `${slug}-${attempt}`,
 				});
 
-			if (orgError) {
+				if (!result.error) {
+					orgData = result.data;
+					break;
+				}
+
+				orgError = result.error;
+				attempt++;
+			}
+
+			if (orgError && !orgData) {
 				throw new Error(orgError.message);
 			}
 
