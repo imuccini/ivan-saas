@@ -16,11 +16,35 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@ui/components/tabs";
 import { FileText } from "lucide-react";
 import { useState } from "react";
 import { ConfigureSignupFormDialog } from "../configure-signup-form-dialog";
+import { ConfigureTermsDialog } from "../configure-terms-dialog";
 
-export function StepAuthentication() {
+interface FormField {
+	id: string;
+	label: string;
+	placeholder?: string;
+	required: boolean;
+	type: string;
+	isCustom?: boolean;
+	options?: string[];
+}
+
+interface StepAuthenticationProps {
+	registrationFields: FormField[];
+	setRegistrationFields: (fields: FormField[]) => void;
+}
+
+export function StepAuthentication({
+	registrationFields,
+	setRegistrationFields,
+}: StepAuthenticationProps) {
 	const [signupFormDialogOpen, setSignupFormDialogOpen] = useState(false);
-	const [timeLimitEnabled, setTimeLimitEnabled] = useState(true);
-	const [sponsorshipEnabled, setSponsorshipEnabled] = useState(true);
+	const [termsDialogOpen, setTermsDialogOpen] = useState(false);
+	const [phoneVerificationEnabled, setPhoneVerificationEnabled] =
+		useState(false);
+	const [accessCodesEnabled, setAccessCodesEnabled] = useState(false);
+	const [timeLimitEnabled, setTimeLimitEnabled] = useState(false);
+	const [sponsorshipEnabled, setSponsorshipEnabled] = useState(false);
+	const [accessHoursEnabled, setAccessHoursEnabled] = useState(false);
 
 	return (
 		<div className="flex h-full">
@@ -81,6 +105,8 @@ export function StepAuthentication() {
 								<ConfigureSignupFormDialog
 									open={signupFormDialogOpen}
 									onOpenChange={setSignupFormDialogOpen}
+									initialFields={registrationFields}
+									onSave={setRegistrationFields}
 								/>
 
 								<div className="flex items-center gap-2">
@@ -132,7 +158,18 @@ export function StepAuthentication() {
 						{/* Phone verification */}
 						<div className="space-y-2">
 							<Label>Phone verification</Label>
-							<Select defaultValue="enabled">
+							<Select
+								value={
+									phoneVerificationEnabled
+										? "enabled"
+										: "disabled"
+								}
+								onValueChange={(value) =>
+									setPhoneVerificationEnabled(
+										value === "enabled",
+									)
+								}
+							>
 								<SelectTrigger>
 									<SelectValue />
 								</SelectTrigger>
@@ -162,10 +199,17 @@ export function StepAuthentication() {
 								variant="outline"
 								size="sm"
 								className="gap-2"
+								onClick={() => setTermsDialogOpen(true)}
+								type="button"
 							>
 								<FileText className="h-4 w-4" />
 								Configure Terms
 							</Button>
+
+							<ConfigureTermsDialog
+								open={termsDialogOpen}
+								onOpenChange={setTermsDialogOpen}
+							/>
 						</div>
 
 						{/* Enterprise IdP */}
@@ -190,7 +234,10 @@ export function StepAuthentication() {
 									Manages access via Access Codes
 								</p>
 							</div>
-							<Switch defaultChecked />
+							<Switch
+								checked={accessCodesEnabled}
+								onCheckedChange={setAccessCodesEnabled}
+							/>
 						</div>
 					</TabsContent>
 
@@ -208,7 +255,10 @@ export function StepAuthentication() {
 										for guest users
 									</p>
 								</div>
-								<Switch checked={timeLimitEnabled} onCheckedChange={setTimeLimitEnabled} />
+								<Switch
+									checked={timeLimitEnabled}
+									onCheckedChange={setTimeLimitEnabled}
+								/>
 							</div>
 
 							{timeLimitEnabled && (
@@ -250,7 +300,10 @@ export function StepAuthentication() {
 										Require guest to be approved by a host
 									</p>
 								</div>
-								<Switch checked={sponsorshipEnabled} onCheckedChange={setSponsorshipEnabled} />
+								<Switch
+									checked={sponsorshipEnabled}
+									onCheckedChange={setSponsorshipEnabled}
+								/>
 							</div>
 
 							{sponsorshipEnabled && (
@@ -341,7 +394,10 @@ export function StepAuthentication() {
 									Limit access to WiFi to business hours
 								</p>
 							</div>
-							<Switch />
+							<Switch
+								checked={accessHoursEnabled}
+								onCheckedChange={setAccessHoursEnabled}
+							/>
 						</div>
 					</TabsContent>
 				</Tabs>
@@ -368,24 +424,38 @@ export function StepAuthentication() {
 							</div>
 
 							<div className="space-y-3">
-								<Input placeholder="First Name" />
-								<Input placeholder="Email address" />
+								{registrationFields.map((field) => (
+									<Input
+										key={field.id}
+										type={field.type}
+										placeholder={
+											field.placeholder || field.label
+										}
+									/>
+								))}
 								<Button className="w-full">Register</Button>
 
-								<div className="relative">
-									<div className="absolute inset-0 flex items-center">
-										<span className="w-full border-t" />
-									</div>
-									<div className="relative flex justify-center text-xs uppercase">
-										<span className="bg-background px-2 text-muted-foreground">
-											or
-										</span>
-									</div>
-								</div>
+								{accessCodesEnabled && (
+									<>
+										<div className="relative">
+											<div className="absolute inset-0 flex items-center">
+												<span className="w-full border-t" />
+											</div>
+											<div className="relative flex justify-center text-xs uppercase">
+												<span className="bg-background px-2 text-muted-foreground">
+													or
+												</span>
+											</div>
+										</div>
 
-								<Button variant="outline" className="w-full">
-									Enter an Access Code
-								</Button>
+										<Button
+											variant="outline"
+											className="w-full"
+										>
+											Enter an Access Code
+										</Button>
+									</>
+								)}
 								<Button variant="outline" className="w-full">
 									Login with your account
 								</Button>
