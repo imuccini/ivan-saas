@@ -26,20 +26,23 @@ export default async function OrganizationLayout({
 
 	const queryClient = getServerQueryClient();
 
-	await queryClient.prefetchQuery({
-		queryKey: activeOrganizationQueryKey(organizationSlug),
-		queryFn: () => organization,
-	});
-
-	if (config.users.enableBilling) {
-		await queryClient.prefetchQuery(
-			orpc.payments.listPurchases.queryOptions({
-				input: {
-					organizationId: organization.id,
-				},
-			}),
-		);
-	}
+	// Parallelize prefetching to eliminate waterfall
+	await Promise.all([
+		queryClient.prefetchQuery({
+			queryKey: activeOrganizationQueryKey(organizationSlug),
+			queryFn: () => organization,
+		}),
+		// Only fetch payments if organization-level billing is enabled
+		config.organizations.enableBilling
+			? queryClient.prefetchQuery(
+					orpc.payments.listPurchases.queryOptions({
+						input: {
+							organizationId: organization.id,
+						},
+					}),
+				)
+			: Promise.resolve(),
+	]);
 
 	return (
 		<ActiveWorkspaceProvider>

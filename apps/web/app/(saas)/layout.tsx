@@ -6,7 +6,6 @@ import { ActiveOrganizationProvider } from "@saas/organizations/components/Activ
 import { organizationListQueryKey } from "@saas/organizations/lib/api";
 import { ConfirmationAlertProvider } from "@saas/shared/components/ConfirmationAlertProvider";
 import { Document } from "@shared/components/Document";
-import { orpc } from "@shared/lib/orpc-query-utils";
 import { getServerQueryClient } from "@shared/lib/server";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { redirect } from "next/navigation";
@@ -15,9 +14,12 @@ import { getLocale, getMessages } from "next-intl/server";
 import type { PropsWithChildren } from "react";
 
 export default async function SaaSLayout({ children }: PropsWithChildren) {
-	const locale = await getLocale();
-	const messages = await getMessages();
-	const session = await getSession();
+	// Parallelize all async operations to eliminate waterfall
+	const [locale, messages, session] = await Promise.all([
+		getLocale(),
+		getMessages(),
+		getSession(),
+	]);
 
 	if (!session) {
 		redirect("/auth/login");
@@ -25,25 +27,20 @@ export default async function SaaSLayout({ children }: PropsWithChildren) {
 
 	const queryClient = getServerQueryClient();
 
-	await queryClient.prefetchQuery({
-		queryKey: sessionQueryKey,
-		queryFn: () => session,
-	});
-
-	if (config.organizations.enable) {
-		await queryClient.prefetchQuery({
-			queryKey: organizationListQueryKey,
-			queryFn: getOrganizationList,
-		});
-	}
-
-	if (config.users.enableBilling) {
-		await queryClient.prefetchQuery(
-			orpc.payments.listPurchases.queryOptions({
-				input: {},
-			}),
-		);
-	}
+	// Parallelize query prefetching
+	await Promise.all([
+		queryClient.prefetchQuery({
+			queryKey: sessionQueryKey,
+			queryFn: () => session,
+		}),
+		config.organizations.enable
+			? queryClient.prefetchQuery({
+					queryKey: organizationListQueryKey,
+					queryFn: getOrganizationList,
+				})
+			: Promise.resolve(),
+		// Removed user-level payments prefetch - will be handled at organization level
+	]);
 
 	return (
 		<Document locale={locale}>

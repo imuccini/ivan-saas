@@ -7,9 +7,8 @@ import { cache } from "react";
 export const getSession = cache(async () => {
 	const session = await auth.api.getSession({
 		headers: await headers(),
-		query: {
-			disableCookieCache: true,
-		},
+		// Cookie cache enabled for better performance
+		// React cache() wrapper provides request-level deduplication
 	});
 
 	return session;

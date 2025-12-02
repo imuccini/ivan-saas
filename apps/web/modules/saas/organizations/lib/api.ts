@@ -18,6 +18,9 @@ export const useOrganizationListQuery = () => {
 
 			return data;
 		},
+		// Organization list is relatively stable, cache for 5 minutes
+		staleTime: 5 * 60 * 1000, // 5 minutes
+		gcTime: 10 * 60 * 1000, // 10 minutes
 	});
 };
 
@@ -39,6 +42,9 @@ export const useActiveOrganizationQuery = (
 			return organization;
 		},
 		enabled: options?.enabled,
+		// Active organization data is stable, cache for 5 minutes
+		staleTime: 5 * 60 * 1000, // 5 minutes
+		gcTime: 10 * 60 * 1000, // 10 minutes
 	});
 };
 
@@ -54,6 +60,9 @@ export const useFullOrganizationQuery = (id: string) => {
 
 			return organization;
 		},
+		// Full organization data (with members) is stable, cache for 3 minutes
+		staleTime: 3 * 60 * 1000, // 3 minutes (shorter due to member changes)
+		gcTime: 10 * 60 * 1000, // 10 minutes
 	});
 };
 

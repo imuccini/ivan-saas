@@ -10,6 +10,8 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export default async function Layout({ children }: PropsWithChildren) {
+	// Session and organizations are already fetched in parent layout
+	// Access them via React cache - they will be deduplicated automatically
 	const session = await getSession();
 
 	if (!session) {
@@ -20,6 +22,7 @@ export default async function Layout({ children }: PropsWithChildren) {
 		redirect("/onboarding");
 	}
 
+	// This call is deduplicated via React cache() wrapper in server.ts
 	const organizations = await getOrganizationList();
 
 	if (
@@ -40,18 +43,16 @@ export default async function Layout({ children }: PropsWithChildren) {
 		(plan) => "isFree" in plan,
 	);
 
+	// Only check user-level billing if enabled and no free plan exists
+	// Organization-level billing will be checked in [organizationSlug]/layout.tsx
 	if (
-		((config.organizations.enable && config.organizations.enableBilling) ||
-			config.users.enableBilling) &&
+		config.users.enableBilling &&
+		!config.organizations.enableBilling &&
 		!hasFreePlan
 	) {
-		const organizationId = config.organizations.enable
-			? session?.session.activeOrganizationId || organizations?.at(0)?.id
-			: undefined;
-
 		const [error, data] = await attemptAsync(() =>
 			orpcClient.payments.listPurchases({
-				organizationId,
+				organizationId: undefined, // User-level purchases only
 			}),
 		);
 
