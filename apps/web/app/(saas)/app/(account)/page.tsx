@@ -1,3 +1,4 @@
+import { config } from "@repo/config";
 import { db } from "@repo/database";
 import { getOrganizationList, getSession } from "@saas/auth/lib/server";
 import { UserOrganizationList } from "@saas/organizations/components/UserOrganizationList";
@@ -10,6 +11,10 @@ export default async function AppStartPage() {
 
 	if (!session) {
 		redirect("/auth/login");
+	}
+
+	if (config.users.enableOnboarding && !session.user.onboardingComplete) {
+		redirect("/onboarding");
 	}
 
 	const organizations = await getOrganizationList();
@@ -27,7 +32,8 @@ export default async function AppStartPage() {
 		});
 
 		if (member) {
-			const isOrgAdmin = member.role === "owner" || member.role === "admin";
+			const isOrgAdmin =
+				member.role === "owner" || member.role === "admin";
 
 			const workspace = await db.workspace.findFirst({
 				where: {

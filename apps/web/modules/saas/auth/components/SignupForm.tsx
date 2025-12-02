@@ -272,7 +272,11 @@ export function SignupForm({ prefillEmail }: { prefillEmail?: string }) {
 			sessionStorage.removeItem("signupData");
 
 			// Redirect to onboarding where company data will be collected
-			router.push(redirectPath);
+			if (config.users.enableOnboarding) {
+				router.push("/onboarding");
+			} else {
+				router.push(redirectPath);
+			}
 		} catch (e) {
 			step3Form.setError("root", {
 				message:

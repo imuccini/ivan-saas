@@ -21,6 +21,7 @@ import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import type { SubmitHandler } from "react-hook-form";
 import { useForm } from "react-hook-form";
+import slugify from "slugify";
 import { z } from "zod";
 
 const formSchema = z.object({
@@ -99,7 +100,7 @@ export function OnboardingStep1({ onCompleted }: { onCompleted: () => void }) {
 			const { data: orgData, error: orgError } =
 				await authClient.organization.create({
 					name: companyName,
-					slug: companyName.toLowerCase().replace(/\s+/g, "-"),
+					slug: slugify(companyName, { lower: true, strict: true }),
 				});
 
 			if (orgError) {
