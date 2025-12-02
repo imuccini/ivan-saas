@@ -1,8 +1,8 @@
 "use client";
 import { authClient } from "@repo/auth/client";
-import { orpcClient } from "@shared/lib/orpc-client";
 import { useRouter } from "@shared/hooks/router";
 import { clearCache } from "@shared/lib/cache";
+import { orpcClient } from "@shared/lib/orpc-client";
 import { Progress } from "@ui/components/progress";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -37,16 +37,19 @@ export function OnboardingForm() {
 		await clearCache();
 
 		try {
-			const { data: organizations } = await authClient.listOrganizations();
+			const { data: organizations } =
+				await authClient.organization.list();
 
 			if (organizations && organizations.length === 1) {
 				const organization = organizations[0];
-				const workspaces = await orpcClient.workspaces.listWorkspaces({
+				const workspaces = await orpcClient.workspaces.list({
 					organizationId: organization.id,
 				});
 
 				if (workspaces && workspaces.length > 0) {
-					router.replace(`/app/${organization.slug}/${workspaces[0].slug}`);
+					router.replace(
+						`/app/${organization.slug}/${workspaces[0].slug}`,
+					);
 					return;
 				}
 

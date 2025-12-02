@@ -35,6 +35,7 @@ export const getActiveOrganization = cache(async (slug: string) => {
 							},
 						},
 					},
+					invitations: true,
 				},
 			});
 			return organization;

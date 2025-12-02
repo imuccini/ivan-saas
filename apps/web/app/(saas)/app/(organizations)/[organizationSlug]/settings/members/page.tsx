@@ -28,7 +28,7 @@ export default async function OrganizationSettingsPage({
 
 	return (
 		<SettingsList>
-			{isOrganizationAdmin(organization, session?.user) && (
+			{isOrganizationAdmin(organization as any, session?.user) && (
 				<InviteMemberForm organizationId={organization.id} />
 			)}
 			<OrganizationMembersBlock organizationId={organization.id} />

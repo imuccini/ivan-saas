@@ -161,7 +161,7 @@ export function ConfigureSignupFormDialog({
 			placeholder: template.placeholder,
 			required: false,
 			type: template.type,
-			options: template.options,
+			options: "options" in template ? template.options : undefined,
 		};
 		setFields([...fields, newField]);
 	};
@@ -201,8 +201,8 @@ export function ConfigureSignupFormDialog({
 					<DialogHeader>
 						<DialogTitle>Customise registration form</DialogTitle>
 						<DialogDescription>
-							Control the fields users see during sign-up. Toggle, require, and
-							drag to reorder.
+							Control the fields users see during sign-up. Toggle,
+							require, and drag to reorder.
 						</DialogDescription>
 					</DialogHeader>
 
@@ -224,12 +224,17 @@ export function ConfigureSignupFormDialog({
 									</Label>
 									<Input
 										type={field.type}
-										placeholder={field.placeholder || `Enter ${field.label.toLowerCase()}`}
+										placeholder={
+											field.placeholder ||
+											`Enter ${field.label.toLowerCase()}`
+										}
 										disabled
 										className="bg-muted/50"
 									/>
 									{field.isCustom && (
-										<p className="text-xs text-primary">Custom Field</p>
+										<p className="text-xs text-primary">
+											Custom Field
+										</p>
 									)}
 								</div>
 
@@ -246,7 +251,9 @@ export function ConfigureSignupFormDialog({
 												: "bg-muted text-muted-foreground hover:bg-muted/80"
 										}`}
 									>
-										{field.required ? "Required" : "Optional"}
+										{field.required
+											? "Required"
+											: "Optional"}
 									</button>
 									<Button
 										variant="ghost"
@@ -278,31 +285,46 @@ export function ConfigureSignupFormDialog({
 										<ChevronDown className="h-4 w-4 ml-auto" />
 									</Button>
 								</DropdownMenuTrigger>
-								<DropdownMenuContent align="start" className="w-56">
+								<DropdownMenuContent
+									align="start"
+									className="w-56"
+								>
 									<DropdownMenuItem
-										onClick={() => addPredefinedField("company")}
+										onClick={() =>
+											addPredefinedField("company")
+										}
 									>
 										<Building2 className="h-4 w-4 mr-2" />
 										Company
 									</DropdownMenuItem>
 									<DropdownMenuItem
-										onClick={() => addPredefinedField("title")}
+										onClick={() =>
+											addPredefinedField("title")
+										}
 									>
 										<User className="h-4 w-4 mr-2" />
 										Job Title
 									</DropdownMenuItem>
 									<DropdownMenuItem
-										onClick={() => addPredefinedField("gender")}
+										onClick={() =>
+											addPredefinedField("gender")
+										}
 									>
 										<Users className="h-4 w-4 mr-2" />
 										Gender
 									</DropdownMenuItem>
-									<DropdownMenuItem onClick={() => addPredefinedField("age")}>
+									<DropdownMenuItem
+										onClick={() =>
+											addPredefinedField("age")
+										}
+									>
 										<Hash className="h-4 w-4 mr-2" />
 										Age
 									</DropdownMenuItem>
 									<DropdownMenuItem
-										onClick={() => addPredefinedField("birthday")}
+										onClick={() =>
+											addPredefinedField("birthday")
+										}
 									>
 										<Calendar className="h-4 w-4 mr-2" />
 										Birthday
@@ -323,17 +345,28 @@ export function ConfigureSignupFormDialog({
 										<ChevronDown className="h-4 w-4 ml-auto" />
 									</Button>
 								</DropdownMenuTrigger>
-								<DropdownMenuContent align="end" className="w-56">
-									<DropdownMenuItem onClick={() => openCustomFieldModal("text")}>
+								<DropdownMenuContent
+									align="end"
+									className="w-56"
+								>
+									<DropdownMenuItem
+										onClick={() =>
+											openCustomFieldModal("text")
+										}
+									>
 										Text Field
 									</DropdownMenuItem>
 									<DropdownMenuItem
-										onClick={() => openCustomFieldModal("select")}
+										onClick={() =>
+											openCustomFieldModal("select")
+										}
 									>
 										Select Dropdown
 									</DropdownMenuItem>
 									<DropdownMenuItem
-										onClick={() => openCustomFieldModal("boolean")}
+										onClick={() =>
+											openCustomFieldModal("boolean")
+										}
 									>
 										Checkbox
 									</DropdownMenuItem>
@@ -343,7 +376,10 @@ export function ConfigureSignupFormDialog({
 					</div>
 
 					<DialogFooter>
-						<Button variant="outline" onClick={() => onOpenChange(false)}>
+						<Button
+							variant="outline"
+							onClick={() => onOpenChange(false)}
+						>
 							Cancel
 						</Button>
 						<Button onClick={handleSave}>Update</Button>

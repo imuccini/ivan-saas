@@ -1,11 +1,39 @@
 ---
-description: 
-globs: 
+description: Optimization strategies for SPA-like navigation, perceived performance, and reactivity in Next.js App Router.
+globs: "**/*.{ts,tsx}"
 alwaysApply: true
 ---
-This rule describes how to optimize the code for performance.
 
-- Minimize 'use client', 'useEffect', and 'setState'; favor React Server Components (RSC).
-- Wrap client components in Suspense with fallback.
-- Use dynamic loading for non-critical components.
-- Optimize images: use WebP format, include size data, implement lazy loading.
+# Performance & SPA-Like Experience Strategy
+---
+description: Next.js App Router Performance & SPA UX Strategy
+globs: "**/*.{ts,tsx}"
+alwaysApply: true
+---
+# Performance & SPA UX
+
+- **Instant Nav:** Ensure non-blocking transitions using `loading.tsx` and granular `<Suspense>`.
+- **Feedback:** Use Shadcn `<Skeleton />` to minimize layout shift (CLS) while data streams.
+- **Fetching:** Await data *inside* components (not layouts). Use `Promise.all` to prevent waterfalls.
+- **Client Boundaries:** Push `'use client'` to leaf nodes. Lazy load heavy components via `next/dynamic`.
+- **Mutations:** STRICTLY use `useOptimistic` for instant UI updates during Server Actions.
+- **Assets:** Use `next/font` and `next/image` (set `priority` for LCP).
+## 1. Instant Navigation & Feedback (The SPA Feel)
+- **Non-Blocking Navigation:** Ensure route transitions happen immediately. Never block the UI while fetching data.
+- **Loading UI:** MUST implement `loading.tsx` for all major route segments to provide immediate visual feedback (Skeletons/Spinners) upon navigation.
+- **Granular Suspense:** Wrap individual heavy components or data-fetching sections in `<Suspense fallback={<Skeleton />}>`. Do not wait for the entire page data to resolve before rendering the shell.
+- **Shadcn Skeletons:** Use Shadcn UI `<Skeleton />` components mimicking the final layout shape to reduce layout shift (CLS).
+
+## 2. Server Components & Streaming
+- **RSC First:** Keep logic on the server to reduce bundle size, but stream the UI.
+- **Async Components:** Main page components should be `async`. Await data calls *inside* Suspense boundaries, not at the layout level (unless critical for metadata).
+- **Parallel Data Fetching:** Use `Promise.all` for independent data fetches to minimize waterfalls.
+
+## 3. Client Reactivity & Optimization
+- **Leaf-Node Interactivity:** Push `'use client'` down to the smallest possible components (buttons, inputs, interactive graphs) to keep the parent page static/streamable.
+- **Optimistic UI:** Use `useOptimistic` hook for mutations (Server Actions) to update the UI immediately before the server responds.
+- **Dynamic Imports:** Use `next/dynamic` for heavy client components (e.g., Charts, Rich Text Editors) that are not visible "above the fold."
+
+## 4. Assets & Resources
+- **Image Optimization:** Use `next/image` with explicit `sizes`, WebP/AVIF formats, and priority tagging for LCP (Largest Contentful Paint) images.
+- **Font Optimization:** Utilize `next/font` to eliminate layout shift caused by font loading.
