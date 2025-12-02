@@ -1,8 +1,8 @@
 "use client";
 
-import { useOrganizationListQuery } from "@saas/organizations/lib/api";
-import { useActiveOrganization } from "@saas/organizations/hooks/use-active-organization";
 import { useSession } from "@saas/auth/hooks/use-session";
+import { useActiveOrganization } from "@saas/organizations/hooks/use-active-organization";
+import { useOrganizationListQuery } from "@saas/organizations/lib/api";
 import { useActiveWorkspace } from "@saas/workspaces/hooks/use-active-workspace";
 import { useWorkspaceListQuery } from "@saas/workspaces/lib/api";
 import {
@@ -41,11 +41,44 @@ export function UnifiedWorkspaceSwitcher({
 	const { user } = useSession();
 
 	if (!activeOrganization) {
-		return null;
+		// Show skeleton placeholder to prevent layout shift
+		return (
+			<button
+				type="button"
+				disabled
+				className={cn(
+					isSidebar
+						? sidebarMenuButtonVariants({
+								size: "lg",
+								variant: "default",
+							})
+						: "flex items-center gap-2 rounded-md border p-2 text-left",
+					"opacity-50 cursor-not-allowed",
+					className,
+				)}
+			>
+				<div
+					className={cn(
+						"flex aspect-square size-8 shrink-0 items-center justify-center rounded-lg",
+						isSidebar
+							? "bg-sidebar-primary text-sidebar-primary-foreground"
+							: "border bg-background",
+					)}
+				>
+					<LayoutGridIcon className="size-4 shrink-0 animate-pulse" />
+				</div>
+				<div className="grid flex-1 text-left text-sm leading-tight">
+					<span className="truncate font-semibold">Loading...</span>
+					<span className="truncate text-xs">Please wait</span>
+				</div>
+				<ChevronsUpDownIcon className="ml-auto size-4 opacity-50" />
+			</button>
+		);
 	}
 
 	const isSuperAdmin = user?.role === "admin";
-	const hasMultipleOrganizations = (organizations?.length ?? 0) > 1 || isSuperAdmin;
+	const hasMultipleOrganizations =
+		(organizations?.length ?? 0) > 1 || isSuperAdmin;
 
 	return (
 		<DropdownMenu>
