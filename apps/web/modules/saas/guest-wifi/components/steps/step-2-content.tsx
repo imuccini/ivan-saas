@@ -15,7 +15,21 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@ui/components/tabs";
 import { Textarea } from "@ui/components/textarea";
 import { useState } from "react";
 
-export function StepContent() {
+interface FormField {
+	id: string;
+	label: string;
+	placeholder?: string;
+	required: boolean;
+	type: string;
+	isCustom?: boolean;
+	options?: string[];
+}
+
+interface StepContentProps {
+	registrationFields: FormField[];
+}
+
+export function StepContent({ registrationFields }: StepContentProps) {
 	const [previewMode, setPreviewMode] = useState<
 		"mobile" | "tablet" | "desktop"
 	>("mobile");
@@ -240,13 +254,17 @@ export function StepContent() {
 										</div>
 									</div>
 
-									<Input placeholder="Gender" />
-									<Input placeholder="First name" />
-									<Input placeholder="Last name" />
-									<div className="grid grid-cols-3 gap-2">
-										<Input placeholder="Day" />
-										<Input placeholder="Month" />
-										<Input placeholder="Year" />
+									<div className="space-y-3">
+										{registrationFields.map((field) => (
+											<Input
+												key={field.id}
+												type={field.type}
+												placeholder={
+													field.placeholder ||
+													field.label
+												}
+											/>
+										))}
 									</div>
 								</div>
 							</div>
