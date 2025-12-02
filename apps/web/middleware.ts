@@ -42,7 +42,7 @@ export default async function middleware(req: NextRequest) {
 	}
 
 	const pathsWithoutLocale = [
-		"/onboarding",
+		"/auth/onboarding",
 		"/new-organization",
 		"/choose-plan",
 		"/organization-invitation",

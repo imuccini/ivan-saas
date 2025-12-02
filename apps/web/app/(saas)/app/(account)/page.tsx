@@ -14,7 +14,7 @@ export default async function AppStartPage() {
 	}
 
 	if (config.users.enableOnboarding && !session.user.onboardingComplete) {
-		redirect("/onboarding");
+		redirect("/auth/onboarding");
 	}
 
 	const organizations = await getOrganizationList();

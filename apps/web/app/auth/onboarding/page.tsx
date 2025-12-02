@@ -1,7 +1,6 @@
 import { config } from "@repo/config";
 import { getSession } from "@saas/auth/lib/server";
 import { OnboardingForm } from "@saas/onboarding/components/OnboardingForm";
-import { AuthWrapper } from "@saas/shared/components/AuthWrapper";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 
@@ -27,9 +26,6 @@ export default async function OnboardingPage() {
 		redirect("/app");
 	}
 
-	return (
-		<AuthWrapper>
-			<OnboardingForm />
-		</AuthWrapper>
-	);
+	// AuthWrapper is already provided by the auth layout
+	return <OnboardingForm />;
 }

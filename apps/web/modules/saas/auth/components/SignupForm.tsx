@@ -20,8 +20,6 @@ import { Input } from "@ui/components/input";
 import {
 	AlertTriangleIcon,
 	ArrowRightIcon,
-	EyeIcon,
-	EyeOffIcon,
 	MailboxIcon,
 } from "lucide-react";
 import Link from "next/link";
@@ -76,23 +74,7 @@ const step1Schema = z.object({
 	}),
 });
 
-// Step 3: Password Setup
-const step3Schema = z
-	.object({
-		password: z
-			.string()
-			.min(8, "Password must be at least 8 characters")
-			.regex(/[A-Z]/, "Password must include an uppercase letter")
-			.regex(/[0-9]/, "Password must include a number"),
-		confirmPassword: z.string(),
-	})
-	.refine((data) => data.password === data.confirmPassword, {
-		message: "Passwords don't match",
-		path: ["confirmPassword"],
-	});
-
 type Step1Data = z.infer<typeof step1Schema>;
-type Step3Data = z.infer<typeof step3Schema>;
 
 export function SignupForm({ prefillEmail }: { prefillEmail?: string }) {
 	const t = useTranslations();
@@ -101,16 +83,20 @@ export function SignupForm({ prefillEmail }: { prefillEmail?: string }) {
 	const searchParams = useSearchParams();
 
 	const [currentStep, setCurrentStep] = useState(1);
-	const [showPassword, setShowPassword] = useState(false);
-	const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 	const [emailExists, setEmailExists] = useState(false);
 	const [signupData, setSignupData] = useState<{
 		step1?: Step1Data;
-		step3?: Step3Data;
 	}>({});
 
 	const invitationId = searchParams.get("invitationId");
 	const email = searchParams.get("email");
+
+	// Prefetch the set-password page when showing email verification (step 2)
+	useEffect(() => {
+		if (currentStep === 2) {
+			router.prefetch("/auth/set-password");
+		}
+	}, [currentStep, router]);
 	const redirectTo = searchParams.get("redirectTo");
 
 	// Check if we're coming from magic link verification
@@ -158,14 +144,7 @@ export function SignupForm({ prefillEmail }: { prefillEmail?: string }) {
 		},
 	});
 
-	// Step 3 Form
-	const step3Form = useForm<Step3Data>({
-		resolver: zodResolver(step3Schema),
-		defaultValues: {
-			password: "",
-			confirmPassword: "",
-		},
-	});
+
 
 	const redirectPath = invitationId
 		? `/organization-invitation/${invitationId}`
@@ -206,14 +185,10 @@ export function SignupForm({ prefillEmail }: { prefillEmail?: string }) {
 				JSON.stringify({ step1: data }),
 			);
 
-			// Send magic link with user data in URL for fallback
+			// Send magic link with callback to set-password page
 			const callbackURL = new URL(
-				`${window.location.origin}/auth/signup`,
+				`${window.location.origin}/auth/set-password`,
 			);
-			callbackURL.searchParams.set("verified", "true");
-			callbackURL.searchParams.set("email", data.email);
-			callbackURL.searchParams.set("firstName", data.firstName);
-			callbackURL.searchParams.set("lastName", data.lastName);
 
 			const { error } = await authClient.signIn.magicLink({
 				email: data.email,
@@ -237,55 +212,9 @@ export function SignupForm({ prefillEmail }: { prefillEmail?: string }) {
 		}
 	});
 
-	// Step 3: Submit password and set it for the authenticated user
-	const onStep3Submit = step3Form.handleSubmit(async (data) => {
-		try {
-			// Get signup data from state or fallback to URL params
-			const step1Data = signupData.step1 || {
-				email: searchParams.get("email") || "",
-				firstName: searchParams.get("firstName") || "",
-				lastName: searchParams.get("lastName") || "",
-				consent: true,
-			};
 
-			if (!step1Data.email) {
-				throw new Error("Missing signup data");
-			}
 
-			// Call the API route to set password for the authenticated user
-			const response = await fetch("/api/auth/set-password", {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-				},
-				body: JSON.stringify({
-					password: data.password,
-				}),
-			});
-
-			if (!response.ok) {
-				const errorData = await response.json();
-				throw new Error(errorData.error || "Failed to set password");
-			}
-
-			// Clear stored signup data
-			sessionStorage.removeItem("signupData");
-
-			// Redirect to onboarding where company data will be collected
-			if (config.users.enableOnboarding) {
-				router.push("/onboarding");
-			} else {
-				router.push(redirectPath);
-			}
-		} catch (e) {
-			step3Form.setError("root", {
-				message:
-					e instanceof Error ? e.message : "Failed to set password",
-			});
-		}
-	});
-
-	const totalSteps = 3;
+	const totalSteps = 2;
 	const progress = (currentStep / totalSteps) * 100;
 
 	return (
@@ -293,13 +222,10 @@ export function SignupForm({ prefillEmail }: { prefillEmail?: string }) {
 			<h1 className="font-bold text-xl md:text-2xl">
 				{currentStep === 1 && "Create a free account"}
 				{currentStep === 2 && "Check your email"}
-				{currentStep === 3 && "Set your password"}
 			</h1>
 			<p className="mt-1 mb-6 text-foreground/60">
 				{currentStep === 1 && "Get started in less than 2 minutes."}
 				{currentStep === 2 && "We sent you a verification link"}
-				{currentStep === 3 &&
-					"Create a secure password for your account"}
 			</p>
 
 			{/* Progress Indicator */}
@@ -560,116 +486,7 @@ export function SignupForm({ prefillEmail }: { prefillEmail?: string }) {
 				</div>
 			)}
 
-			{/* Step 3: Password Setup */}
-			{currentStep === 3 && (
-				<Form {...step3Form}>
-					<form
-						className="flex flex-col items-stretch gap-4"
-						onSubmit={onStep3Submit}
-					>
-						{step3Form.formState.isSubmitted &&
-							step3Form.formState.errors.root && (
-								<Alert variant="destructive">
-									<AlertTriangleIcon />
-									<AlertDescription>
-										{
-											step3Form.formState.errors.root
-												.message
-										}
-									</AlertDescription>
-								</Alert>
-							)}
 
-						<FormField
-							control={step3Form.control}
-							name="password"
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>Create Password</FormLabel>
-									<FormControl>
-										<div className="relative">
-											<Input
-												type={
-													showPassword
-														? "text"
-														: "password"
-												}
-												className="pr-10"
-												{...field}
-												autoComplete="new-password"
-											/>
-											<button
-												type="button"
-												onClick={() =>
-													setShowPassword(
-														!showPassword,
-													)
-												}
-												className="absolute inset-y-0 right-0 flex items-center pr-4 text-primary text-xl"
-											>
-												{showPassword ? (
-													<EyeOffIcon className="size-4" />
-												) : (
-													<EyeIcon className="size-4" />
-												)}
-											</button>
-										</div>
-									</FormControl>
-									<p className="text-xs text-muted-foreground">
-										Must be at least 8 characters, include
-										an uppercase letter and a number.
-									</p>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
-
-						<FormField
-							control={step3Form.control}
-							name="confirmPassword"
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>Confirm Password</FormLabel>
-									<FormControl>
-										<div className="relative">
-											<Input
-												type={
-													showConfirmPassword
-														? "text"
-														: "password"
-												}
-												className="pr-10"
-												{...field}
-												autoComplete="new-password"
-											/>
-											<button
-												type="button"
-												onClick={() =>
-													setShowConfirmPassword(
-														!showConfirmPassword,
-													)
-												}
-												className="absolute inset-y-0 right-0 flex items-center pr-4 text-primary text-xl"
-											>
-												{showConfirmPassword ? (
-													<EyeOffIcon className="size-4" />
-												) : (
-													<EyeIcon className="size-4" />
-												)}
-											</button>
-										</div>
-									</FormControl>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
-
-						<Button loading={step3Form.formState.isSubmitting}>
-							Set Password
-						</Button>
-					</form>
-				</Form>
-			)}
 
 			{/* Login Link */}
 			{currentStep === 1 && (

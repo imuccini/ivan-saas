@@ -19,7 +19,7 @@ export default async function Layout({ children }: PropsWithChildren) {
 	}
 
 	if (config.users.enableOnboarding && !session.user.onboardingComplete) {
-		redirect("/onboarding");
+		redirect("/auth/onboarding");
 	}
 
 	// This call is deduplicated via React cache() wrapper in server.ts
