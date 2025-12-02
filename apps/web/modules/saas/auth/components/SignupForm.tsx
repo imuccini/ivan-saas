@@ -104,7 +104,6 @@ export function SignupForm({ prefillEmail }: { prefillEmail?: string }) {
 	const [showPassword, setShowPassword] = useState(false);
 	const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 	const [emailExists, setEmailExists] = useState(false);
-	const [isCheckingEmail, setIsCheckingEmail] = useState(false);
 	const [signupData, setSignupData] = useState<{
 		step1?: Step1Data;
 		step3?: Step3Data;
@@ -115,12 +114,38 @@ export function SignupForm({ prefillEmail }: { prefillEmail?: string }) {
 	const redirectTo = searchParams.get("redirectTo");
 
 	// Check if we're coming from magic link verification
-	const verificationToken = searchParams.get("token");
+	const isVerified = searchParams.get("verified") === "true";
 	useEffect(() => {
-		if (verificationToken) {
+		if (isVerified) {
+			// Retrieve stored signup data from sessionStorage
+			const storedData = sessionStorage.getItem("signupData");
+			if (storedData) {
+				try {
+					const parsed = JSON.parse(storedData);
+					setSignupData(parsed);
+				} catch (e) {
+					console.error("Failed to parse stored signup data:", e);
+				}
+			} else {
+				// Fallback: populate from URL params if sessionStorage is empty
+				const urlEmail = searchParams.get("email");
+				const urlFirstName = searchParams.get("firstName");
+				const urlLastName = searchParams.get("lastName");
+
+				if (urlEmail) {
+					setSignupData({
+						step1: {
+							email: urlEmail,
+							firstName: urlFirstName || "",
+							lastName: urlLastName || "",
+							consent: true, // Already consented in step 1
+						},
+					});
+				}
+			}
 			setCurrentStep(3); // Go to password setup
 		}
-	}, [verificationToken]);
+	}, [isVerified, searchParams]);
 
 	// Step 1 Form
 	const step1Form = useForm<Step1Data>({
@@ -142,8 +167,6 @@ export function SignupForm({ prefillEmail }: { prefillEmail?: string }) {
 		},
 	});
 
-	const invitationOnlyMode = !config.auth.enableSignup && invitationId;
-
 	const redirectPath = invitationId
 		? `/organization-invitation/${invitationId}`
 		: (redirectTo ?? config.auth.redirectAfterSignIn);
@@ -154,7 +177,6 @@ export function SignupForm({ prefillEmail }: { prefillEmail?: string }) {
 			return;
 		}
 
-		setIsCheckingEmail(true);
 		try {
 			const response = await fetch(
 				`/api/auth/check-email?email=${encodeURIComponent(email)}`,
@@ -164,8 +186,6 @@ export function SignupForm({ prefillEmail }: { prefillEmail?: string }) {
 		} catch (error) {
 			console.error("Error checking email:", error);
 			setEmailExists(false);
-		} finally {
-			setIsCheckingEmail(false);
 		}
 	};
 
@@ -181,12 +201,24 @@ export function SignupForm({ prefillEmail }: { prefillEmail?: string }) {
 			}
 
 			setSignupData({ ...signupData, step1: data });
+			sessionStorage.setItem(
+				"signupData",
+				JSON.stringify({ step1: data }),
+			);
 
-			// Send magic link
+			// Send magic link with user data in URL for fallback
+			const callbackURL = new URL(
+				`${window.location.origin}/auth/signup`,
+			);
+			callbackURL.searchParams.set("verified", "true");
+			callbackURL.searchParams.set("email", data.email);
+			callbackURL.searchParams.set("firstName", data.firstName);
+			callbackURL.searchParams.set("lastName", data.lastName);
+
 			const { error } = await authClient.signIn.magicLink({
 				email: data.email,
 				name: `${data.firstName} ${data.lastName}`,
-				callbackURL: `${window.location.origin}/auth/signup?token=verify&email=${encodeURIComponent(data.email)}`,
+				callbackURL: callbackURL.toString(),
 			});
 
 			if (error) {
@@ -205,34 +237,46 @@ export function SignupForm({ prefillEmail }: { prefillEmail?: string }) {
 		}
 	});
 
-	// Step 3: Submit password and create account
+	// Step 3: Submit password and set it for the authenticated user
 	const onStep3Submit = step3Form.handleSubmit(async (data) => {
 		try {
-			if (!signupData.step1) {
+			// Get signup data from state or fallback to URL params
+			const step1Data = signupData.step1 || {
+				email: searchParams.get("email") || "",
+				firstName: searchParams.get("firstName") || "",
+				lastName: searchParams.get("lastName") || "",
+				consent: true,
+			};
+
+			if (!step1Data.email) {
 				throw new Error("Missing signup data");
 			}
 
-			// Create account with password
-			const { error } = await authClient.signUp.email({
-				email: signupData.step1.email,
-				password: data.password,
-				name: `${signupData.step1.firstName} ${signupData.step1.lastName}`,
-				callbackURL: redirectPath,
+			// Call the API route to set password for the authenticated user
+			const response = await fetch("/api/auth/set-password", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({
+					password: data.password,
+				}),
 			});
 
-			if (error) {
-				throw error;
+			if (!response.ok) {
+				const errorData = await response.json();
+				throw new Error(errorData.error || "Failed to set password");
 			}
+
+			// Clear stored signup data
+			sessionStorage.removeItem("signupData");
 
 			// Redirect to onboarding where company data will be collected
 			router.push(redirectPath);
 		} catch (e) {
 			step3Form.setError("root", {
-				message: getAuthErrorMessage(
-					e && typeof e === "object" && "code" in e
-						? (e.code as string)
-						: undefined,
-				),
+				message:
+					e instanceof Error ? e.message : "Failed to set password",
 			});
 		}
 	});
@@ -472,10 +516,30 @@ export function SignupForm({ prefillEmail }: { prefillEmail?: string }) {
 							onClick={async () => {
 								if (signupData.step1) {
 									try {
+										const callbackURL = new URL(
+											`${window.location.origin}/auth/signup`,
+										);
+										callbackURL.searchParams.set(
+											"verified",
+											"true",
+										);
+										callbackURL.searchParams.set(
+											"email",
+											signupData.step1.email,
+										);
+										callbackURL.searchParams.set(
+											"firstName",
+											signupData.step1.firstName,
+										);
+										callbackURL.searchParams.set(
+											"lastName",
+											signupData.step1.lastName,
+										);
+
 										await authClient.signIn.magicLink({
 											email: signupData.step1.email,
 											name: `${signupData.step1.firstName} ${signupData.step1.lastName}`,
-											callbackURL: `${window.location.origin}/auth/signup?token=verify&email=${encodeURIComponent(signupData.step1.email)}`,
+											callbackURL: callbackURL.toString(),
 										});
 									} catch (error) {
 										console.error(
