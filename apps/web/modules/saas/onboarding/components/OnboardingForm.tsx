@@ -4,8 +4,10 @@ import { useRouter } from "@shared/hooks/router";
 import { clearCache } from "@shared/lib/cache";
 import { orpcClient } from "@shared/lib/orpc-client";
 import { Progress } from "@ui/components/progress";
+import { LoaderIcon } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { useEffect, useState } from "react";
 import { withQuery } from "ufo";
 import { OnboardingStep1 } from "./OnboardingStep1";
 
@@ -13,6 +15,7 @@ export function OnboardingForm() {
 	const t = useTranslations();
 	const router = useRouter();
 	const searchParams = useSearchParams();
+	const [isCompleting, setIsCompleting] = useState(false);
 
 	const stepSearchParam = searchParams.get("step");
 	const redirectTo = searchParams.get("redirectTo");
@@ -30,13 +33,16 @@ export function OnboardingForm() {
 	};
 
 	const onCompleted = async () => {
-		await authClient.updateUser({
-			onboardingComplete: true,
-		});
-
-		await clearCache();
+		// Note: isCompleting is already set to true by OnboardingStep1
+		// We don't reset it - let it persist until the new page loads
 
 		try {
+			await authClient.updateUser({
+				onboardingComplete: true,
+			});
+
+			await clearCache();
+
 			const { data: organizations } =
 				await authClient.organization.list();
 
@@ -47,6 +53,7 @@ export function OnboardingForm() {
 				});
 
 				if (workspaces && workspaces.length > 0) {
+					// Loading state persists during navigation
 					router.replace(
 						`/app/${organization.slug}/${workspaces[0].slug}`,
 					);
@@ -56,18 +63,47 @@ export function OnboardingForm() {
 				router.replace(`/app/${organization.slug}/settings/workspaces`);
 				return;
 			}
+
+			router.replace(redirectTo ?? "/app");
 		} catch (e) {
 			console.error(e);
+			// Even on error, navigate away - the error will be handled by the destination page
+			router.replace(redirectTo ?? "/app");
 		}
-
-		router.replace(redirectTo ?? "/app");
 	};
+
+	// Prefetch the dashboard on mount
+	useEffect(() => {
+		router.prefetch("/app");
+	}, [router]);
 
 	const steps = [
 		{
-			component: <OnboardingStep1 onCompleted={() => onCompleted()} />,
+			component: (
+				<OnboardingStep1
+					onCompleted={() => onCompleted()}
+					setIsCompleting={setIsCompleting}
+				/>
+			),
 		},
 	];
+
+	// Show loading state during workspace setup
+	if (isCompleting) {
+		return (
+			<div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
+				<LoaderIcon className="size-8 animate-spin text-primary" />
+				<div className="text-center">
+					<h2 className="font-semibold text-lg">
+						Setting up your workspace...
+					</h2>
+					<p className="text-muted-foreground text-sm mt-1">
+						This will only take a moment
+					</p>
+				</div>
+			</div>
+		);
+	}
 
 	return (
 		<div>

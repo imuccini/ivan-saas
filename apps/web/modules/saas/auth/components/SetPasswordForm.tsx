@@ -101,9 +101,14 @@ export function SetPasswordForm() {
 	return (
 		<div>
 			<h1 className="font-bold text-xl md:text-2xl">Set your password</h1>
-			<p className="mt-1 mb-6 text-foreground/60">
+			<p className="mt-1 mb-2 text-foreground/60">
 				Create a secure password for your account
 			</p>
+
+			{/* Step Indicator */}
+			<div className="mb-6">
+				<p className="text-sm text-muted-foreground">Step 3 of 3</p>
+			</div>
 
 			<Form {...form}>
 				<form

@@ -33,7 +33,13 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-export function OnboardingStep1({ onCompleted }: { onCompleted: () => void }) {
+export function OnboardingStep1({
+	onCompleted,
+	setIsCompleting,
+}: {
+	onCompleted: () => void;
+	setIsCompleting: (value: boolean) => void;
+}) {
 	const t = useTranslations();
 	const { user } = useSession();
 	const [isLoadingCompany, setIsLoadingCompany] = useState(false);
@@ -79,8 +85,8 @@ export function OnboardingStep1({ onCompleted }: { onCompleted: () => void }) {
 						form.setValue("country", companyData.country);
 					}
 				})
-				.catch((error) => {
-					console.error("Failed to fetch company data:", error);
+				.catch(() => {
+					// Silently fail if company data fetch fails
 				})
 				.finally(() => {
 					setIsLoadingCompany(false);
@@ -95,6 +101,9 @@ export function OnboardingStep1({ onCompleted }: { onCompleted: () => void }) {
 		country,
 	}) => {
 		form.clearErrors("root");
+
+		// Set loading state IMMEDIATELY before any async operations
+		setIsCompleting(true);
 
 		try {
 			let orgData = null;
@@ -136,6 +145,8 @@ export function OnboardingStep1({ onCompleted }: { onCompleted: () => void }) {
 
 			onCompleted();
 		} catch (e) {
+			// Reset loading state on error
+			setIsCompleting(false);
 			form.setError("root", {
 				type: "server",
 				message: t("onboarding.notifications.accountSetupFailed"),

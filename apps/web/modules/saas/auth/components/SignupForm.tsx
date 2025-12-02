@@ -228,20 +228,11 @@ export function SignupForm({ prefillEmail }: { prefillEmail?: string }) {
 				{currentStep === 2 && "We sent you a verification link"}
 			</p>
 
-			{/* Progress Indicator */}
+			{/* Step Indicator */}
 			<div className="mb-6">
-				<div className="flex items-center justify-between text-sm text-muted-foreground mb-2">
-					<span>
-						Step {currentStep} of {totalSteps}
-					</span>
-					<span>{Math.round(progress)}%</span>
-				</div>
-				<div className="h-2 bg-muted rounded-full overflow-hidden">
-					<div
-						className="h-full bg-primary transition-all duration-300"
-						style={{ width: `${progress}%` }}
-					/>
-				</div>
+				<p className="text-sm text-muted-foreground">
+					Step {currentStep} of 3
+				</p>
 			</div>
 
 			{/* Step 1: User Details */}
