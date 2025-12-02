@@ -1,8 +1,4 @@
 ---
-trigger: always_on
----
-
----
 description: Performance optimization guidelines for Next.js App Router development
 globs: 
 alwaysApply: true
@@ -500,4 +496,59 @@ export default async function Layout() {
 Before submitting code, verify:
 
 - [ ] **Layouts**: No sequential `await` calls - use `Promise.all()`
-- [ ] **L
+- [ ] **Layouts**: No duplicate data fetches across layout hierarchy
+- [ ] **Layouts**: Data prefetched at closest layout to usage, not root
+- [ ] **Auth**: Cookie cache enabled unless security requires otherwise
+- [ ] **Queries**: `staleTime` and `gcTime` configured for client queries
+- [ ] **Queries**: Query keys match exactly between server prefetch and client usage
+- [ ] **Components**: Client boundaries pushed to leaf nodes, not layout providers
+- [ ] **Components**: Heavy libraries lazy-loaded with `next/dynamic`
+- [ ] **Suspense**: Granular boundaries around slow-loading sections
+- [ ] **Conditional**: Feature-flagged data only fetched when enabled
+- [ ] **Cache**: Check cache before prefetching in layouts
+
+---
+
+## Performance Targets
+
+Ensure your changes meet these benchmarks:
+
+| Metric | Target | Critical Threshold |
+|--------|--------|-------------------|
+| **Time to First Byte (TTFB)** | < 200ms | < 400ms |
+| **First Contentful Paint (FCP)** | < 1.2s | < 2.0s |
+| **Largest Contentful Paint (LCP)** | < 2.5s | < 4.0s |
+| **Total Blocking Time (TBT)** | < 200ms | < 600ms |
+| **API Calls per Navigation** | 3-5 | < 8 |
+| **Client Bundle (First Load JS)** | < 200KB | < 300KB |
+
+---
+
+## Testing Performance Changes
+
+When making performance-related changes:
+
+1. **Before/After Comparison**: Measure navigation time with Chrome DevTools Performance tab
+2. **Network Audit**: Check for duplicate requests in Network tab
+3. **Bundle Analysis**: Run `npm run build && npx @next/bundle-analyzer`
+4. **Lighthouse**: Run Lighthouse CI on affected routes
+5. **Manual Testing**: Test with "Fast 3G" throttling to catch issues
+
+---
+
+## Common Performance Pitfalls
+
+### 1. The "Just One More Fetch" Trap
+Adding "just one more" `await` in a layout seems harmless but compounds across nested layouts. Always use `Promise.all()`.
+
+### 2. The "It's Cached" Assumption
+Don't assume TanStack Query will deduplicate without proper `staleTime`. Always configure it explicitly.
+
+### 3. The "Client Component Creep"
+Starting with `'use client'` at a high level is easy but costly. Always start with Server Components and add client boundaries only where needed.
+
+### 4. The "Loading State Later" Fallacy
+Adding Suspense boundaries after the fact is harder than building them in from the start. Plan for progressive loading upfront.
+
+### 5. The "It Works on My Machine" Blindspot
+Fast local connections hide performance issues. Always test with throttling enabled.

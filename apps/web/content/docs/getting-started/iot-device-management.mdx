@@ -1,0 +1,339 @@
+---
+title: IoT Device Management
+description: Secure IoT devices with automatic discovery and micro-segmentation.
+---
+
+# IoT Device Management
+
+Secure thousands of IoT devices without manual configuration using cloud NAC's automated discovery and micro-segmentation.
+
+## Overview
+
+IoT device management includes:
+
+1. Automatic device discovery
+2. Device profiling and classification
+3. Micro-segmentation policies
+4. Behavioral monitoring
+
+## Step 1: Enable IoT Discovery
+
+Activate automatic IoT device detection:
+
+### Discovery Methods
+
+Cloud NAC discovers IoT devices through:
+
+- **Passive monitoring**: Analyze network traffic
+- **Active scanning**: Probe for devices (optional)
+- **DHCP analysis**: Identify from DHCP requests
+- **mDNS/SSDP**: Discover via service announcements
+
+### Discovery Configuration
+
+```json
+{
+  "discovery": {
+    "passive": true,
+    "active": false,
+    "protocols": ["dhcp", "mdns", "ssdp", "upnp"],
+    "scanInterval": "1h"
+  }
+}
+```
+
+## Step 2: Device Profiling
+
+AI automatically classifies discovered devices:
+
+### Device Categories
+
+- **Cameras**: IP cameras, webcams
+- **Sensors**: Temperature, motion, environmental
+- **Building Automation**: HVAC, lighting, access control
+- **Printers**: Network printers, MFPs
+- **Smart Devices**: TVs, displays, appliances
+- **Medical**: Patient monitors, imaging equipment
+- **Industrial**: PLCs, SCADA, manufacturing equipment
+
+### Profiling Attributes
+
+For each device, cloud NAC identifies:
+
+- **Type**: Camera, sensor, printer, etc.
+- **Manufacturer**: Vendor name
+- **Model**: Specific model number
+- **Firmware**: Version information
+- **Protocols**: Communication methods used
+- **Risk Level**: Security assessment
+
+## Step 3: Create Micro-Segments
+
+Isolate IoT devices in dedicated segments:
+
+### Segmentation Strategy
+
+Group devices by:
+
+- **Function**: Cameras, sensors, printers
+- **Location**: Building, floor, room
+- **Risk**: High-risk (internet-facing) vs. low-risk
+- **Vendor**: Separate untrusted vendors
+
+### Example Segments
+
+**IP Cameras Segment**:
+- Inbound: Management station only
+- Outbound: NVR/VMS server only
+- Inter-segment: Blocked
+
+**Building Sensors Segment**:
+- Inbound: BMS controller only
+- Outbound: BMS controller only
+- Inter-segment: Blocked
+
+**Printers Segment**:
+- Inbound: Print server, user devices
+- Outbound: Internet (for updates)
+- Inter-segment: Blocked
+
+## Step 4: Define Access Policies
+
+Set granular rules for each segment:
+
+### Policy Components
+
+- **Source**: Who/what can initiate connections
+- **Destination**: What the device can connect to
+- **Protocols**: Allowed protocols and ports
+- **Schedule**: Time-based restrictions
+- **Actions**: Allow, block, alert
+
+### Example Policy
+
+```json
+{
+  "segment": "ip-cameras",
+  "rules": [
+    {
+      "name": "Allow NVR Access",
+      "source": "ip-cameras",
+      "destination": "nvr.company.local",
+      "protocol": "rtsp",
+      "port": 554,
+      "action": "allow"
+    },
+    {
+      "name": "Allow Management",
+      "source": "admin.company.local",
+      "destination": "ip-cameras",
+      "protocol": "https",
+      "port": 443,
+      "action": "allow"
+    },
+    {
+      "name": "Block Everything Else",
+      "source": "any",
+      "destination": "ip-cameras",
+      "protocol": "any",
+      "action": "block"
+    }
+  ]
+}
+```
+
+## Step 5: Enable Behavioral Monitoring
+
+Activate AI-powered anomaly detection:
+
+### Baseline Learning
+
+AI establishes normal behavior for each device:
+
+- Typical communication patterns
+- Expected data volumes
+- Regular connection times
+- Known destinations
+
+Learning period: 7-14 days
+
+### Anomaly Detection
+
+AI flags deviations from baseline:
+
+- **Unusual Destinations**: Device connecting to new servers
+- **Abnormal Traffic**: Excessive data transfer
+- **Timing Anomalies**: Activity at unusual hours
+- **Protocol Violations**: Unexpected communication methods
+
+### Automated Response
+
+When anomalies detected:
+
+1. **Generate Alert**: Notify security team
+2. **Increase Monitoring**: Capture detailed logs
+3. **Quarantine (optional)**: Isolate suspicious device
+4. **Block Traffic**: Prevent malicious connections
+
+## Device Inventory
+
+Maintain comprehensive IoT inventory:
+
+### Inventory Data
+
+For each device, track:
+
+- Device type and manufacturer
+- IP and MAC addresses
+- Network segment
+- First/last seen timestamps
+- Firmware version
+- Security posture
+- Anomaly history
+
+### Export Options
+
+Export inventory as:
+
+- CSV for spreadsheets
+- JSON for automation
+- PDF for reports
+
+## Monitoring Dashboard
+
+View real-time IoT security status:
+
+### Key Metrics
+
+- **Total Devices**: All discovered IoT devices
+- **By Category**: Breakdown by device type
+- **By Risk Level**: High, medium, low risk devices
+- **Active Alerts**: Current security issues
+- **Policy Violations**: Blocked connection attempts
+
+### Visualizations
+
+- Device map by location
+- Traffic flow diagrams
+- Anomaly timeline
+- Top talkers
+
+## Common IoT Scenarios
+
+### Scenario 1: IP Camera Deployment
+
+**Requirements**:
+- 50 IP cameras across facility
+- Cameras must send video to NVR
+- Management from admin workstation only
+- No internet access
+
+**Solution**:
+1. Create "IP Cameras" segment
+2. Allow outbound to NVR only
+3. Allow inbound from admin workstation
+4. Block all other traffic
+5. Enable anomaly detection
+
+### Scenario 2: Building Automation
+
+**Requirements**:
+- HVAC, lighting, access control
+- Devices communicate with BMS
+- No cross-device communication
+- Internet for cloud updates
+
+**Solution**:
+1. Create segment per system type
+2. Allow communication with BMS only
+3. Block inter-device traffic
+4. Allow internet on schedule (e.g., 2 AM daily)
+5. Monitor for unusual patterns
+
+### Scenario 3: Guest Printers
+
+**Requirements**:
+- Printers in lobby for guest use
+- Guests can print from guest WiFi
+- Isolated from corporate network
+- Internet for driver downloads
+
+**Solution**:
+1. Create "Guest Printers" segment
+2. Allow inbound from guest WiFi
+3. Allow outbound to internet
+4. Block corporate network access
+5. Monitor print jobs
+
+## Best Practices
+
+### 1. Start with Discovery
+
+Before implementing policies:
+
+- Run discovery for 1-2 weeks
+- Review all discovered devices
+- Verify device classifications
+- Document device purposes
+
+### 2. Implement Gradually
+
+Don't segment everything at once:
+
+- Start with high-risk devices
+- Test policies thoroughly
+- Monitor for issues
+- Expand incrementally
+
+### 3. Document Everything
+
+Maintain clear documentation:
+
+- Segment definitions
+- Policy justifications
+- Device inventories
+- Change history
+
+### 4. Regular Audits
+
+Quarterly review:
+
+- New devices discovered
+- Orphaned devices (no longer active)
+- Policy effectiveness
+- Anomaly patterns
+
+## Troubleshooting
+
+### Device Not Discovered
+
+If IoT device not appearing:
+
+- **Check network connectivity**: Verify device is online
+- **Review discovery settings**: Ensure appropriate methods enabled
+- **Wait for scan**: Discovery runs periodically
+- **Manual add**: Add device manually if needed
+
+### Device Can't Communicate
+
+If device can't reach required destination:
+
+- **Review policy**: Check segment rules
+- **Verify destination**: Confirm target is correct
+- **Check firewall**: Ensure no blocking rules
+- **Test connectivity**: Use ping/traceroute
+
+### False Positive Alerts
+
+If getting too many anomaly alerts:
+
+- **Extend baseline**: Allow longer learning period
+- **Adjust sensitivity**: Reduce alert threshold
+- **Whitelist behavior**: Mark known-good patterns
+- **Review device**: Investigate if device compromised
+
+## Next Steps
+
+- [Configure AI Features](/docs/ai-features)
+- [Set Up Alerting](/docs/alerting)
+- [API Integration](/docs/api)

@@ -19,6 +19,7 @@ import { type PropsWithChildren, useEffect, useState } from "react";
 function AppLayout({ children }: PropsWithChildren) {
 	const { setOpen, open } = useSidebar();
 	const [isChatOpen, setIsChatOpen] = useState(false);
+	const [initialMessage, setInitialMessage] = useState("");
 	const insetRef = React.useRef<HTMLElement>(null);
 
 	const openRef = React.useRef(open);
@@ -87,6 +88,17 @@ function AppLayout({ children }: PropsWithChildren) {
 		};
 	}, [setOpen, isChatOpen]);
 
+	// Expose chat controls globally for Launchpad to use
+	React.useEffect(() => {
+		(window as any).openAIChat = (message: string) => {
+			setInitialMessage(message);
+			setIsChatOpen(true);
+		};
+		return () => {
+			delete (window as any).openAIChat;
+		};
+	}, []);
+
 	return (
 		<>
 			<SidebarInset ref={insetRef}>
@@ -94,7 +106,11 @@ function AppLayout({ children }: PropsWithChildren) {
 					{children}
 				</main>
 			</SidebarInset>
-			<RightPanel isOpen={isChatOpen} onOpenChange={setIsChatOpen} />
+			<RightPanel
+				isOpen={isChatOpen}
+				onOpenChange={setIsChatOpen}
+				initialMessage={initialMessage}
+			/>
 		</>
 	);
 }

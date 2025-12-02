@@ -1,0 +1,230 @@
+---
+title: BYOD Configuration
+description: Enable secure BYOD with automatic device profiling and network segmentation.
+---
+
+# BYOD Configuration
+
+Configure Bring Your Own Device (BYOD) access with cloud NAC to enable employees to use personal devices securely.
+
+## Overview
+
+BYOD configuration involves:
+
+1. Defining BYOD policies
+2. Setting up device profiling
+3. Configuring network segmentation
+4. Enabling threat detection
+
+## Step 1: Create BYOD Policy
+
+Define access rules for personal devices:
+
+### Policy Parameters
+
+- **Allowed Device Types**: iOS, Android, Windows, macOS
+- **Required Security**: OS version, encryption, screen lock
+- **Network Segment**: Dedicated BYOD VLAN
+- **Access Scope**: Limited to approved cloud apps
+
+### Example Policy
+
+```json
+{
+  "name": "BYOD Policy",
+  "deviceTypes": ["iOS", "Android", "Windows", "macOS"],
+  "minOSVersion": {
+    "iOS": "15.0",
+    "Android": "12.0",
+    "Windows": "10",
+    "macOS": "12.0"
+  },
+  "requiredSecurity": {
+    "encryption": true,
+    "screenLock": true,
+    "biometric": "recommended"
+  },
+  "networkSegment": "vlan-100",
+  "allowedResources": [
+    "email.company.com",
+    "calendar.company.com",
+    "*.salesforce.com"
+  ]
+}
+```
+
+## Step 2: Configure Device Profiling
+
+Enable automatic device identification:
+
+### Profiling Methods
+
+- **DHCP Fingerprinting**: Identify device type from DHCP requests
+- **User-Agent Analysis**: Parse browser and app user agents
+- **Certificate Inspection**: Examine device certificates
+- **Behavioral Analysis**: Learn device patterns over time
+
+### Profiling Rules
+
+Cloud NAC automatically profiles devices based on:
+
+- Operating system and version
+- Device manufacturer and model
+- Installed applications
+- Security posture
+
+## Step 3: Set Up Network Segmentation
+
+Isolate BYOD devices from corporate resources:
+
+### Segment Configuration
+
+Create dedicated BYOD network segment:
+
+- **VLAN ID**: 100
+- **IP Range**: 10.100.0.0/16
+- **Gateway**: 10.100.0.1
+- **DNS**: Public DNS servers
+
+### Access Control Lists
+
+Define what BYOD devices can access:
+
+**Allowed**:
+- Internet (ports 80, 443)
+- Company email server
+- Approved SaaS applications
+
+**Blocked**:
+- Internal file shares
+- Database servers
+- Management interfaces
+- Other BYOD devices
+
+## Step 4: Enable Threat Detection
+
+Activate AI-powered security monitoring:
+
+### Monitored Behaviors
+
+- Unusual data transfers
+- Connection to suspicious domains
+- Malware indicators
+- Policy violations
+
+### Automated Responses
+
+When threats are detected:
+
+1. **Alert**: Notify security team
+2. **Quarantine**: Move device to isolated segment
+3. **Block**: Prevent malicious traffic
+4. **Log**: Record incident details
+
+## User Onboarding
+
+Guide employees through BYOD enrollment:
+
+### Self-Service Portal
+
+Provide portal for device registration:
+
+1. Employee logs in with corporate credentials
+2. Accepts BYOD policy and terms
+3. Downloads configuration profile
+4. Installs profile on device
+5. Device automatically connects to BYOD network
+
+### Configuration Profiles
+
+For iOS and macOS, distribute profiles that configure:
+
+- WiFi settings
+- VPN (if required)
+- Certificate for authentication
+- Allowed apps
+
+For Android and Windows, provide step-by-step instructions.
+
+## Monitoring and Reporting
+
+Track BYOD usage and security:
+
+### Key Metrics
+
+- **Enrolled Devices**: Total BYOD devices
+- **Active Sessions**: Currently connected
+- **Policy Violations**: Security issues detected
+- **Top Applications**: Most-used apps
+
+### Compliance Reports
+
+Generate reports for:
+
+- Device inventory
+- Security posture
+- Policy compliance
+- Incident history
+
+## Best Practices
+
+### 1. Clear Communication
+
+Inform employees about:
+
+- What BYOD allows and doesn't allow
+- Privacy implications
+- Security requirements
+- Support resources
+
+### 2. Gradual Rollout
+
+Start with pilot group:
+
+- IT department first
+- Gather feedback
+- Refine policies
+- Expand to all employees
+
+### 3. Regular Reviews
+
+Quarterly review of:
+
+- Enrolled devices
+- Policy effectiveness
+- Security incidents
+- User feedback
+
+### 4. Balance Security and Usability
+
+Don't make BYOD so restrictive that employees:
+
+- Work around policies
+- Use unauthorized methods
+- Complain about poor experience
+
+## Troubleshooting
+
+### Device Won't Connect
+
+Common issues:
+
+- **Incorrect credentials**: Verify username/password
+- **Unsupported OS**: Check minimum version requirements
+- **Profile not installed**: Reinstall configuration profile
+- **Certificate expired**: Renew device certificate
+
+### Limited Access
+
+If device connects but can't access resources:
+
+- **Check policy**: Verify device meets security requirements
+- **Review ACLs**: Ensure resource is in allowed list
+- **Test DNS**: Confirm name resolution works
+- **Check firewall**: Verify no blocking rules
+
+## Next Steps
+
+- [Configure IoT Management](/docs/getting-started/iot-device-management)
+- [Enable AI Features](/docs/ai-features)
+- [Set Up Reporting](/docs/reporting)

@@ -35,93 +35,94 @@ export const featureTabs: Array<{
 	}[];
 }> = [
 	{
-		id: "feature1",
-		title: "Feature 1",
-		icon: StarIcon,
-		subtitle: "Do more with our amazing SaaS.",
-		description:
-			"This is a brilliant feature. And below you can see some reasons why. This is basically just a dummy text.",
-		stack: [],
-		image: heroImage,
-		imageBorder: false,
-		highlights: [
-			{
-				title: "Benefit 1",
-				description:
-					"This is an awesome benefit. And below you can see some reasons why. This is basically just a dummy text.",
-				icon: WandIcon,
-			},
-			{
-				title: "Benefit 2",
-				description:
-					"This is an awesome benefit. And below you can see some reasons why. This is basically just a dummy text.",
-				icon: ComputerIcon,
-			},
-			{
-				title: "Benefit 3",
-				description:
-					"This is an awesome benefit. And below you can see some reasons why. This is basically just a dummy text.",
-				icon: MobileIcon,
-			},
-		],
-	},
-	{
-		id: "feature2",
-		title: "Feature 2",
+		id: "guest-wifi",
+		title: "AI-Powered Guest WiFi",
 		icon: CloudIcon,
-		subtitle: "Your SaaS can also do this.",
-		description: "Another dummy text for another feature.",
+		subtitle: "Automated guest access management",
+		description:
+			"Deliver seamless guest WiFi experiences with AI-driven automation. Zero-touch onboarding, customizable portals, and automated compliance reporting.",
 		stack: [],
 		image: heroImage,
 		imageBorder: false,
 		highlights: [
 			{
-				title: "Benefit 1",
+				title: "Zero-Touch Onboarding",
 				description:
-					"This is an awesome benefit. And below you can see some reasons why. This is basically just a dummy text.",
+					"Guests connect instantly with automated device profiling and intelligent access policies. No IT intervention required.",
 				icon: WandIcon,
 			},
 			{
-				title: "Benefit 2",
+				title: "Customizable Portals",
 				description:
-					"This is an awesome benefit. And below you can see some reasons why. This is basically just a dummy text.",
+					"Brand your captive portals with custom logos, colors, and messaging. Support for multiple authentication methods.",
 				icon: ComputerIcon,
 			},
 			{
-				title: "Benefit 3",
+				title: "Compliance Reporting",
 				description:
-					"This is an awesome benefit. And below you can see some reasons why. This is basically just a dummy text.",
+					"Automated logging and reporting for regulatory compliance. Export guest access data with one click.",
 				icon: MobileIcon,
 			},
 		],
 	},
 	{
-		id: "feature3",
-		title: "Feature 3",
-		icon: PaperclipIcon,
-		subtitle: "We even got a third one.",
+		id: "byod-security",
+		title: "BYOD Security",
+		icon: StarIcon,
+		subtitle: "Secure personal device access made simple",
 		description:
-			"Of course your SaaS will have more features than this, but this is just a dummy text.",
+			"Enable BYOD without compromising security. Automatic device profiling, policy-based segmentation, and real-time threat detection.",
 		stack: [],
 		image: heroImage,
 		imageBorder: false,
 		highlights: [
 			{
-				title: "Benefit 1",
+				title: "Automatic Device Profiling",
 				description:
-					"This is an awesome benefit. And below you can see some reasons why. This is basically just a dummy text.",
+					"AI identifies device types and applies appropriate security policies automatically. Works with iOS, Android, Windows, and macOS.",
 				icon: WandIcon,
 			},
 			{
-				title: "Benefit 2",
+				title: "Network Segmentation",
 				description:
-					"This is an awesome benefit. And below you can see some reasons why. This is basically just a dummy text.",
+					"Policy-based micro-segmentation keeps personal devices isolated from corporate resources. Granular access controls.",
 				icon: ComputerIcon,
 			},
 			{
-				title: "Benefit 3",
+				title: "Real-Time Threat Detection",
 				description:
-					"This is an awesome benefit. And below you can see some reasons why. This is basically just a dummy text.",
+					"AI-powered monitoring detects anomalies and suspicious behavior. Automatic quarantine of compromised devices.",
+				icon: MobileIcon,
+			},
+		],
+	},
+	{
+		id: "iot-management",
+		title: "IoT Device Management",
+		icon: PaperclipIcon,
+		subtitle: "Effortless IoT security at scale",
+		description:
+			"Secure thousands of IoT devices without manual configuration. Automatic discovery, micro-segmentation, and AI-powered anomaly detection.",
+		stack: [],
+		image: heroImage,
+		imageBorder: false,
+		highlights: [
+			{
+				title: "Automatic Discovery",
+				description:
+					"Discover and profile IoT devices as they connect. Build comprehensive device inventory automatically.",
+				icon: WandIcon,
+			},
+			{
+				title: "Micro-Segmentation",
+				description:
+					"Isolate IoT devices in dedicated network segments. Prevent lateral movement and contain potential breaches.",
+				icon: ComputerIcon,
+			},
+			{
+				title: "AI Anomaly Detection",
+				description:
+					"Machine learning identifies unusual IoT behavior patterns. Get alerts before security incidents occur.",
 				icon: MobileIcon,
 			},
 		],
@@ -135,12 +136,12 @@ export function Features() {
 			<div className="container max-w-5xl">
 				<div className="mx-auto mb-6 lg:mb-0 lg:max-w-5xl lg:text-center">
 					<h2 className="font-bold text-4xl lg:text-5xl">
-						Features your clients will love
+						Everything you need for modern network security
 					</h2>
 					<p className="mt-6 text-balance text-lg opacity-50">
-						In this section you can showcase all the features of
-						your SaaS provides and how they can benefit your
-						clients.
+						Comprehensive cloud NAC features designed for busy IT
+						teams. Secure guest WiFi, BYOD, and IoT devices with
+						AI-powered automation.
 					</p>
 				</div>
 

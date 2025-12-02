@@ -77,7 +77,7 @@ export const config = {
 	// Mails
 	mails: {
 		// the from address for mails
-		from: "noreply@wifiuniverse.app",
+		from: "noreply@cusna.io",
 	},
 	// Frontend
 	ui: {

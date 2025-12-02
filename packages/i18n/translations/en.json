@@ -455,32 +455,32 @@
 	"pricing": {
 		"choosePlan": "Choose plan",
 		"contactSales": "Contact sales",
-		"description": "Choose the plan that works best for you.",
+		"description": "Choose the plan that works best for your organization.",
 		"getStarted": "Get started",
 		"month": "{count, plural, one {month} other {{count} months}}",
 		"monthly": "Monthly",
 		"products": {
 			"basic": {
-				"description": "Perfect to small teams.",
+				"description": "Perfect for small teams testing cloud NAC",
 				"features": {
-					"anotherFeature": "Another amazing feature",
-					"limitedSupport": "Limited support"
+					"anotherFeature": "Up to 25 devices",
+					"limitedSupport": "Email support"
 				},
-				"title": "Basic"
+				"title": "Starter"
 			},
 			"enterprise": {
-				"description": "Custom plan tailored to your requirements",
+				"description": "Custom solutions for large deployments",
 				"features": {
-					"enterpriseSupport": "Enterprise support",
-					"unlimitedProjects": "Unlimited projects"
+					"enterpriseSupport": "24/7 enterprise support",
+					"unlimitedProjects": "Unlimited devices"
 				},
 				"title": "Enterprise"
 			},
 			"free": {
-				"description": "Start for free",
+				"description": "Try cloud NAC for free",
 				"features": {
-					"anotherFeature": "Another amazing feature",
-					"limitedSupport": "Limited support"
+					"anotherFeature": "Up to 10 devices",
+					"limitedSupport": "Community support"
 				},
 				"title": "Free"
 			},
@@ -493,13 +493,13 @@
 				"title": "Lifetime"
 			},
 			"pro": {
-				"description": "Best for teams",
+				"description": "For growing organizations",
 				"features": {
-					"anotherFeature": "Another amazing feature",
-					"fiveMembers": "Up to 5 members",
-					"fullSupport": "Full support"
+					"anotherFeature": "Up to 500 devices",
+					"fiveMembers": "Advanced AI features",
+					"fullSupport": "Priority support"
 				},
-				"title": "Pro"
+				"title": "Professional"
 			}
 		},
 		"purchase": "Purchase",

@@ -5,9 +5,20 @@ import { Badge } from "@ui/components/badge";
 import { Button } from "@ui/components/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@ui/components/card";
 import {
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+} from "@ui/components/dialog";
+import { Input } from "@ui/components/input";
+import { Label } from "@ui/components/label";
+import {
 	AlertTriangle,
 	CheckCircle2,
 	ChevronRight,
+	InfoIcon,
 	Key,
 	Mail,
 	Play,
@@ -23,9 +34,16 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { OnboardingJourneyWizard } from "../../../../../../../modules/saas/guest-wifi/components/onboarding-journey-wizard";
+import { WelcomeEmailEditor } from "../../../../../../../modules/saas/guest-wifi/components/WelcomeEmailEditor";
 
 export default function GuestWifiPage() {
 	const [wizardOpen, setWizardOpen] = useState(false);
+	const [ssidDialogOpen, setSsidDialogOpen] = useState(false);
+	const [welcomeEmailDialogOpen, setWelcomeEmailDialogOpen] = useState(false);
+	const [ssidName, setSsidName] = useState("Guest_WiFi_Network");
+	const networksConnected = 4;
+	const legacyNetworks = 2;
+
 	return (
 		<div className="space-y-6">
 			{/* Status Card */}
@@ -168,13 +186,13 @@ export default function GuestWifiPage() {
 							icon={Wifi}
 							title="Guest WiFi SSID"
 							description="Security, Bandwidth limits"
-							href="#"
+							onClick={() => setSsidDialogOpen(true)}
 						/>
 						<ActionRow
 							icon={Mail}
 							title="Welcome Email"
 							description="Template, Delivery settings"
-							href="#"
+							onClick={() => setWelcomeEmailDialogOpen(true)}
 						/>
 					</div>
 
@@ -220,6 +238,81 @@ export default function GuestWifiPage() {
 				open={wizardOpen}
 				onClose={() => setWizardOpen(false)}
 			/>
+
+			{/* SSID Edit Dialog */}
+			<Dialog open={ssidDialogOpen} onOpenChange={setSsidDialogOpen}>
+				<DialogContent>
+					<DialogHeader>
+						<DialogTitle>Guest WiFi SSID</DialogTitle>
+						<DialogDescription>
+							Configure the network name for your guest WiFi
+							service
+						</DialogDescription>
+					</DialogHeader>
+
+					<div className="space-y-4">
+						<div className="space-y-2">
+							<Label htmlFor="ssid-name">
+								Network Name (SSID)
+							</Label>
+							<Input
+								id="ssid-name"
+								value={ssidName}
+								onChange={(e) => setSsidName(e.target.value)}
+								placeholder="Enter WiFi network name"
+							/>
+						</div>
+
+						<Alert>
+							<InfoIcon className="h-4 w-4" />
+							<AlertDescription>
+								<p className="text-sm">
+									The name will be applied to{" "}
+									<span className="font-semibold">
+										{networksConnected}
+									</span>{" "}
+									network{networksConnected !== 1 ? "s" : ""}{" "}
+									connected to the Workspace.{" "}
+									{legacyNetworks > 0 && (
+										<>
+											<span className="font-semibold">
+												{legacyNetworks}
+											</span>{" "}
+											network
+											{legacyNetworks !== 1 ? "s" : ""}{" "}
+											use legacy deployment and must be
+											updated manually.
+										</>
+									)}
+								</p>
+							</AlertDescription>
+						</Alert>
+					</div>
+
+					<DialogFooter>
+						<Button
+							variant="outline"
+							onClick={() => setSsidDialogOpen(false)}
+						>
+							Cancel
+						</Button>
+						<Button
+							onClick={() => {
+								// Handle update logic here
+								setSsidDialogOpen(false);
+							}}
+						>
+							Update
+						</Button>
+					</DialogFooter>
+				</DialogContent>
+			</Dialog>
+
+			{/* Welcome Email Editor */}
+			<WelcomeEmailEditor
+				open={welcomeEmailDialogOpen}
+				onClose={() => setWelcomeEmailDialogOpen(false)}
+			/>
 		</div>
 	);
 }
@@ -229,17 +322,16 @@ function ActionRow({
 	title,
 	description,
 	href,
+	onClick,
 }: {
 	icon: any;
 	title: string;
 	description: string;
-	href: string;
+	href?: string;
+	onClick?: () => void;
 }) {
-	return (
-		<Link
-			href={href}
-			className="flex items-center justify-between rounded-lg border p-3 transition-colors hover:bg-muted/50"
-		>
+	const content = (
+		<>
 			<div className="flex items-center gap-3">
 				<div className="flex h-8 w-8 flex-none items-center justify-center rounded-md bg-muted text-muted-foreground">
 					<Icon className="h-4 w-4" />
@@ -254,6 +346,27 @@ function ActionRow({
 				</div>
 			</div>
 			<ChevronRight className="h-4 w-4 text-muted-foreground" />
+		</>
+	);
+
+	if (onClick) {
+		return (
+			<button
+				type="button"
+				onClick={onClick}
+				className="w-full flex items-center justify-between rounded-lg border p-3 transition-colors hover:bg-muted/50 text-left"
+			>
+				{content}
+			</button>
+		);
+	}
+
+	return (
+		<Link
+			href={href || "#"}
+			className="flex items-center justify-between rounded-lg border p-3 transition-colors hover:bg-muted/50"
+		>
+			{content}
 		</Link>
 	);
 }

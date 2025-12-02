@@ -3,13 +3,17 @@ trigger: always_on
 ---
 
 ---
-description: 
-globs: 
+description: UI & Styling Standards (Shadcn/Tailwind)
+globs: "**/*.{ts,tsx}"
 alwaysApply: true
 ---
-This rule describes guidelines for creating UI and styling components:
+# UI Standards
 
-- Use Shadcn UI, Radix, and Tailwind for components and styling.
-- Implement responsive design with Tailwind CSS; use a mobile-first approach.
-- Use the `cn` function for class name concatenation.
-- The global theme variables and tailwind config are defined in `tooling/tailwind/theme.css`.
+- **Source:** STRICTLY import Shadcn UI components from `apps/web/modules/ui/`.
+- **Stack:** Use **Shadcn UI**, **Radix UI** primitives, and **Lucide React** for icons.
+- **Styling:**
+  - Use **Tailwind CSS** with **semantic theme variables** (e.g., `bg-primary`, `text-muted-foreground`) exclusively.
+  - Never use hardcoded colors (e.g., `bg-blue-500`) or inline styles.
+  - Use the `cn()` utility for class merging.
+  - Design **mobile-first**.
+- **Prohibited:** Do NOT install external UI libraries (MUI, Chakra, etc.).

@@ -3,22 +3,37 @@ trigger: always_on
 ---
 
 ---
-description: 
-globs: 
+description: Supastarter Monorepo Structure & Architecture Guide
+globs: "**/*"
 alwaysApply: true
 ---
-This rule describes the basic project structure of the repository and where to find or add certain parts of the application:
+# Project Architecture (Turborepo + Next.js 15)
 
-- The main application is in the `apps/web/app` directory which is a Next.js App Router. Put all frontend-only code in this directory.
-- Put all backend logic into one of the `packages` directories:
-  - `packages/ai` contains all AI-related code
-  - `packages/api` contains all API routes
-  - `packages/auth` contains the config for better-auth and helper functions
-  - `packages/database` contains the database schema and auto-generated types
-  - `packages/i18n` contains translations and internationalization helper functions
-  - `packages/logs` contains the logging config and helper functions
-  - `packages/mail` contains providers for sending mails and email templates
-  - `packages/payments` contains code for payment providers and payment processing
-  - `packages/storage` contains providers for storing files and images
-  - `packages/utils` contains utility functions
-  - `config` contains the application configuration
+## 1. Directory Map
+**Frontend (`apps/web/`)**
+- **Routes:**
+  - `app/(marketing)/`: Public pages.
+  - `app/(saas)/app/`: Authenticated dashboard.
+  - `app/(saas)/app/(organizations)/[slug]/`: Tenant-specific routes.
+  - `app/api/`: Next.js Route Handlers (Edge cases only).
+- **Logic (Modules):** `apps/web/modules/` (Strict Separation)
+  - `ui/`: Shared Shadcn components.
+  - `saas/[feature]/`: Feature logic (contains `components/`, `hooks/`, `lib/`).
+  - `marketing/`: Marketing components.
+
+**Backend (`packages/`)**
+- `api/`: Main API layer (ORPC/tRPC). **ALL business logic goes here.**
+- `auth/`: Better-auth config & plugins.
+- `database/`: Prisma schema & client.
+- `mail/`: Email templates & providers.
+
+## 2. Critical Placement Rules
+- **Backend Logic:** NEVER place DB calls or heavy logic in `apps/web`. Must reside in `packages/api` or `packages/database`.
+- **Imports:** Use workspace protocol (e.g., `import { db } from "@repo/database"`).
+- **Module Pattern:** Frontend features must exist in `modules/[name]`, not in `app/`. The `app/` directory is strictly for routing and page shells.
+
+## 3. Tech Stack
+- **API:** ORPC (tRPC-like).
+- **Auth:** Better-auth.
+- **ORM:** Prisma.
+- **Styling:** Tailwind 4 + Shadcn UI.

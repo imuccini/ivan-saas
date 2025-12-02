@@ -1,0 +1,176 @@
+---
+title: Guest WiFi Setup
+description: Configure guest WiFi access with customizable portals and automated onboarding.
+---
+
+# Guest WiFi Setup
+
+This guide walks you through setting up guest WiFi access with cloud NAC.
+
+## Prerequisites
+
+Before you begin, ensure you have:
+
+- Cloud NAC account with admin access
+- Network infrastructure configured
+- SSID created for guest access
+
+## Step 1: Create Guest Network Policy
+
+Navigate to **Policies** → **Guest Access** and create a new policy:
+
+```json
+{
+  "name": "Guest WiFi",
+  "accessType": "guest",
+  "duration": "24h",
+  "bandwidth": "10Mbps",
+  "isolation": true
+}
+```
+
+### Policy Settings
+
+- **Access Duration**: How long guests can stay connected (1h, 8h, 24h, 7d)
+- **Bandwidth Limit**: Maximum speed per device
+- **Client Isolation**: Prevent guests from seeing each other
+- **Internet Only**: Block access to internal resources
+
+## Step 2: Configure Captive Portal
+
+Customize the guest onboarding experience:
+
+### Portal Branding
+
+Upload your logo and customize colors:
+
+- **Logo**: 200x60px PNG or SVG
+- **Primary Color**: Brand color for buttons and links
+- **Background**: Solid color or image
+
+### Authentication Methods
+
+Choose how guests authenticate:
+
+- **Email**: Guests enter email address
+- **SMS**: Receive code via text message
+- **Social Login**: Sign in with Google, Facebook, etc.
+- **Voucher**: Use pre-generated access codes
+- **Sponsor**: Require employee approval
+
+## Step 3: Set Up Compliance
+
+Configure data collection and retention:
+
+### Required Fields
+
+Collect information for compliance:
+
+- Full name
+- Email address
+- Phone number (optional)
+- Company name (optional)
+- Terms acceptance
+
+### Data Retention
+
+Set how long to keep guest records:
+
+- **30 days**: Minimum for most regulations
+- **90 days**: Recommended for business use
+- **1 year**: For high-security environments
+
+## Step 4: Test Guest Access
+
+Before going live, test the complete flow:
+
+1. Connect to guest SSID
+2. Verify captive portal appears
+3. Complete authentication
+4. Confirm internet access
+5. Check isolation (can't reach internal resources)
+
+## Step 5: Monitor and Optimize
+
+After deployment, monitor guest activity:
+
+### Key Metrics
+
+- **Active Sessions**: Current connected guests
+- **Daily Users**: Unique guests per day
+- **Average Duration**: How long guests stay connected
+- **Bandwidth Usage**: Total data transferred
+
+### Common Adjustments
+
+- Increase/decrease session duration
+- Adjust bandwidth limits
+- Add/remove authentication methods
+- Update portal branding
+
+## Advanced Features
+
+### Custom Terms and Conditions
+
+Upload your own T&C document:
+
+```markdown
+# Terms of Service
+
+By accessing this network, you agree to:
+
+1. Use the network for lawful purposes only
+2. Not attempt to access restricted resources
+3. Accept monitoring of network activity
+```
+
+### Scheduled Access
+
+Limit guest WiFi to business hours:
+
+- **Monday-Friday**: 8 AM - 6 PM
+- **Saturday**: 9 AM - 5 PM
+- **Sunday**: Disabled
+
+### Location-Based Policies
+
+Apply different policies by location:
+
+- **Lobby**: 1-hour access, social login
+- **Conference Rooms**: 8-hour access, email verification
+- **Outdoor**: 30-minute access, no authentication
+
+## Troubleshooting
+
+### Portal Not Appearing
+
+If guests don't see the captive portal:
+
+1. Check DNS settings (should redirect to portal)
+2. Verify DHCP is providing correct gateway
+3. Test with different devices/browsers
+4. Check firewall rules
+
+### Authentication Failing
+
+If guests can't authenticate:
+
+1. Verify email/SMS service is configured
+2. Check for typos in email addresses
+3. Test with known-good credentials
+4. Review authentication logs
+
+### No Internet Access
+
+If guests can authenticate but can't browse:
+
+1. Verify NAT is configured
+2. Check firewall allows outbound traffic
+3. Test DNS resolution
+4. Review bandwidth limits
+
+## Next Steps
+
+- [Configure BYOD Access](/docs/getting-started/byod-configuration)
+- [Set Up IoT Management](/docs/getting-started/iot-device-management)
+- [Enable AI Features](/docs/ai-features)
