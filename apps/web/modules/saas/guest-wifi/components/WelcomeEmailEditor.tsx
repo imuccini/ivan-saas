@@ -13,13 +13,15 @@ import { Input } from "@ui/components/input";
 import { Label } from "@ui/components/label";
 import { Switch } from "@ui/components/switch";
 import { Tabs, TabsList, TabsTrigger } from "@ui/components/tabs";
-import { CodeIcon } from "lucide-react";
-import dynamic from "next/dynamic";
-import { useState } from "react";
-import "react-quill/dist/quill.snow.css";
-
-// Dynamically import ReactQuill to avoid SSR issues
-const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
+import {
+	Bold,
+	CodeIcon,
+	Italic,
+	List,
+	ListOrdered,
+	Underline,
+} from "lucide-react";
+import { useRef, useState } from "react";
 
 interface WelcomeEmailEditorProps {
 	open: boolean;
@@ -33,6 +35,7 @@ export function WelcomeEmailEditor({ open, onClose }: WelcomeEmailEditorProps) {
 		"<p>Dear Guest,</p><p>Welcome to our WiFi network! We're glad to have you connected.</p><p>If you need any assistance, please don't hesitate to contact our support team.</p><p>Best regards,<br/>The Team</p>",
 	);
 	const [viewMode, setViewMode] = useState<"visual" | "html">("visual");
+	const editorRef = useRef<HTMLDivElement>(null);
 
 	const handleSave = () => {
 		// Handle save logic here
@@ -44,30 +47,18 @@ export function WelcomeEmailEditor({ open, onClose }: WelcomeEmailEditorProps) {
 		onClose();
 	};
 
-	const modules = {
-		toolbar: [
-			[{ header: [1, 2, 3, false] }],
-			["bold", "italic", "underline", "strike"],
-			[{ list: "ordered" }, { list: "bullet" }],
-			[{ color: [] }, { background: [] }],
-			["link", "image"],
-			["clean"],
-		],
+	const execCommand = (command: string, value?: string) => {
+		document.execCommand(command, false, value);
+		if (editorRef.current) {
+			setContent(editorRef.current.innerHTML);
+		}
 	};
 
-	const formats = [
-		"header",
-		"bold",
-		"italic",
-		"underline",
-		"strike",
-		"list",
-		"bullet",
-		"color",
-		"background",
-		"link",
-		"image",
-	];
+	const handleContentChange = () => {
+		if (editorRef.current) {
+			setContent(editorRef.current.innerHTML);
+		}
+	};
 
 	return (
 		<Dialog open={open} onOpenChange={onClose}>
@@ -132,9 +123,9 @@ export function WelcomeEmailEditor({ open, onClose }: WelcomeEmailEditorProps) {
 							</Label>
 							<Tabs
 								value={viewMode}
-								onValueChange={(v) =>
-									setViewMode(v as "visual" | "html")
-								}
+								onValueChange={(v) => {
+									setViewMode(v as "visual" | "html");
+								}}
 								className="w-auto"
 							>
 								<TabsList className="h-8">
@@ -158,19 +149,85 @@ export function WelcomeEmailEditor({ open, onClose }: WelcomeEmailEditorProps) {
 						</div>
 
 						{viewMode === "visual" ? (
-							<div
-								className={`rounded-md border ${!isEnabled ? "opacity-50" : ""}`}
-							>
-								<ReactQuill
-									theme="snow"
-									value={content}
-									onChange={setContent}
-									modules={modules}
-									formats={formats}
-									readOnly={!isEnabled}
-									className={
-										!isEnabled ? "pointer-events-none" : ""
-									}
+							<div className="space-y-2">
+								{/* Toolbar */}
+								<div
+									className={`flex flex-wrap gap-1 rounded-md border p-2 ${!isEnabled ? "opacity-50 pointer-events-none" : ""}`}
+								>
+									<Button
+										type="button"
+										variant="ghost"
+										size="sm"
+										className="h-8 w-8 p-0"
+										onClick={() => execCommand("bold")}
+										disabled={!isEnabled}
+									>
+										<Bold className="h-4 w-4" />
+									</Button>
+									<Button
+										type="button"
+										variant="ghost"
+										size="sm"
+										className="h-8 w-8 p-0"
+										onClick={() => execCommand("italic")}
+										disabled={!isEnabled}
+									>
+										<Italic className="h-4 w-4" />
+									</Button>
+									<Button
+										type="button"
+										variant="ghost"
+										size="sm"
+										className="h-8 w-8 p-0"
+										onClick={() => execCommand("underline")}
+										disabled={!isEnabled}
+									>
+										<Underline className="h-4 w-4" />
+									</Button>
+									<div className="w-px h-8 bg-border mx-1" />
+									<Button
+										type="button"
+										variant="ghost"
+										size="sm"
+										className="h-8 w-8 p-0"
+										onClick={() =>
+											execCommand("insertUnorderedList")
+										}
+										disabled={!isEnabled}
+									>
+										<List className="h-4 w-4" />
+									</Button>
+									<Button
+										type="button"
+										variant="ghost"
+										size="sm"
+										className="h-8 w-8 p-0"
+										onClick={() =>
+											execCommand("insertOrderedList")
+										}
+										disabled={!isEnabled}
+									>
+										<ListOrdered className="h-4 w-4" />
+									</Button>
+								</div>
+
+								{/* Editor */}
+								<div
+									ref={editorRef}
+									contentEditable={isEnabled}
+									onInput={handleContentChange}
+									dangerouslySetInnerHTML={{
+										__html: content,
+									}}
+									className={`min-h-[300px] w-full rounded-md border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring ${
+										!isEnabled
+											? "opacity-50 pointer-events-none"
+											: ""
+									}`}
+									style={{
+										whiteSpace: "pre-wrap",
+										wordWrap: "break-word",
+									}}
 								/>
 							</div>
 						) : (
