@@ -41,8 +41,8 @@ export default function GuestWifiPage() {
 	const [ssidDialogOpen, setSsidDialogOpen] = useState(false);
 	const [welcomeEmailDialogOpen, setWelcomeEmailDialogOpen] = useState(false);
 	const [ssidName, setSsidName] = useState("Guest_WiFi_Network");
-	const networksConnected = 4;
-	const legacyNetworks = 2;
+	const networksConnected: number = 4;
+	const legacyNetworks: number = 2;
 
 	return (
 		<div className="space-y-6">
