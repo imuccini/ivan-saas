@@ -37,7 +37,7 @@ export function OnboardingStep1({
 	onCompleted,
 	setIsCompleting,
 }: {
-	onCompleted: () => void;
+	onCompleted: (orgSlug?: string, workspaceSlug?: string) => void;
 	setIsCompleting: (value: boolean) => void;
 }) {
 	const t = useTranslations();
@@ -109,12 +109,21 @@ export function OnboardingStep1({
 			let orgData = null;
 			let orgError = null;
 			const slug = slugify(companyName, { lower: true, strict: true });
+			
+			if (!slug) {
+				throw new Error("Invalid company name. Please try a different name.");
+			}
+
 			let attempt = 0;
 
 			while (attempt < 5) {
+				const currentSlug = attempt === 0 
+					? slug 
+					: `${slug}-${Math.floor(1000 + Math.random() * 9000)}`;
+
 				const result = await authClient.organization.create({
 					name: companyName,
-					slug: attempt === 0 ? slug : `${slug}-${attempt}`,
+					slug: currentSlug,
 				});
 
 				if (!result.error) {
@@ -122,6 +131,7 @@ export function OnboardingStep1({
 					break;
 				}
 
+				console.error("Organization creation failed (attempt " + attempt + "):", result.error);
 				orgError = result.error;
 				attempt++;
 			}
@@ -131,19 +141,22 @@ export function OnboardingStep1({
 			}
 
 			if (orgData) {
-				await createWorkspaceMutation.mutateAsync({
-					name: "Default Workspace",
-					organizationId: orgData.id,
-				});
+				// Run independent operations in parallel for performance
+				const [workspace] = await Promise.all([
+					createWorkspaceMutation.mutateAsync({
+						name: "Default Workspace",
+						organizationId: orgData.id,
+					}),
+					authClient.organization.setActive({
+						organizationId: orgData.id,
+					}),
+				]);
 
-				await authClient.organization.setActive({
-					organizationId: orgData.id,
-				});
+				// Pass slugs to onCompleted to avoid re-fetching
+				onCompleted(orgData.slug, workspace.slug);
+			} else {
+				onCompleted();
 			}
-
-			// TODO: Store website, industry, country in organization metadata
-
-			onCompleted();
 		} catch (e) {
 			// Reset loading state on error
 			setIsCompleting(false);

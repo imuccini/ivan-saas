@@ -6,11 +6,8 @@ export default function Loading() {
 			<LoaderIcon className="size-8 animate-spin text-primary" />
 			<div className="text-center">
 				<h2 className="font-semibold text-lg">
-					Setting up your workspace...
+					Loading...
 				</h2>
-				<p className="text-muted-foreground text-sm mt-1">
-					This will only take a moment
-				</p>
 			</div>
 		</div>
 	);

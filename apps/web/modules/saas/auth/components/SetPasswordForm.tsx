@@ -46,6 +46,7 @@ export function SetPasswordForm() {
 	const router = useRouter();
 	const [showPassword, setShowPassword] = useState(false);
 	const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+	const [isNavigating, setIsNavigating] = useState(false);
 
 	const form = useForm<PasswordFormValues>({
 		resolver: zodResolver(passwordSchema),
@@ -81,8 +82,10 @@ export function SetPasswordForm() {
 				: "/app";
 
 			// Navigate immediately for better UX
+			setIsNavigating(true);
 			router.push(nextRoute);
 		} catch (e) {
+			setIsNavigating(false);
 			form.setError("root", {
 				message:
 					e instanceof Error ? e.message : "Failed to set password",
@@ -209,7 +212,7 @@ export function SetPasswordForm() {
 					<Button
 						className="w-full"
 						type="submit"
-						loading={form.formState.isSubmitting}
+						loading={form.formState.isSubmitting || isNavigating}
 					>
 						Continue
 						<ArrowRightIcon className="ml-2 size-4" />

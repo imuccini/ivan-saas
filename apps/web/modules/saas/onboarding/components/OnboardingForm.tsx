@@ -7,7 +7,7 @@ import { Progress } from "@ui/components/progress";
 import { LoaderIcon } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { withQuery } from "ufo";
 import { OnboardingStep1 } from "./OnboardingStep1";
 
@@ -32,17 +32,29 @@ export function OnboardingForm() {
 		);
 	};
 
-	const onCompleted = async () => {
+	const onCompleted = useCallback(async (orgSlug?: string, workspaceSlug?: string) => {
 		// Note: isCompleting is already set to true by OnboardingStep1
 		// We don't reset it - let it persist until the new page loads
 
 		try {
-			await authClient.updateUser({
+			// 1. Update user state
+			const updateUserPromise = authClient.updateUser({
 				onboardingComplete: true,
 			});
 
-			await clearCache();
+			// 2. Clear cache
+			const clearCachePromise = clearCache();
 
+			// Run independent operations in parallel
+			await Promise.all([updateUserPromise, clearCachePromise]);
+
+			// 3. Navigate directly if we have the slugs (Performance Optimization)
+			if (orgSlug && workspaceSlug) {
+				router.replace(`/app/${orgSlug}/${workspaceSlug}`);
+				return;
+			}
+
+			// Fallback: Fetch if we don't have slugs (e.g. if skipped or error)
 			const { data: organizations } =
 				await authClient.organization.list();
 
@@ -70,23 +82,23 @@ export function OnboardingForm() {
 			// Even on error, navigate away - the error will be handled by the destination page
 			router.replace(redirectTo ?? "/app");
 		}
-	};
+	}, [router, redirectTo]);
 
 	// Prefetch the dashboard on mount
 	useEffect(() => {
 		router.prefetch("/app");
 	}, [router]);
 
-	const steps = [
+	const steps = useMemo(() => [
 		{
 			component: (
 				<OnboardingStep1
-					onCompleted={() => onCompleted()}
+					onCompleted={onCompleted}
 					setIsCompleting={setIsCompleting}
 				/>
 			),
 		},
-	];
+	], [onCompleted]);
 
 	// Show loading state during workspace setup
 	if (isCompleting) {

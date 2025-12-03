@@ -59,28 +59,26 @@ export async function POST(request: Request) {
 			);
 		}
 
-		// Get the full user record from the database to ensure we have the email
-		const user = await db.user.findUnique({
-			where: { id: session.user.id },
-		});
-
+		// Parallelize independent operations for performance
+		const [user, hashedPassword, existingAccount] = await Promise.all([
+			db.user.findUnique({
+				where: { id: session.user.id },
+			}),
+			hashPassword(password),
+			db.account.findFirst({
+				where: {
+					userId: session.user.id,
+					providerId: "credential",
+				},
+			}),
+		]);
+		
 		if (!user || !user.email) {
 			return NextResponse.json(
 				{ error: "User email not found" },
 				{ status: 400 },
 			);
 		}
-
-		// Hash the password using scrypt (same as better-auth)
-		const hashedPassword = await hashPassword(password);
-
-		// Find or create the credential account for this user
-		const existingAccount = await db.account.findFirst({
-			where: {
-				userId: session.user.id,
-				providerId: "credential",
-			},
-		});
 
 		if (existingAccount) {
 			// Update existing account
