@@ -1,5 +1,5 @@
 // Import the PrismaClient constructor from the generated client library
-import { PrismaClient } from "./generated/client";
+import { PrismaClient } from "@prisma/client";
 
 /**
  * Creates and returns a new instance of the PrismaClient.

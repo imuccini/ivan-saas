@@ -1,4 +1,4 @@
-import { PrismaClient } from "./generated/client";
+import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
@@ -12,16 +12,25 @@ async function main() {
 		{ slug: "workspace.create", description: "Create new workspaces" },
 		{ slug: "workspace.update", description: "Update workspace settings" },
 		{ slug: "workspace.delete", description: "Delete workspaces" },
-		
+
 		// Organization
 		{ slug: "organization.read", description: "View organization details" },
-		{ slug: "organization.update", description: "Update organization settings" },
+		{
+			slug: "organization.update",
+			description: "Update organization settings",
+		},
 		{ slug: "organization.delete", description: "Delete organization" },
-		{ slug: "organization.invite", description: "Invite members to organization" },
-		
+		{
+			slug: "organization.invite",
+			description: "Invite members to organization",
+		},
+
 		// Billing
 		{ slug: "billing.read", description: "View billing information" },
-		{ slug: "billing.update", description: "Manage billing and subscriptions" },
+		{
+			slug: "billing.update",
+			description: "Manage billing and subscriptions",
+		},
 	];
 
 	console.log("Upserting permissions...");

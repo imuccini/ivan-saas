@@ -118,6 +118,24 @@ export const PartnerSettingsScalarFieldEnumSchema = z.enum(['organizationId', 'w
 
 export type PartnerSettingsScalarFieldEnum = z.infer<typeof PartnerSettingsScalarFieldEnumSchema>;
 
+// File: NotificationCategoryScalarFieldEnum.schema.ts
+
+export const NotificationCategoryScalarFieldEnumSchema = z.enum(['id', 'name', 'description', 'slug', 'createdAt', 'updatedAt'])
+
+export type NotificationCategoryScalarFieldEnum = z.infer<typeof NotificationCategoryScalarFieldEnumSchema>;
+
+// File: NotificationTriggerScalarFieldEnum.schema.ts
+
+export const NotificationTriggerScalarFieldEnumSchema = z.enum(['id', 'eventKey', 'name', 'description', 'supportedVariables', 'categoryId', 'createdAt', 'updatedAt'])
+
+export type NotificationTriggerScalarFieldEnum = z.infer<typeof NotificationTriggerScalarFieldEnumSchema>;
+
+// File: CommunicationTemplateScalarFieldEnum.schema.ts
+
+export const CommunicationTemplateScalarFieldEnumSchema = z.enum(['id', 'triggerId', 'workspaceId', 'type', 'subject', 'bodyContent', 'isActive', 'createdAt', 'updatedAt'])
+
+export type CommunicationTemplateScalarFieldEnum = z.infer<typeof CommunicationTemplateScalarFieldEnumSchema>;
+
 // File: SortOrder.schema.ts
 
 export const SortOrderSchema = z.enum(['asc', 'desc'])
@@ -153,6 +171,12 @@ export type JsonNullValueFilter = z.infer<typeof JsonNullValueFilterSchema>;
 export const PurchaseTypeSchema = z.enum(['SUBSCRIPTION', 'ONE_TIME'])
 
 export type PurchaseType = z.infer<typeof PurchaseTypeSchema>;
+
+// File: CommunicationType.schema.ts
+
+export const CommunicationTypeSchema = z.enum(['EMAIL', 'SMS'])
+
+export type CommunicationType = z.infer<typeof CommunicationTypeSchema>;
 
 // File: User.schema.ts
 
@@ -422,4 +446,51 @@ export const PartnerSettingsSchema = z.object({
 });
 
 export type PartnerSettingsType = z.infer<typeof PartnerSettingsSchema>;
+
+
+// File: NotificationCategory.schema.ts
+
+export const NotificationCategorySchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  description: z.string().nullish(),
+  slug: z.string(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
+export type NotificationCategoryType = z.infer<typeof NotificationCategorySchema>;
+
+
+// File: NotificationTrigger.schema.ts
+
+export const NotificationTriggerSchema = z.object({
+  id: z.string(),
+  eventKey: z.string(),
+  name: z.string(),
+  description: z.string().nullish(),
+  supportedVariables: z.unknown().refine((val) => { const getDepth = (obj: unknown, depth: number = 0): number => { if (depth > 10) return depth; if (obj === null || typeof obj !== 'object') return depth; const values = Object.values(obj as Record<string, unknown>); if (values.length === 0) return depth; return Math.max(...values.map(v => getDepth(v, depth + 1))); }; return getDepth(val) <= 10; }, "JSON nesting depth exceeds maximum of 10").default("[]"),
+  categoryId: z.string(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
+export type NotificationTriggerType = z.infer<typeof NotificationTriggerSchema>;
+
+
+// File: CommunicationTemplate.schema.ts
+
+export const CommunicationTemplateSchema = z.object({
+  id: z.string(),
+  triggerId: z.string(),
+  workspaceId: z.string().nullish(),
+  type: CommunicationTypeSchema.default("EMAIL"),
+  subject: z.string().nullish(),
+  bodyContent: z.string(),
+  isActive: z.boolean().default(true),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
+export type CommunicationTemplateType = z.infer<typeof CommunicationTemplateSchema>;
 

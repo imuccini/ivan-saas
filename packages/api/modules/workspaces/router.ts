@@ -1,7 +1,7 @@
 import { createWorkspace } from "./procedures/create";
+import { deleteWorkspace } from "./procedures/delete";
 import { listWorkspaces } from "./procedures/list";
 import { updateWorkspace } from "./procedures/update";
-import { deleteWorkspace } from "./procedures/delete";
 
 export const workspacesRouter = {
 	create: createWorkspace,

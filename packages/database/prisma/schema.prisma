@@ -6,7 +6,6 @@ datasource db {
 
 generator client {
     provider = "prisma-client-js"
-    output   = "./generated/client"
 }
 
 generator zod {
@@ -156,7 +155,8 @@ model Workspace {
     createdAt      DateTime     @default(now())
     updatedAt      DateTime     @updatedAt
 
-    workspaceMembers   WorkspaceMember[]
+    workspaceMembers       WorkspaceMember[]
+    communicationTemplates CommunicationTemplate[]
 
     @@unique([organizationId, slug])
     @@map("workspace")
@@ -300,3 +300,60 @@ model PartnerSettings {
 
     @@map("partner_settings")
 }
+
+// Communication Manager Models
+model NotificationCategory {
+    id          String                 @id @default(cuid())
+    name        String
+    description String?
+    slug        String                 @unique
+    createdAt   DateTime               @default(now())
+    updatedAt   DateTime               @updatedAt
+    triggers    NotificationTrigger[]
+
+    @@map("notification_category")
+}
+
+model NotificationTrigger {
+    id                 String                  @id @default(cuid())
+    eventKey           String                  @unique // e.g., "GUEST_SIGNUP"
+    name               String
+    description        String?
+    /// [SupportedVariable[]]
+    supportedVariables Json                    @default("[]") // Array of {key, description, example}
+    categoryId         String
+    category           NotificationCategory    @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+    createdAt          DateTime                @default(now())
+    updatedAt          DateTime                @updatedAt
+    templates          CommunicationTemplate[]
+
+    @@index([categoryId])
+    @@map("notification_trigger")
+}
+
+enum CommunicationType {
+    EMAIL
+    SMS
+}
+
+model CommunicationTemplate {
+    id          String            @id @default(cuid())
+    triggerId   String
+    trigger     NotificationTrigger @relation(fields: [triggerId], references: [id], onDelete: Cascade)
+    
+    // Workspace-specific templates: NULL = global default, non-NULL = workspace override
+    workspaceId String?
+    workspace   Workspace?        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+    
+    type        CommunicationType @default(EMAIL)
+    subject     String?           // NULL for SMS
+    bodyContent String            @db.Text
+    isActive    Boolean           @default(true)
+    createdAt   DateTime          @default(now())
+    updatedAt   DateTime          @updatedAt
+
+    @@index([triggerId])
+    @@index([workspaceId])
+    @@map("communication_template")
+}
+
