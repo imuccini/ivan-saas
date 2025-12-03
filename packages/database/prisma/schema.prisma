@@ -157,6 +157,7 @@ model Workspace {
 
     workspaceMembers       WorkspaceMember[]
     communicationTemplates CommunicationTemplate[]
+    terms                  Term[]
 
     @@unique([organizationId, slug])
     @@map("workspace")
@@ -357,3 +358,40 @@ model CommunicationTemplate {
     @@map("communication_template")
 }
 
+// Terms Management Models
+enum TermCategory {
+    PRIVACY_POLICY
+    TERMS_OF_USE
+    COOKIE_POLICY
+    OTHER
+}
+
+enum TermStatus {
+    DRAFT
+    PUBLISHED
+}
+
+model Term {
+    id           String       @id @default(cuid())
+    workspaceId  String
+    workspace    Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+    
+    // Core fields
+    name         String       // Internal name
+    version      String       // e.g., "1.0", "2.0"
+    category     TermCategory
+    isMandatory  Boolean      @default(false)
+    isPreChecked Boolean      @default(false)
+    status       TermStatus   @default(DRAFT)
+    
+    // Multi-language content (JSON structure)
+    // { "en": { label: "...", linkText: "...", documentTitle: "...", documentContent: "..." }, "es": {...} }
+    translations Json
+    
+    createdAt    DateTime     @default(now())
+    updatedAt    DateTime     @updatedAt
+    
+    @@index([workspaceId])
+    @@index([workspaceId, status])
+    @@map("term")
+}

@@ -136,6 +136,12 @@ export const CommunicationTemplateScalarFieldEnumSchema = z.enum(['id', 'trigger
 
 export type CommunicationTemplateScalarFieldEnum = z.infer<typeof CommunicationTemplateScalarFieldEnumSchema>;
 
+// File: TermScalarFieldEnum.schema.ts
+
+export const TermScalarFieldEnumSchema = z.enum(['id', 'workspaceId', 'name', 'version', 'category', 'isMandatory', 'isPreChecked', 'status', 'translations', 'createdAt', 'updatedAt'])
+
+export type TermScalarFieldEnum = z.infer<typeof TermScalarFieldEnumSchema>;
+
 // File: SortOrder.schema.ts
 
 export const SortOrderSchema = z.enum(['asc', 'desc'])
@@ -177,6 +183,18 @@ export type PurchaseType = z.infer<typeof PurchaseTypeSchema>;
 export const CommunicationTypeSchema = z.enum(['EMAIL', 'SMS'])
 
 export type CommunicationType = z.infer<typeof CommunicationTypeSchema>;
+
+// File: TermCategory.schema.ts
+
+export const TermCategorySchema = z.enum(['PRIVACY_POLICY', 'TERMS_OF_USE', 'COOKIE_POLICY', 'OTHER'])
+
+export type TermCategory = z.infer<typeof TermCategorySchema>;
+
+// File: TermStatus.schema.ts
+
+export const TermStatusSchema = z.enum(['DRAFT', 'PUBLISHED'])
+
+export type TermStatus = z.infer<typeof TermStatusSchema>;
 
 // File: User.schema.ts
 
@@ -493,4 +511,23 @@ export const CommunicationTemplateSchema = z.object({
 });
 
 export type CommunicationTemplateType = z.infer<typeof CommunicationTemplateSchema>;
+
+
+// File: Term.schema.ts
+
+export const TermSchema = z.object({
+  id: z.string(),
+  workspaceId: z.string(),
+  name: z.string(),
+  version: z.string(),
+  category: TermCategorySchema,
+  isMandatory: z.boolean(),
+  isPreChecked: z.boolean(),
+  status: TermStatusSchema.default("DRAFT"),
+  translations: z.unknown().refine((val) => { const getDepth = (obj: unknown, depth: number = 0): number => { if (depth > 10) return depth; if (obj === null || typeof obj !== 'object') return depth; const values = Object.values(obj as Record<string, unknown>); if (values.length === 0) return depth; return Math.max(...values.map(v => getDepth(v, depth + 1))); }; return getDepth(val) <= 10; }, "JSON nesting depth exceeds maximum of 10"),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
+export type TermType = z.infer<typeof TermSchema>;
 

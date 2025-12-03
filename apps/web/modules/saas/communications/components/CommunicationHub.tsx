@@ -119,21 +119,21 @@ export function CommunicationHub(_props: CommunicationHubProps = {}) {
 			<div className="flex gap-2">
 				<Badge
 					variant={activeTab === "all" ? "default" : "outline"}
-					className="cursor-pointer px-4 py-1.5 text-sm hover:bg-primary/90 hover:text-primary-foreground"
+					className="cursor-pointer"
 					onClick={() => setActiveTab("all")}
 				>
 					All
 				</Badge>
 				<Badge
 					variant={activeTab === "guest" ? "default" : "outline"}
-					className="cursor-pointer px-4 py-1.5 text-sm hover:bg-primary/90 hover:text-primary-foreground"
+					className="cursor-pointer"
 					onClick={() => setActiveTab("guest")}
 				>
 					Guest WiFi
 				</Badge>
 				<Badge
 					variant={activeTab === "employee" ? "default" : "outline"}
-					className="cursor-pointer px-4 py-1.5 text-sm hover:bg-primary/90 hover:text-primary-foreground"
+					className="cursor-pointer"
 					onClick={() => setActiveTab("employee")}
 				>
 					Employees
