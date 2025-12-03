@@ -10,7 +10,7 @@ export function Footer() {
 					<Logo className="opacity-70 grayscale" />
 					<p className="mt-3 text-sm opacity-70">
 						© {new Date().getFullYear()} {config.appName}.{" "}
-						<a href="https://supastarter.dev">Build with AI</a>.
+						<a href="https://cloud4wi.com">Build with AI</a>.
 					</p>
 				</div>
 

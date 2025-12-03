@@ -17,11 +17,7 @@ import {
 	FormMessage,
 } from "@ui/components/form";
 import { Input } from "@ui/components/input";
-import {
-	AlertTriangleIcon,
-	ArrowRightIcon,
-	MailboxIcon,
-} from "lucide-react";
+import { AlertTriangleIcon, ArrowRightIcon, MailboxIcon } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -97,7 +93,6 @@ export function SignupForm({ prefillEmail }: { prefillEmail?: string }) {
 			router.prefetch("/auth/set-password");
 		}
 	}, [currentStep, router]);
-	const redirectTo = searchParams.get("redirectTo");
 
 	// Check if we're coming from magic link verification
 	const isVerified = searchParams.get("verified") === "true";
@@ -143,12 +138,6 @@ export function SignupForm({ prefillEmail }: { prefillEmail?: string }) {
 			consent: false,
 		},
 	});
-
-
-
-	const redirectPath = invitationId
-		? `/organization-invitation/${invitationId}`
-		: (redirectTo ?? config.auth.redirectAfterSignIn);
 
 	// Check if email exists when user types
 	const checkEmailExists = async (email: string) => {
@@ -212,28 +201,14 @@ export function SignupForm({ prefillEmail }: { prefillEmail?: string }) {
 		}
 	});
 
-
-
-	const totalSteps = 2;
-	const progress = (currentStep / totalSteps) * 100;
-
 	return (
 		<div>
 			<h1 className="font-bold text-xl md:text-2xl">
 				{currentStep === 1 && "Create a free account"}
-				{currentStep === 2 && "Check your email"}
 			</h1>
 			<p className="mt-1 mb-6 text-foreground/60">
 				{currentStep === 1 && "Get started in less than 2 minutes."}
-				{currentStep === 2 && "We sent you a verification link"}
 			</p>
-
-			{/* Step Indicator */}
-			<div className="mb-6">
-				<p className="text-sm text-muted-foreground">
-					Step {currentStep} of 3
-				</p>
-			</div>
 
 			{/* Step 1: User Details */}
 			{currentStep === 1 && (
@@ -421,12 +396,10 @@ export function SignupForm({ prefillEmail }: { prefillEmail?: string }) {
 						</div>
 					</div>
 
-					<Alert>
-						<AlertDescription className="text-sm">
-							Click the link in the email to continue setting up
-							your account. The link will expire in 15 minutes.
-						</AlertDescription>
-					</Alert>
+					<div className="rounded-lg border p-4 text-center text-sm text-muted-foreground">
+						Click the link in the email to continue setting up your
+						account. The link will expire in 15 minutes.
+					</div>
 
 					<div className="text-center">
 						<p className="text-sm text-muted-foreground mb-3">
@@ -476,8 +449,6 @@ export function SignupForm({ prefillEmail }: { prefillEmail?: string }) {
 					</div>
 				</div>
 			)}
-
-
 
 			{/* Login Link */}
 			{currentStep === 1 && (

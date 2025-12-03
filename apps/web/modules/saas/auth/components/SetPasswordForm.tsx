@@ -20,7 +20,6 @@ import {
 	EyeIcon,
 	EyeOffIcon,
 } from "lucide-react";
-import { useTranslations } from "next-intl";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -42,7 +41,6 @@ const passwordSchema = z
 type PasswordFormValues = z.infer<typeof passwordSchema>;
 
 export function SetPasswordForm() {
-	const t = useTranslations();
 	const router = useRouter();
 	const [showPassword, setShowPassword] = useState(false);
 	const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -77,8 +75,8 @@ export function SetPasswordForm() {
 			}
 
 			// Determine next route
-			const nextRoute = config.users.enableOnboarding 
-				? "/auth/onboarding" 
+			const nextRoute = config.users.enableOnboarding
+				? "/auth/onboarding"
 				: "/app";
 
 			// Navigate immediately for better UX
@@ -95,8 +93,8 @@ export function SetPasswordForm() {
 
 	// Prefetch the next page on mount to speed up navigation
 	React.useEffect(() => {
-		const nextRoute = config.users.enableOnboarding 
-			? "/auth/onboarding" 
+		const nextRoute = config.users.enableOnboarding
+			? "/auth/onboarding"
 			: "/app";
 		router.prefetch(nextRoute);
 	}, [router]);
@@ -109,23 +107,22 @@ export function SetPasswordForm() {
 			</p>
 
 			{/* Step Indicator */}
-			<div className="mb-6">
-				<p className="text-sm text-muted-foreground">Step 3 of 3</p>
-			</div>
+			<div className="mb-6"></div>
 
 			<Form {...form}>
 				<form
 					className="flex flex-col items-stretch gap-4"
 					onSubmit={onSubmit}
 				>
-					{form.formState.isSubmitted && form.formState.errors.root && (
-						<Alert variant="destructive">
-							<AlertTriangleIcon />
-							<AlertDescription>
-								{form.formState.errors.root.message}
-							</AlertDescription>
-						</Alert>
-					)}
+					{form.formState.isSubmitted &&
+						form.formState.errors.root && (
+							<Alert variant="destructive">
+								<AlertTriangleIcon />
+								<AlertDescription>
+									{form.formState.errors.root.message}
+								</AlertDescription>
+							</Alert>
+						)}
 
 					<FormField
 						control={form.control}
