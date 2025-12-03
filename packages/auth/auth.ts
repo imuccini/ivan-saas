@@ -1,4 +1,6 @@
+// Import global application configuration
 import { config } from "@repo/config";
+// Import database utilities and queries
 import {
 	db,
 	getInvitationById,
@@ -6,13 +8,21 @@ import {
 	getPurchasesByUserId,
 	getUserByEmail,
 } from "@repo/database";
+// Import internationalization types
 import type { Locale } from "@repo/i18n";
+// Import logging utility
 import { logger } from "@repo/logs";
+// Import email sending utility
 import { sendEmail } from "@repo/mail";
+// Import payment utilities for handling subscriptions
 import { cancelSubscription } from "@repo/payments";
+// Import utility to get the base URL of the application
 import { getBaseUrl } from "@repo/utils";
+// Import the main authentication library
 import { betterAuth } from "better-auth";
+// Import the Prisma adapter for the authentication library
 import { prismaAdapter } from "better-auth/adapters/prisma";
+// Import various plugins for the authentication library
 import {
 	admin,
 	createAuthMiddleware,
@@ -22,11 +32,16 @@ import {
 	twoFactor,
 	username,
 } from "better-auth/plugins";
+// Import the passkey plugin for passwordless authentication
 import { passkey } from "better-auth/plugins/passkey";
+// Import cookie parsing utility
 import { parse as parseCookies } from "cookie";
+// Import utility for updating organization subscription seats
 import { updateSeatsInOrganizationSubscription } from "./lib/organization";
+// Import a custom plugin for invitation-only signups
 import { invitationOnlyPlugin } from "./plugins/invitation-only";
 
+// Function to extract locale from the request headers
 const getLocaleFromRequest = (request?: Request) => {
 	const cookies = parseCookies(request?.headers.get("cookie") ?? "");
 	return (
@@ -35,31 +50,42 @@ const getLocaleFromRequest = (request?: Request) => {
 	);
 };
 
+// Get the base URL of the application
 const appUrl = getBaseUrl();
 
+// Initialize and configure the authentication service
 export const auth = betterAuth({
+	// Set the base URL for the application
 	baseURL: appUrl,
+	// Define trusted origins for CORS
 	trustedOrigins: [appUrl, "http://localhost:3001"],
+	// Set the application name
 	appName: config.appName,
+	// Configure the database adapter using Prisma
 	database: prismaAdapter(db, {
 		provider: "postgresql",
 	}),
+	// Advanced database configuration
 	advanced: {
 		database: {
 			generateId: false,
 		},
 	},
+	// Session management configuration
 	session: {
 		expiresIn: config.auth.sessionCookieMaxAge,
 		freshAge: 0,
 	},
+	// Account management configuration
 	account: {
 		accountLinking: {
 			enabled: true,
 			trustedProviders: ["google", "github"],
 		},
 	},
+	// Hooks to run before and after certain authentication events
 	hooks: {
+		// Middleware to run after specific actions
 		after: createAuthMiddleware(async (ctx) => {
 			if (ctx.path.startsWith("/organization/accept-invitation")) {
 				const { invitationId } = ctx.body;
@@ -87,6 +113,7 @@ export const auth = betterAuth({
 				await updateSeatsInOrganizationSubscription(organizationId);
 			}
 		}),
+		// Middleware to run before specific actions
 		before: createAuthMiddleware(async (ctx) => {
 			if (
 				ctx.path.startsWith("/delete-user") ||
@@ -118,6 +145,7 @@ export const auth = betterAuth({
 			}
 		}),
 	},
+	// User model configuration
 	user: {
 		additionalFields: {
 			onboardingComplete: {
@@ -151,6 +179,7 @@ export const auth = betterAuth({
 			},
 		},
 	},
+	// Email and password authentication configuration
 	emailAndPassword: {
 		enabled: true,
 		// If signup is disabled, the only way to sign up is via an invitation. So in this case we can auto sign in the user, as the email is already verified by the invitation.
@@ -170,6 +199,7 @@ export const auth = betterAuth({
 			});
 		},
 	},
+	// Email verification configuration
 	emailVerification: {
 		sendOnSignUp: config.auth.enableSignup,
 		autoSignInAfterVerification: true,
@@ -189,6 +219,7 @@ export const auth = betterAuth({
 			});
 		},
 	},
+	// Social provider configuration
 	socialProviders: {
 		google: {
 			clientId: process.env.GOOGLE_CLIENT_ID as string,
@@ -201,6 +232,7 @@ export const auth = betterAuth({
 			scope: ["user:email"],
 		},
 	},
+	// Enable and configure various authentication plugins
 	plugins: [
 		username(),
 		admin(),
@@ -250,6 +282,7 @@ export const auth = betterAuth({
 		invitationOnlyPlugin(),
 		twoFactor(),
 	],
+	// Error handling for API errors
 	onAPIError: {
 		onError(error, ctx) {
 			logger.error(error, { ctx });
@@ -257,8 +290,10 @@ export const auth = betterAuth({
 	},
 });
 
+// Export organization-related functions
 export * from "./lib/organization";
 
+// Define and export TypeScript types for authentication data
 export type Session = typeof auth.$Infer.Session;
 
 export type ActiveOrganization = NonNullable<
