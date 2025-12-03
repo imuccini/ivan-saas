@@ -76,12 +76,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 				{
 					title: "Access Rules",
 					url: `${basePath}/employees/access-rules`,
-					isActive: currentPath === `${basePath}/employees/access-rules`,
+					isActive:
+						currentPath === `${basePath}/employees/access-rules`,
 				},
 				{
 					title: "Onboarding",
 					url: `${basePath}/employees/onboarding`,
-					isActive: currentPath === `${basePath}/employees/onboarding`,
+					isActive:
+						currentPath === `${basePath}/employees/onboarding`,
 				},
 				{
 					title: "Managed Devices",
@@ -108,7 +110,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 				{
 					title: "Performances",
 					url: `${basePath}/monitor/performances`,
-					isActive: currentPath === `${basePath}/monitor/performances`,
+					isActive:
+						currentPath === `${basePath}/monitor/performances`,
 				},
 				{
 					title: "Health",
@@ -130,7 +133,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 				{
 					title: "Users & Devices",
 					url: `${basePath}/manage/users-devices`,
-					isActive: currentPath === `${basePath}/manage/users-devices`,
+					isActive:
+						currentPath === `${basePath}/manage/users-devices`,
 				},
 				{
 					title: "Networks",
@@ -141,6 +145,17 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 					title: "Integrations",
 					url: `${basePath}/manage/integrations`,
 					isActive: currentPath === `${basePath}/manage/integrations`,
+				},
+				{
+					title: "Terms",
+					url: `${basePath}/manage/terms`,
+					isActive: currentPath === `${basePath}/manage/terms`,
+				},
+				{
+					title: "Communications",
+					url: `${basePath}/manage/communications`,
+					isActive:
+						currentPath === `${basePath}/manage/communications`,
 				},
 			],
 		},
