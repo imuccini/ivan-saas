@@ -1,5 +1,6 @@
-import { db } from "@repo/database";
 import { ORPCError } from "@orpc/client";
+import type { ActiveOrganization } from "@repo/auth";
+import { db } from "@repo/database";
 import { z } from "zod";
 import { protectedProcedure } from "../../../orpc/procedures";
 
@@ -12,12 +13,14 @@ export const getOrganization = protectedProcedure
 		description: "Get organization details by slug",
 	})
 	.input(
-		z.object({
-			slug: z.string().optional(),
-			id: z.string().optional(),
-		}).refine((data) => data.slug || data.id, {
-			message: "Either slug or id must be provided",
-		}),
+		z
+			.object({
+				slug: z.string().optional(),
+				id: z.string().optional(),
+			})
+			.refine((data) => data.slug || data.id, {
+				message: "Either slug or id must be provided",
+			}),
 	)
 	.handler(async ({ input, context }) => {
 		const { user } = context;
@@ -38,6 +41,7 @@ export const getOrganization = protectedProcedure
 						},
 					},
 				},
+				invitations: true,
 			},
 		});
 
@@ -56,5 +60,5 @@ export const getOrganization = protectedProcedure
 			});
 		}
 
-		return organization;
+		return organization as unknown as ActiveOrganization;
 	});
