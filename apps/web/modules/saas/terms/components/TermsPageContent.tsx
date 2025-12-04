@@ -88,7 +88,7 @@ export function TermsPageContent() {
 	};
 
 	const handlePublish = (termId: string) => {
-		publishMutation.mutate({ input: { id: termId } });
+		publishMutation.mutate({ id: termId });
 	};
 
 	const toggleRow = (termId: string) => {
@@ -308,9 +308,7 @@ export function TermsPageContent() {
 				}}
 				onConfirm={() => {
 					if (selectedTerm) {
-						deleteMutation.mutate({
-							input: { id: selectedTerm.id },
-						});
+						deleteMutation.mutate({ id: selectedTerm.id });
 					}
 				}}
 				termName={selectedTerm?.name}
