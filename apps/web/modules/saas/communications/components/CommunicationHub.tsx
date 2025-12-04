@@ -218,7 +218,7 @@ export function CommunicationHub(_props: CommunicationHubProps = {}) {
 													trigger: {
 														...trigger,
 														supportedVariables:
-															(trigger.supportedVariables as SupportedVariable[]) ||
+															(trigger.supportedVariables as unknown as SupportedVariable[]) ||
 															[],
 													},
 												})
