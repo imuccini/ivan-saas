@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Architecture Summary - Supastarter Next.js</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Load Inter Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
+    <!-- Load Mermaid for Diagram Rendering -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
+    
+    <style>
+        /* Custom styles for dark mode and typography */
+        :root {
+            --primary-color: 29 78 216; /* blue-700 */
+        }
+        .dark {
+            --primary-color: 59 130 246; /* blue-500 */
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Custom styling for Mermaid blocks */
+        .mermaid {
+            background-color: #1f2937; /* Gray-800 */
+            border-radius: 0.5rem;
+            padding: 1rem;
+            color: #d1d5db; /* Gray-300 */
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            overflow-x: auto;
+        }
+        /* Override Mermaid default settings for dark theme */
+        .mermaid svg {
+            background-color: transparent !important;
+            color: #e5e7eb !important;
+        }
+        /* Style for the code blocks within the document */
+        pre {
+            background-color: #1f2937;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            overflow-x: auto;
+            border-left: 4px solid rgb(var(--primary-color));
+        }
+        code {
+            font-size: 0.875rem;
+            color: #d1d5db;
+        }
+        /* Style for the horizontal rule */
+        hr {
+            margin-top: 1.5rem;
+            margin-bottom: 1.5rem;
+            border-color: #374151; /* Gray-700 */
+        }
+        /* Styling links to appear better in dark mode content */
+        a {
+            color: rgb(var(--primary-color));
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* Specific list styling for directory structure */
+        .directory-structure {
+            list-style: none;
+            padding-left: 1rem;
+            color: #9ca3af;
+        }
+        .directory-structure li {
+            line-height: 1.5;
+        }
+        .directory-structure li:before {
+            content: "• ";
+            color: rgb(var(--primary-color));
+            display: inline-block;
+            width: 1em;
+            margin-left: -1em;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300">
+
+    <div class="max-w-6xl mx-auto p-6 lg:p-12">
+
+        <header class="mb-10 pb-4 border-b border-gray-200 dark:border-gray-800">
+            <h1 class="text-4xl lg:text-5xl font-extrabold text-white bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-indigo-600 dark:from-blue-300 dark:to-indigo-500">Product Architecture Summary</h1>
+        </header>
+
+        <!-- Executive Overview -->
+        <section class="mb-10 p-6 bg-white dark:bg-gray-800 rounded-xl shadow-lg">
+            <h2 class="text-2xl font-bold mb-4 text-gray-800 dark:text-gray-50">Executive Overview</h2>
+            <p class="text-lg leading-relaxed text-gray-700 dark:text-gray-300">
+                This SaaS application is built on <strong class="text-blue-500">supastarter for Next.js</strong>, a production-ready starter kit optimized for rapid development and enterprise-scale deployment. The architecture leverages modern frameworks and best practices to deliver exceptional performance, scalability, and developer experience on Vercel's edge infrastructure.
+            </p>
+        </section>
+
+        <hr>
+
+        <!-- Technology Stack -->
+        <section class="mb-10">
+            <h2 class="text-3xl font-bold mb-6 text-gray-800 dark:text-gray-100">Technology Stack</h2>
+            
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+                <!-- Core Framework -->
+                <div class="p-5 bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-xl transition-shadow">
+                    <h3 class="font-semibold text-xl mb-3 text-blue-500">Core Framework</h3>
+                    <ul class="list-none space-y-2 text-sm text-gray-700 dark:text-gray-300">
+                        <li><strong>Next.js 15.5.2</strong> (App Router)</li>
+                        <ul class="list-disc ml-4 space-y-1">
+                            <li>React Server Components for optimal performance</li>
+                            <li>Server Actions for type-safe mutations</li>
+                            <li>Streaming SSR with Suspense boundaries</li>
+                            <li>Automatic code splitting and lazy loading</li>
+                        </ul>
+                    </ul>
+                </div>
+
+                <!-- Frontend Technologies -->
+                <div class="p-5 bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-xl transition-shadow">
+                    <h3 class="font-semibold text-xl mb-3 text-blue-500">Frontend Technologies</h3>
+                    <ul class="list-none space-y-2 text-sm text-gray-700 dark:text-gray-300">
+                        <li><strong>React 19.1.1</strong> - Latest React with concurrent features</li>
+                        <li><strong>TypeScript 5.9.2</strong> - Full type safety across the stack</li>
+                        <li><strong>Tailwind CSS 4.1.12</strong> - Utility-first styling with JIT compilation</li>
+                        <li><strong>Shadcn UI + Radix UI</strong> - Accessible, composable component library</li>
+                        <li><strong>Framer Motion</strong> - Performant animations</li>
+                    </ul>
+                </div>
+
+                <!-- Backend & API Layer -->
+                <div class="p-5 bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-xl transition-shadow">
+                    <h3 class="font-semibold text-xl mb-3 text-blue-500">Backend & API Layer</h3>
+                    <ul class="list-none space-y-2 text-sm text-gray-700 dark:text-gray-300">
+                        <li><strong>ORPC (oRPC)</strong> - Type-safe RPC framework</li>
+                        <ul class="list-disc ml-4 space-y-1">
+                            <li>End-to-end type safety from client to server</li>
+                            <li>Automatic request/response validation</li>
+                            <li>TanStack Query integration for optimal caching</li>
+                        </ul>
+                    </ul>
+                </div>
+
+                <!-- Database & ORM -->
+                <div class="p-5 bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-xl transition-shadow">
+                    <h3 class="font-semibold text-xl mb-3 text-blue-500">Database & ORM</h3>
+                    <ul class="list-none space-y-2 text-sm text-gray-700 dark:text-gray-300">
+                        <li><strong>PostgreSQL</strong> (via Supabase/Neon) - Serverless Postgres</li>
+                        <li><strong>Prisma 6.15.0</strong> - Type-safe database client</li>
+                        <ul class="list-disc ml-4 space-y-1">
+                            <li>Automatic migrations</li>
+                            <li>Zod schema generation for runtime validation</li>
+                        </ul>
+                    </ul>
+                </div>
+
+                <!-- Authentication & Authorization -->
+                <div class="p-5 bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-xl transition-shadow">
+                    <h3 class="font-semibold text-xl mb-3 text-blue-500">Authentication & Authorization</h3>
+                    <ul class="list-none space-y-2 text-sm text-gray-700 dark:text-gray-300">
+                        <li><strong>Better Auth 1.3.7</strong></li>
+                        <ul class="list-disc ml-4 space-y-1">
+                            <li>Email/password, Magic link, OAuth, Passkey support</li>
+                            <li>Two-factor authentication (TOTP)</li>
+                            <li>Organization-based access control</li>
+                        </ul>
+                    </ul>
+                </div>
+
+                <!-- State Management & Payments -->
+                <div class="p-5 bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-xl transition-shadow">
+                    <h3 class="font-semibold text-xl mb-3 text-blue-500">Data & Payments</h3>
+                    <ul class="list-none space-y-2 text-sm text-gray-700 dark:text-gray-300">
+                        <li><strong>TanStack Query v5</strong> - Intelligent caching, optimistic updates</li>
+                        <li><strong>Stripe</strong> (via @repo/payments) - Subscription management, Webhook handling</li>
+                        <li><strong>AWS S3</strong> - Scalable object storage (Avatars, Documents)</li>
+                    </ul>
+                </div>
+
+            </div>
+            
+            <!-- Other key technologies -->
+            <div class="mt-6 p-5 bg-white dark:bg-gray-800 rounded-lg shadow-md">
+                <h3 class="font-semibold text-xl mb-3 text-blue-500">Other Key Technologies</h3>
+                <ul class="list-disc ml-6 space-y-1 text-sm text-gray-700 dark:text-gray-300 grid sm:grid-cols-2">
+                    <li><strong>React Email</strong> & <strong>Resend/SendGrid</strong> - Type-safe email templates & delivery.</li>
+                    <li><strong>Vercel AI SDK</strong> - Streaming AI responses & chat components.</li>
+                    <li><strong>next-intl 4.3.5</strong> - Server-side translations & type-safe keys.</li>
+                    <li><strong>Turborepo 2.5.6</strong> - Intelligent monorepo build caching.</li>
+                    <li><strong>Biome 2.2.2</strong> - Fast linter and formatter.</li>
+                    <li><strong>Playwright</strong> - E2E testing framework.</li>
+                </ul>
+            </div>
+        </section>
+
+        <hr>
+
+        <!-- Architecture Patterns -->
+        <section class="mb-10">
+            <h2 class="text-3xl font-bold mb-6 text-gray-800 dark:text-gray-100">Architecture Patterns</h2>
+
+            <h3 class="text-2xl font-semibold mb-4 text-blue-400">Monorepo Structure</h3>
+            <pre class="whitespace-pre-wrap"><code class="language-bash">supastarter/
+├── apps/
+│   └── web/                    # Next.js application
+│       ├── app/                # App Router pages
+│       │   ├── (marketing)/    # Public marketing site
+│       │   ├── (saas)/        # Authenticated SaaS app
+│       │   └── api/           # API routes
+│       └── modules/           # Feature modules
+│           ├── saas/          # SaaS features
+│           ├── marketing/     # Marketing components
+│           ├── shared/        # Shared utilities
+│           └── ui/            # UI components
+└── packages/
+    ├── api/                   # ORPC API layer
+    ├── auth/                  # Authentication logic
+    ├── database/              # Prisma schema & client
+    ├── payments/              # Payment integrations
+    ├── mail/                  # Email templates
+    ├── storage/               # File storage
+    ├── i18n/                  # Internationalization
+    └── config/                # Shared configuration</code></pre>
+
+            <h3 class="text-2xl font-semibold mt-8 mb-4 text-blue-400">Key Architectural Decisions</h3>
+            <ul class="list-disc ml-6 space-y-3 text-gray-700 dark:text-gray-300">
+                <li><strong>Strict Module Separation:</strong> Frontend logic in <code>apps/web/modules/</code>, Backend logic in <code>packages/api/</code>, and Database operations in <code>packages/database/</code>.</li>
+                <li><strong>Performance-First Data Fetching:</strong> Parallel fetches, prefetching in server components, and TanStack Query for client-side caching.</li>
+                <li><strong>Multi-Tenancy Architecture:</strong> Utilizes Organizations and Workspaces for resource isolation.</li>
+                <li><strong>Type Safety Across the Stack:</strong> ORPC provides end-to-end type safety, eliminating manual type assertions.</li>
+            </ul>
+
+            <h4 class="text-xl font-medium mt-6 mb-3 text-gray-300">Multi-Tenancy Architecture Diagram</h4>
+            <div class="mermaid">
+                graph TD
+                    A[User] --> B[Organization]
+                    B --> C[Workspace 1]
+                    B --> D[Workspace 2]
+                    C --> E[Members]
+                    C --> F[Resources]
+                    D --> G[Members]
+                    D --> H[Resources]
+            </div>
+
+            <h4 class="text-xl font-medium mt-6 mb-3 text-gray-300">Type Safety Example</h4>
+            <pre><code class="language-typescript">// Client → Server type safety with ORPC
+const { data } = useQuery(
+  orpc.workspaces.create.queryOptions({
+    name: "My Workspace",
+    organizationId: "org_123"
+  })
+);
+// ✅ Fully typed response, no manual type assertions</code></pre>
+        </section>
+
+        <hr>
+
+        <!-- Performance Optimizations -->
+        <section class="mb-10">
+            <h2 class="text-3xl font-bold mb-6 text-gray-800 dark:text-gray-100">Performance Optimizations</h2>
+
+            <h3 class="text-2xl font-semibold mb-4 text-blue-400">Vercel Deployment Advantages</h3>
+            <ul class="list-disc ml-6 space-y-1 text-gray-700 dark:text-gray-300">
+                <li><strong>Edge Network:</strong> Global CDN and Edge Functions for API routes run closer to users.</li>
+                <li><strong>Build Optimizations:</strong> Incremental Static Regeneration (ISR) and Partial Prerendering.</li>
+                <li><strong>Database Connection Pooling:</strong> Optimized for serverless environments.</li>
+            </ul>
+
+            <h4 class="text-xl font-medium mt-6 mb-3 text-gray-300">Database Connection Pooling Configuration</h4>
+            <pre><code class="language-typescript">// Optimized for serverless
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")      // Pooled connection
+  directUrl = env("DIRECT_URL")        // Direct for migrations
+}</code></pre>
+
+            <h3 class="text-2xl font-semibold mt-8 mb-4 text-blue-400">Performance Metrics</h3>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left table-auto rounded-lg overflow-hidden shadow-lg">
+                    <thead class="bg-blue-700 dark:bg-blue-600 text-white">
+                        <tr>
+                            <th class="py-3 px-4 font-semibold">Metric</th>
+                            <th class="py-3 px-4 font-semibold">Target</th>
+                            <th class="py-3 px-4 font-semibold">Implementation</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                        <tr class="bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                            <td class="py-3 px-4 font-medium text-blue-400">First Contentful Paint (FCP)</td>
+                            <td class="py-3 px-4">&lt; 1.8s</td>
+                            <td class="py-3 px-4">Server Components, edge delivery</td>
+                        </tr>
+                        <tr class="bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                            <td class="py-3 px-4 font-medium text-blue-400">Largest Contentful Paint (LCP)</td>
+                            <td class="py-3 px-4">&lt; 2.5s</td>
+                            <td class="py-3 px-4">Image optimization, lazy loading</td>
+                        </tr>
+                        <tr class="bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                            <td class="py-3 px-4 font-medium text-blue-400">Time to Interactive (TTI)</td>
+                            <td class="py-3 px-4">&lt; 3.5s</td>
+                            <td class="py-3 px-4">Code splitting, minimal JS</td>
+                        </tr>
+                        <tr class="bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                            <td class="py-3 px-4 font-medium text-blue-400">Cumulative Layout Shift (CLS)</td>
+                            <td class="py-3 px-4">&lt; 0.1</td>
+                            <td class="py-3 px-4">Skeleton loaders, fixed dimensions</td>
+                        </tr>
+                        <tr class="bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                            <td class="py-3 px-4 font-medium text-blue-400">API Response Time</td>
+                            <td class="py-3 px-4">&lt; 200ms</td>
+                            <td class="py-3 px-4">Edge functions, connection pooling</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <hr>
+
+        <!-- Scalability Considerations -->
+        <section class="mb-10">
+            <h2 class="text-3xl font-bold mb-6 text-gray-800 dark:text-gray-100">Scalability Considerations</h2>
+
+            <h3 class="text-2xl font-semibold mb-4 text-blue-400">Caching Layers Diagram</h3>
+            <p class="text-gray-700 dark:text-gray-300 mb-4">The application uses a multi-layered caching strategy for optimal performance and reduced origin load:</p>
+            <div class="mermaid">
+                graph LR
+                    A[User Request] --> B{Edge Cache}
+                    B -->|HIT| C[Return Cached]
+                    B -->|MISS| D{TanStack Query}
+                    D -->|HIT| E[Return Cached]
+                    D -->|MISS| F[API Call]
+                    F --> G[Database]
+            </div>
+
+            <h3 class="text-2xl font-semibold mt-8 mb-4 text-blue-400">Horizontal Scalability</h3>
+            <ul class="list-disc ml-6 space-y-1 text-gray-700 dark:text-gray-300">
+                <li><strong>Serverless Architecture:</strong> Vercel auto-scales based on traffic, providing high availability.</li>
+                <li><strong>Database Scalability:</strong> Connection pooling handles thousands of concurrent connections.</li>
+            </ul>
+        </section>
+
+        <hr>
+
+        <!-- Security and Feature Highlights -->
+        <section class="mb-10 grid md:grid-cols-2 gap-8">
+            <div>
+                <h2 class="text-3xl font-bold mb-6 text-gray-800 dark:text-gray-100">Security Features</h2>
+                <div class="p-5 bg-white dark:bg-gray-800 rounded-lg shadow-md">
+                    <h3 class="font-semibold text-xl mb-3 text-blue-500">Authentication Security</h3>
+                    <ul class="list-disc ml-6 space-y-1 text-sm text-gray-700 dark:text-gray-300">
+                        <li>Secure session cookies (HTTP-only, SameSite=Lax).</li>
+                        <li>CSRF protection.</li>
+                        <li>Password hashing (Argon2).</li>
+                        <li>Rate limiting.</li>
+                    </ul>
+                    <h3 class="font-semibold text-xl mt-4 mb-3 text-blue-500">Data Security</h3>
+                    <ul class="list-disc ml-6 space-y-1 text-sm text-gray-700 dark:text-gray-300">
+                        <li>Row-level security for tenant isolation.</li>
+                        <li>Zod input validation on all inputs.</li>
+                        <li>Prisma parameterized queries (SQL injection prevention).</li>
+                        <li>HTTPS only.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div>
+                <h2 class="text-3xl font-bold mb-6 text-gray-800 dark:text-gray-100">Feature Highlights</h2>
+                <div class="p-5 bg-white dark:bg-gray-800 rounded-lg shadow-md">
+                    <h3 class="font-semibold text-xl mb-3 text-blue-500">SaaS Application</h3>
+                    <ul class="list-disc ml-6 space-y-1 text-sm text-gray-700 dark:text-gray-300">
+                        <li>Multi-tenant (Organization & Workspace) Management.</li>
+                        <li>Stripe Billing & Payments.</li>
+                        <li>AI Integration (Chat interface with streaming).</li>
+                        <li>Terms Management (Version control, acceptance).</li>
+                    </ul>
+                    <h3 class="font-semibold text-xl mt-4 mb-3 text-blue-500">Marketing Site</h3>
+                    <ul class="list-disc ml-6 space-y-1 text-sm text-gray-700 dark:text-gray-300">
+                        <li>SEO-optimized pages.</li>
+                        <li>Blog with MDX support.</li>
+                        <li>Documentation with search (Fumadocs).</li>
+                        <li>Multi-language support.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <hr>
+        
+        <!-- Development Workflow and Future -->
+        <section class="mb-10">
+            <h2 class="text-3xl font-bold mb-6 text-gray-800 dark:text-gray-100">Development & Future</h2>
+
+            <div class="grid md:grid-cols-2 gap-8">
+                <!-- Development Workflow -->
+                <div>
+                    <h3 class="text-2xl font-semibold mb-4 text-blue-400">Development Workflow</h3>
+                    <p class="text-gray-700 dark:text-gray-300 mb-4">Key `pnpm` commands for local development:</p>
+                    <pre><code class="language-bash">pnpm dev              # Start all services
+pnpm build            # Production build
+pnpm lint             # Biome linting
+pnpm db:studio        # Prisma Studio
+</code></pre>
+                    <p class="mt-4 text-gray-700 dark:text-gray-300">CI/CD is automated via GitHub and Vercel, including preview deployments for every PR and automated database migrations.</p>
+                </div>
+
+                <!-- Future Scalability -->
+                <div>
+                    <h3 class="text-2xl font-semibold mb-4 text-blue-400">Future Scalability Enhancements</h3>
+                    <ul class="list-none space-y-2 text-gray-700 dark:text-gray-300">
+                        <li><strong>Short-term:</strong> Redis caching, Database read replicas, Advanced rate limiting.</li>
+                        <li><strong>Medium-term:</strong> Background job processing (Inngest/BullMQ), Real-time features (WebSockets).</li>
+                        <li><strong>Long-term:</strong> Microservices for compute-heavy features, Event-driven architecture, Data warehouse.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <hr>
+
+        <!-- Conclusion -->
+        <section class="mb-10 p-6 bg-blue-900 dark:bg-blue-950 text-white rounded-xl shadow-2xl border-l-4 border-blue-400">
+            <h2 class="text-2xl font-bold mb-4">Conclusion</h2>
+            <p class="leading-relaxed">
+                This architecture provides a <strong class="text-yellow-300">production-ready foundation</strong> for a scalable SaaS application with:
+                <ul class="list-none mt-3 space-y-1">
+                    <li class="flex items-center"><svg class="w-4 h-4 mr-2 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> <strong>Performance</strong> - Sub-second page loads with edge delivery </li>
+                    <li class="flex items-center"><svg class="w-4 h-4 mr-2 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> <strong>Scalability</strong> - Serverless auto-scaling to handle traffic spikes </li>
+                    <li class="flex items-center"><svg class="w-4 h-4 mr-2 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> <strong>Security</strong> - Enterprise-grade authentication and data isolation </li>
+                </ul>
+                <br>
+                Built on <strong>supastarter for Next.js</strong> and deployed on <strong>Vercel</strong>, this stack is optimized for both developer productivity and end-user experience.
+            </p>
+        </section>
+
+    </div>
+
+    <script>
+        // Initialize Mermaid.js
+        document.addEventListener('DOMContentLoaded', function() {
+            // Configure Mermaid for Dark Mode styling, ensuring nodes look good on the dark background
+            mermaid.initialize({
+                startOnLoad: true,
+                theme: 'dark',
+                securityLevel: 'loose',
+                themeVariables: {
+                    // General background color
+                    'darkMode': true,
+                    'primaryColor': '#3b82f6', // Blue-500 for nodes
+                    'primaryTextColor': '#e5e7eb',
+                    'primaryBorderColor': '#1d4ed8',
+                    'lineColor': '#9ca3af',
+                    'secondaryColor': '#1f2937', // Gray-800
+                    'tertiaryColor': '#4b5563', // Gray-600
+                    // Flowchart specific
+                    'nodeBorder': '#3b82f6',
+                    'nodeBkg': '#1f2937',
+                }
+            });
+        });
+    </script>
+</body>
+</html>
