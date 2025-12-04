@@ -102,7 +102,6 @@ export function SignupForm({ prefillEmail }: { prefillEmail?: string }) {
 		}
 	}, [currentStep, router]);
 
-
 	// Step 1 Form
 	const step1Form = useForm<Step1Data>({
 		resolver: zodResolver(step1Schema),
@@ -165,18 +164,23 @@ export function SignupForm({ prefillEmail }: { prefillEmail?: string }) {
 	});
 
 	const sendOtp = async (email: string) => {
-		const response = await fetch("/api/auth/email-otp/send-verification-otp", {
-			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({
-				email,
-				type: "sign-in",
-			}),
-		});
+		const response = await fetch(
+			"/api/auth/email-otp/send-verification-otp",
+			{
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({
+					email,
+					type: "sign-in",
+				}),
+			},
+		);
 
 		if (!response.ok) {
 			const errorData = await response.json().catch(() => ({}));
-			throw new Error(errorData.message || "Failed to send verification code");
+			throw new Error(
+				errorData.message || "Failed to send verification code",
+			);
 		}
 	};
 
@@ -185,7 +189,7 @@ export function SignupForm({ prefillEmail }: { prefillEmail?: string }) {
 
 		setIsVerifying(true);
 		setOtpError(null);
-		
+
 		try {
 			const { error } = await authClient.signIn.emailOtp({
 				email: signupData.step1.email,
@@ -328,7 +332,7 @@ export function SignupForm({ prefillEmail }: { prefillEmail?: string }) {
 												I accept Cloud4Wi's{" "}
 												<Link
 													href="/terms"
-													className="text-primary hover:underline"
+													className="text-primary underline"
 													target="_blank"
 												>
 													Terms & Conditions
@@ -336,7 +340,7 @@ export function SignupForm({ prefillEmail }: { prefillEmail?: string }) {
 												and{" "}
 												<Link
 													href="/privacy"
-													className="text-primary hover:underline"
+													className="text-primary underline"
 													target="_blank"
 												>
 													Privacy Policy
@@ -394,7 +398,10 @@ export function SignupForm({ prefillEmail }: { prefillEmail?: string }) {
 								Enter verification code
 							</h2>
 							<p className="mt-2 text-muted-foreground">
-								We sent a code to <span className="font-medium text-foreground">{signupData.step1?.email}</span>
+								We sent a code to{" "}
+								<span className="font-medium text-foreground">
+									{signupData.step1?.email}
+								</span>
 							</p>
 						</div>
 					</div>
@@ -443,14 +450,17 @@ export function SignupForm({ prefillEmail }: { prefillEmail?: string }) {
 						<Button
 							variant="outline"
 							onClick={async () => {
-					if (signupData.step1) {
-						try {
-							await sendOtp(signupData.step1.email);
-						} catch (error) {
-							console.error("Failed to resend:", error);
-						}
-					}
-				}}
+								if (signupData.step1) {
+									try {
+										await sendOtp(signupData.step1.email);
+									} catch (error) {
+										console.error(
+											"Failed to resend:",
+											error,
+										);
+									}
+								}
+							}}
 						>
 							Resend Code
 						</Button>
