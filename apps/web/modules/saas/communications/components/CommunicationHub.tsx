@@ -215,7 +215,12 @@ export function CommunicationHub(_props: CommunicationHubProps = {}) {
 											onClick={() =>
 												setEditingTemplate({
 													template,
-													trigger,
+													trigger: {
+														...trigger,
+														supportedVariables:
+															(trigger.supportedVariables as SupportedVariable[]) ||
+															[],
+													},
 												})
 											}
 										>
