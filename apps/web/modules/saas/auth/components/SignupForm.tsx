@@ -202,8 +202,30 @@ export function SignupForm({ prefillEmail }: { prefillEmail?: string }) {
 				return;
 			}
 
-			// Success! Navigate to set password
-			router.push("/auth/set-password");
+			// Wait for session to be fully established before navigating
+			// This prevents race condition with middleware
+			let sessionVerified = false;
+			let retries = 0;
+			const maxRetries = 5;
+
+			while (!sessionVerified && retries < maxRetries) {
+				const session = await authClient.getSession();
+				if (session.data?.session) {
+					sessionVerified = true;
+				} else {
+					// Wait 200ms before retrying
+					await new Promise((resolve) => setTimeout(resolve, 200));
+					retries++;
+				}
+			}
+
+			if (sessionVerified) {
+				// Session confirmed, safe to navigate
+				router.push("/auth/set-password");
+			} else {
+				// Fallback: use full page navigation to ensure session is picked up
+				window.location.href = "/auth/set-password";
+			}
 		} catch (e) {
 			setOtpError("An error occurred. Please try again.");
 			setIsVerifying(false);

@@ -113,7 +113,7 @@ export function EmployeesPageContent() {
 								Users & Groups
 							</CardTitle>
 							<Link
-								href="directory"
+								href="employees/directory"
 								className="flex items-center gap-1 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
 							>
 								BYOD Directory{" "}
@@ -150,7 +150,7 @@ export function EmployeesPageContent() {
 								Access Rules
 							</CardTitle>
 							<Link
-								href="access-rules"
+								href="employees/access-rules"
 								className="flex items-center gap-1 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
 							>
 								Configure <ArrowUpRight className="h-3 w-3" />
@@ -188,7 +188,7 @@ export function EmployeesPageContent() {
 								Onboarding & Network
 							</CardTitle>
 							<Link
-								href="onboarding"
+								href="employees/onboarding"
 								className="flex items-center gap-1 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
 							>
 								Setup <ArrowUpRight className="h-3 w-3" />
@@ -230,7 +230,7 @@ export function EmployeesPageContent() {
 								Identity Providers
 							</CardTitle>
 							<Link
-								href="integrations?tab=identity-providers"
+								href="manage/integrations"
 								className="flex items-center gap-1 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
 							>
 								Manage IdPs <ArrowUpRight className="h-3 w-3" />
