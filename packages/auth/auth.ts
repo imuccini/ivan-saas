@@ -31,6 +31,7 @@ import {
 	organization,
 	twoFactor,
 	username,
+	emailOTP,
 } from "better-auth/plugins";
 // Import the passkey plugin for passwordless authentication
 import { passkey } from "better-auth/plugins/passkey";
@@ -280,6 +281,19 @@ export const auth = betterAuth({
 		}),
 		openAPI(),
 		invitationOnlyPlugin(),
+		emailOTP({
+			async sendVerificationOTP({ email, otp, type }, request) {
+				const locale = getLocaleFromRequest(request);
+				await sendEmail({
+					to: email,
+					templateId: "emailOtp",
+					context: {
+						otp,
+					},
+					locale,
+				});
+			},
+		}),
 		twoFactor(),
 	],
 	// Error handling for API errors

@@ -273,6 +273,10 @@
 			"headline": "Join the organization {organizationName}",
 			"join": "Join the organization",
 			"subject": "You have been invited to join an organization"
+		},
+		"emailOtp": {
+			"body": "Hey,\nyou requested a verification code.\n\nUse the code below to continue:",
+			"subject": "Your verification code"
 		}
 	},
 	"newsletter": {

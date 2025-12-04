@@ -1,397 +1,402 @@
+
 datasource db {
-    provider  = "postgresql"
-    url       = env("DATABASE_URL")
-    directUrl = env("DIRECT_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 generator client {
-    provider = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 generator zod {
-    provider = "prisma-zod-generator"
-    output   = "./zod"
-    config   = "./zod-generator.config.json"
+  provider = "prisma-zod-generator"
+  output   = "./zod"
+  config   = "./zod-generator.config.json"
 }
 
 model User {
-    id                 String       @id @default(cuid())
-    name               String
-    email              String
-    emailVerified      Boolean
-    image              String?
-    createdAt          DateTime
-    updatedAt          DateTime
-    username           String?
-    role               String?
-    banned             Boolean?
-    banReason          String?
-    banExpires         DateTime?
-    onboardingComplete Boolean      @default(false)
-    paymentsCustomerId String?
-    locale             String?
-    twoFactorEnabled   Boolean?
-    sessions           Session[]
-    accounts           Account[]
-    passkeys           Passkey[]
-    invitations        Invitation[]
-    purchases          Purchase[]
-    members            Member[]
-    twofactors         TwoFactor[]
-    aiChats            AiChat[]
-    workspaceMembers   WorkspaceMember[]
-    roleAssignments    RoleAssignment[]
+  id                 String            @id @default(cuid())
+  name               String
+  email              String
+  emailVerified      Boolean
+  image              String?
+  createdAt          DateTime
+  updatedAt          DateTime
+  username           String?
+  role               String?
+  banned             Boolean?
+  banReason          String?
+  banExpires         DateTime?
+  onboardingComplete Boolean           @default(false)
+  paymentsCustomerId String?
+  locale             String?
+  twoFactorEnabled   Boolean?
+  sessions           Session[]
+  accounts           Account[]
+  passkeys           Passkey[]
+  invitations        Invitation[]
+  purchases          Purchase[]
+  members            Member[]
+  twofactors         TwoFactor[]
+  aiChats            AiChat[]
+  workspaceMembers   WorkspaceMember[]
+  roleAssignments    RoleAssignment[]
 
-    @@unique([email])
-    @@unique([username])
-    @@map("user")
+  displayUsername String?
+
+  @@unique([email])
+  @@unique([username])
+  @@map("user")
 }
 
 model Session {
-    id        String   @id @default(cuid())
-    expiresAt DateTime
-    ipAddress String?
-    userAgent String?
-    userId    String
-    user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id        String   @id @default(cuid())
+  expiresAt DateTime
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-    impersonatedBy String?
+  impersonatedBy String?
 
-    activeOrganizationId String?
+  activeOrganizationId String?
 
-    token     String
-    createdAt DateTime
-    updatedAt DateTime
+  token     String
+  createdAt DateTime
+  updatedAt DateTime
 
-    @@unique([token])
-    @@map("session")
+  @@unique([token])
+  @@map("session")
+  @@index([userId])
 }
 
 model Account {
-    id           String    @id @default(cuid())
-    accountId    String
-    providerId   String
-    userId       String
-    user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-    accessToken  String?   @db.Text
-    refreshToken String?   @db.Text
-    idToken      String?   @db.Text
-    expiresAt    DateTime?
-    password     String?
+  id           String    @id @default(cuid())
+  accountId    String
+  providerId   String
+  userId       String
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken  String?   @db.Text
+  refreshToken String?   @db.Text
+  idToken      String?   @db.Text
+  expiresAt    DateTime?
+  password     String?
 
-    accessTokenExpiresAt  DateTime?
-    refreshTokenExpiresAt DateTime?
-    scope                 String?
-    createdAt             DateTime
-    updatedAt             DateTime
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  createdAt             DateTime
+  updatedAt             DateTime
 
-    @@map("account")
+  @@map("account")
+  @@index([userId])
 }
 
 model Verification {
-    id         String   @id @default(cuid())
-    identifier String
-    value      String   @db.Text
-    expiresAt  DateTime
+  id         String   @id @default(cuid())
+  identifier String
+  value      String   @db.Text
+  expiresAt  DateTime
 
-    createdAt DateTime?
-    updatedAt DateTime?
+  createdAt DateTime?
+  updatedAt DateTime?
 
-    @@map("verification")
+  @@map("verification")
+  @@index([identifier])
 }
 
 model Passkey {
-    id           String    @id @default(cuid())
-    name         String?
-    publicKey    String
-    userId       String
-    user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-    credentialID String
-    counter      Int
-    deviceType   String
-    backedUp     Boolean
-    transports   String?
-    createdAt    DateTime?
+  id           String    @id @default(cuid())
+  name         String?
+  publicKey    String
+  userId       String
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  credentialID String
+  counter      Int
+  deviceType   String
+  backedUp     Boolean
+  transports   String?
+  createdAt    DateTime?
 
-    @@map("passkey")
+  aaguid String?
+
+  @@map("passkey")
 }
 
 model TwoFactor {
-    id          String @id @default(cuid())
-    secret      String
-    backupCodes String
-    userId      String
-    user        User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id          String @id @default(cuid())
+  secret      String
+  backupCodes String
+  userId      String
+  user        User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-    @@map("twoFactor")
+  @@map("twoFactor")
 }
 
 model Organization {
-    id                 String       @id @default(cuid())
-    name               String
-    slug               String?
-    logo               String?
-    createdAt          DateTime
-    metadata           String?
-    paymentsCustomerId String?
-    members            Member[]
-    invitations        Invitation[]
-    purchases          Purchase[]
-    aiChats            AiChat[]
-    workspaces         Workspace[]
-    roles              Role[]
-    partnerSettings    PartnerSettings?
+  id                 String           @id @default(cuid())
+  name               String
+  slug               String?
+  logo               String?
+  createdAt          DateTime
+  metadata           String?
+  paymentsCustomerId String?
+  members            Member[]
+  invitations        Invitation[]
+  purchases          Purchase[]
+  aiChats            AiChat[]
+  workspaces         Workspace[]
+  roles              Role[]
+  partnerSettings    PartnerSettings?
 
-    @@unique([slug])
-    @@map("organization")
+  @@unique([slug])
+  @@map("organization")
 }
 
 model Workspace {
-    id             String       @id @default(cuid())
-    organizationId String
-    organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-    name           String
-    slug           String
-    createdAt      DateTime     @default(now())
-    updatedAt      DateTime     @updatedAt
+  id             String       @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  name           String
+  slug           String
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
 
-    workspaceMembers       WorkspaceMember[]
-    communicationTemplates CommunicationTemplate[]
-    terms                  Term[]
+  workspaceMembers       WorkspaceMember[]
+  communicationTemplates CommunicationTemplate[]
+  terms                  Term[]
 
-    @@unique([organizationId, slug])
-    @@map("workspace")
+  @@unique([organizationId, slug])
+  @@map("workspace")
 }
 
 model WorkspaceMember {
-    id          String    @id @default(cuid())
-    workspaceId String
-    workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-    userId      String
-    user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-    createdAt   DateTime  @default(now())
+  id          String    @id @default(cuid())
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime  @default(now())
 
-    @@unique([workspaceId, userId])
-    @@map("workspace_member")
+  @@unique([workspaceId, userId])
+  @@map("workspace_member")
 }
 
 model Member {
-    id             String       @id @default(cuid())
-    organizationId String
-    organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-    userId         String
-    user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-    role           String
-    createdAt      DateTime
+  id             String       @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  userId         String
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role           String
+  createdAt      DateTime
 
-    @@unique([organizationId, userId])
-    @@map("member")
+  @@unique([organizationId, userId])
+  @@map("member")
 }
 
 model Invitation {
-    id             String       @id @default(cuid())
-    organizationId String
-    organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-    email          String
-    role           String?
-    status         String
-    expiresAt      DateTime
-    inviterId      String
-    user           User         @relation(fields: [inviterId], references: [id], onDelete: Cascade)
+  id             String       @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  email          String
+  role           String?
+  status         String
+  expiresAt      DateTime
+  inviterId      String
+  user           User         @relation(fields: [inviterId], references: [id], onDelete: Cascade)
 
-    @@map("invitation")
+  @@map("invitation")
 }
 
 enum PurchaseType {
-    SUBSCRIPTION
-    ONE_TIME
+  SUBSCRIPTION
+  ONE_TIME
 }
 
 model Purchase {
-    id             String        @id @default(cuid())
-    organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-    organizationId String?
-    user           User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
-    userId         String?
-    type           PurchaseType
-    customerId     String
-    subscriptionId String?       @unique
-    productId      String
-    status         String?
-    createdAt      DateTime      @default(now())
-    updatedAt      DateTime      @updatedAt
+  id             String        @id @default(cuid())
+  organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  organizationId String?
+  user           User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId         String?
+  type           PurchaseType
+  customerId     String
+  subscriptionId String?       @unique
+  productId      String
+  status         String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
 
-    @@index([subscriptionId])
-    @@map("purchase")
+  @@index([subscriptionId])
+  @@map("purchase")
 }
 
 model AiChat {
-    id             String        @id @default(cuid())
-    organizationId String?
-    organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-    userId         String?
-    user           User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
-    title          String?
-    /// [ChatMessages]
-    messages       Json          @default("[]")
-    createdAt      DateTime      @default(now())
-    updatedAt      DateTime      @updatedAt
+  id             String        @id @default(cuid())
+  organizationId String?
+  organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  userId         String?
+  user           User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title          String?
+  /// [ChatMessages]
+  messages       Json          @default("[]")
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
 
-    @@map("ai_chat")
+  @@map("ai_chat")
 }
 
 model Role {
-    id             String           @id @default(cuid())
-    name           String
-    description    String?
-    organizationId String? // NULL for system-wide/default roles
-    organization   Organization?    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-    permissions    RolePermission[]
-    assignments    RoleAssignment[]
+  id             String           @id @default(cuid())
+  name           String
+  description    String?
+  organizationId String? // NULL for system-wide/default roles
+  organization   Organization?    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  permissions    RolePermission[]
+  assignments    RoleAssignment[]
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-    @@unique([organizationId, name])
-    @@map("role")
+  @@unique([organizationId, name])
+  @@map("role")
 }
 
 model Permission {
-    id          String           @id @default(cuid())
-    slug        String           @unique // e.g., "workspace.settings.edit"
-    description String?
-    roles       RolePermission[]
+  id          String           @id @default(cuid())
+  slug        String           @unique // e.g., "workspace.settings.edit"
+  description String?
+  roles       RolePermission[]
 
-    @@map("permission")
+  @@map("permission")
 }
 
 model RolePermission {
-    roleId       String
-    role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
-    permissionId String
-    permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+  roleId       String
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permissionId String
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
 
-    @@id([roleId, permissionId])
-    @@map("role_permission")
+  @@id([roleId, permissionId])
+  @@map("role_permission")
 }
 
 model RoleAssignment {
-    id     String @id @default(cuid())
-    userId String
-    user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-    roleId String
-    role   Role   @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  roleId String
+  role   Role   @relation(fields: [roleId], references: [id], onDelete: Cascade)
 
-    // Polymorphic-like association for scope
-    resourceType String // "ORGANIZATION", "WORKSPACE", "SYSTEM"
-    resourceId   String? // ID of the Org or Workspace. NULL for SYSTEM if we want global system roles.
+  // Polymorphic-like association for scope
+  resourceType String // "ORGANIZATION", "WORKSPACE", "SYSTEM"
+  resourceId   String? // ID of the Org or Workspace. NULL for SYSTEM if we want global system roles.
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-    @@index([userId])
-    @@index([resourceType, resourceId])
-    @@map("role_assignment")
+  @@index([userId])
+  @@index([resourceType, resourceId])
+  @@map("role_assignment")
 }
 
 model PartnerSettings {
-    organizationId    String       @id
-    organization      Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-    whitelabelLogoUrl String?
+  organizationId    String       @id
+  organization      Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  whitelabelLogoUrl String?
 
-    @@map("partner_settings")
+  @@map("partner_settings")
 }
 
 // Communication Manager Models
-model NotificationCategory {
-    id          String                 @id @default(cuid())
-    name        String
-    description String?
-    slug        String                 @unique
-    createdAt   DateTime               @default(now())
-    updatedAt   DateTime               @updatedAt
-    triggers    NotificationTrigger[]
 
-    @@map("notification_category")
+model NotificationCategory {
+  id          String                @id @default(cuid())
+  name        String
+  description String?
+  slug        String                @unique
+  createdAt   DateTime              @default(now())
+  updatedAt   DateTime              @updatedAt
+  triggers    NotificationTrigger[]
+
+  @@map("notification_category")
 }
 
 model NotificationTrigger {
-    id                 String                  @id @default(cuid())
-    eventKey           String                  @unique // e.g., "GUEST_SIGNUP"
-    name               String
-    description        String?
-    /// [SupportedVariable[]]
-    supportedVariables Json                    @default("[]") // Array of {key, description, example}
-    categoryId         String
-    category           NotificationCategory    @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-    createdAt          DateTime                @default(now())
-    updatedAt          DateTime                @updatedAt
-    templates          CommunicationTemplate[]
+  id                 String                  @id @default(cuid())
+  eventKey           String                  @unique // e.g., "GUEST_SIGNUP"
+  name               String
+  description        String?
+  /// [SupportedVariable[]]
+  supportedVariables Json                    @default("[]") // Array of {key, description, example}
+  categoryId         String
+  category           NotificationCategory    @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  createdAt          DateTime                @default(now())
+  updatedAt          DateTime                @updatedAt
+  templates          CommunicationTemplate[]
 
-    @@index([categoryId])
-    @@map("notification_trigger")
+  @@index([categoryId])
+  @@map("notification_trigger")
 }
 
 enum CommunicationType {
-    EMAIL
-    SMS
+  EMAIL
+  SMS
 }
 
 model CommunicationTemplate {
-    id          String            @id @default(cuid())
-    triggerId   String
-    trigger     NotificationTrigger @relation(fields: [triggerId], references: [id], onDelete: Cascade)
-    
-    // Workspace-specific templates: NULL = global default, non-NULL = workspace override
-    workspaceId String?
-    workspace   Workspace?        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-    
-    type        CommunicationType @default(EMAIL)
-    subject     String?           // NULL for SMS
-    bodyContent String            @db.Text
-    isActive    Boolean           @default(true)
-    createdAt   DateTime          @default(now())
-    updatedAt   DateTime          @updatedAt
+  id          String              @id @default(cuid())
+  triggerId   String
+  trigger     NotificationTrigger @relation(fields: [triggerId], references: [id], onDelete: Cascade)
+  // Workspace-specific templates: NULL = global default, non-NULL = workspace override
+  workspaceId String?
+  workspace   Workspace?          @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  type        CommunicationType   @default(EMAIL)
+  subject     String? // NULL for SMS
+  bodyContent String              @db.Text
+  isActive    Boolean             @default(true)
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
 
-    @@index([triggerId])
-    @@index([workspaceId])
-    @@map("communication_template")
+  @@index([triggerId])
+  @@index([workspaceId])
+  @@map("communication_template")
 }
 
 // Terms Management Models
+
 enum TermCategory {
-    PRIVACY_POLICY
-    TERMS_OF_USE
-    COOKIE_POLICY
-    OTHER
+  PRIVACY_POLICY
+  TERMS_OF_USE
+  COOKIE_POLICY
+  OTHER
 }
 
 enum TermStatus {
-    DRAFT
-    PUBLISHED
+  DRAFT
+  PUBLISHED
 }
 
 model Term {
-    id           String       @id @default(cuid())
-    workspaceId  String
-    workspace    Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-    
-    // Core fields
-    name         String       // Internal name
-    version      String       // e.g., "1.0", "2.0"
-    category     TermCategory
-    isMandatory  Boolean      @default(false)
-    isPreChecked Boolean      @default(false)
-    status       TermStatus   @default(DRAFT)
-    
-    // Multi-language content (JSON structure)
-    // { "en": { label: "...", linkText: "...", documentTitle: "...", documentContent: "..." }, "es": {...} }
-    translations Json
-    
-    createdAt    DateTime     @default(now())
-    updatedAt    DateTime     @updatedAt
-    
-    @@index([workspaceId])
-    @@index([workspaceId, status])
-    @@map("term")
+  id           String       @id @default(cuid())
+  workspaceId  String
+  workspace    Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  // Core fields
+  name         String // Internal name
+  version      String // e.g., "1.0", "2.0"
+  category     TermCategory
+  isMandatory  Boolean      @default(false)
+  isPreChecked Boolean      @default(false)
+  status       TermStatus   @default(DRAFT)
+  // Multi-language content (JSON structure)
+  // { "en": { label: "...", linkText: "...", documentTitle: "...", documentContent: "..." }, "es": {...} }
+  translations Json
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  @@index([workspaceId])
+  @@index([workspaceId, status])
+  @@map("term")
 }

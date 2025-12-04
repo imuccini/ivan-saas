@@ -6,6 +6,7 @@ import {
 	organizationClient,
 	passkeyClient,
 	twoFactorClient,
+	emailOTPClient,
 } from "better-auth/client/plugins";
 // Import the main client-side authentication library for React
 import { createAuthClient } from "better-auth/react";
@@ -28,6 +29,7 @@ export const authClient = createAuthClient({
 		passkeyClient(),
 		// Enables two-factor authentication on the client
 		twoFactorClient(),
+		emailOTPClient(),
 	],
 });
 

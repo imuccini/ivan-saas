@@ -12,7 +12,7 @@ export type TransactionIsolationLevel = z.infer<typeof TransactionIsolationLevel
 
 // File: UserScalarFieldEnum.schema.ts
 
-export const UserScalarFieldEnumSchema = z.enum(['id', 'name', 'email', 'emailVerified', 'image', 'createdAt', 'updatedAt', 'username', 'role', 'banned', 'banReason', 'banExpires', 'onboardingComplete', 'paymentsCustomerId', 'locale', 'twoFactorEnabled'])
+export const UserScalarFieldEnumSchema = z.enum(['id', 'name', 'email', 'emailVerified', 'image', 'createdAt', 'updatedAt', 'username', 'role', 'banned', 'banReason', 'banExpires', 'onboardingComplete', 'paymentsCustomerId', 'locale', 'twoFactorEnabled', 'displayUsername'])
 
 export type UserScalarFieldEnum = z.infer<typeof UserScalarFieldEnumSchema>;
 
@@ -36,7 +36,7 @@ export type VerificationScalarFieldEnum = z.infer<typeof VerificationScalarField
 
 // File: PasskeyScalarFieldEnum.schema.ts
 
-export const PasskeyScalarFieldEnumSchema = z.enum(['id', 'name', 'publicKey', 'userId', 'credentialID', 'counter', 'deviceType', 'backedUp', 'transports', 'createdAt'])
+export const PasskeyScalarFieldEnumSchema = z.enum(['id', 'name', 'publicKey', 'userId', 'credentialID', 'counter', 'deviceType', 'backedUp', 'transports', 'createdAt', 'aaguid'])
 
 export type PasskeyScalarFieldEnum = z.infer<typeof PasskeyScalarFieldEnumSchema>;
 
@@ -215,6 +215,7 @@ export const UserSchema = z.object({
   paymentsCustomerId: z.string().nullish(),
   locale: z.string().nullish(),
   twoFactorEnabled: z.boolean().nullish(),
+  displayUsername: z.string().nullish(),
 });
 
 export type UserType = z.infer<typeof UserSchema>;
@@ -287,6 +288,7 @@ export const PasskeySchema = z.object({
   backedUp: z.boolean(),
   transports: z.string().nullish(),
   createdAt: z.date().nullish(),
+  aaguid: z.string().nullish(),
 });
 
 export type PasskeyType = z.infer<typeof PasskeySchema>;

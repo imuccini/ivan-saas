@@ -17,6 +17,11 @@ import {
 	FormMessage,
 } from "@ui/components/form";
 import { Input } from "@ui/components/input";
+import {
+	InputOTP,
+	InputOTPGroup,
+	InputOTPSlot,
+} from "@ui/components/input-otp";
 import { AlertTriangleIcon, ArrowRightIcon, MailboxIcon } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -80,6 +85,9 @@ export function SignupForm({ prefillEmail }: { prefillEmail?: string }) {
 
 	const [currentStep, setCurrentStep] = useState(1);
 	const [emailExists, setEmailExists] = useState(false);
+	const [otp, setOtp] = useState("");
+	const [otpError, setOtpError] = useState<string | null>(null);
+	const [isVerifying, setIsVerifying] = useState(false);
 	const [signupData, setSignupData] = useState<{
 		step1?: Step1Data;
 	}>({});
@@ -94,39 +102,6 @@ export function SignupForm({ prefillEmail }: { prefillEmail?: string }) {
 		}
 	}, [currentStep, router]);
 
-	// Check if we're coming from magic link verification
-	const isVerified = searchParams.get("verified") === "true";
-	useEffect(() => {
-		if (isVerified) {
-			// Retrieve stored signup data from sessionStorage
-			const storedData = sessionStorage.getItem("signupData");
-			if (storedData) {
-				try {
-					const parsed = JSON.parse(storedData);
-					setSignupData(parsed);
-				} catch (e) {
-					console.error("Failed to parse stored signup data:", e);
-				}
-			} else {
-				// Fallback: populate from URL params if sessionStorage is empty
-				const urlEmail = searchParams.get("email");
-				const urlFirstName = searchParams.get("firstName");
-				const urlLastName = searchParams.get("lastName");
-
-				if (urlEmail) {
-					setSignupData({
-						step1: {
-							email: urlEmail,
-							firstName: urlFirstName || "",
-							lastName: urlLastName || "",
-							consent: true, // Already consented in step 1
-						},
-					});
-				}
-			}
-			setCurrentStep(3); // Go to password setup
-		}
-	}, [isVerified, searchParams]);
 
 	// Step 1 Form
 	const step1Form = useForm<Step1Data>({
@@ -157,7 +132,7 @@ export function SignupForm({ prefillEmail }: { prefillEmail?: string }) {
 		}
 	};
 
-	// Step 1: Submit user details and send magic link
+	// Step 1: Submit user details and send OTP
 	const onStep1Submit = step1Form.handleSubmit(async (data) => {
 		try {
 			// Check if email already exists
@@ -174,22 +149,10 @@ export function SignupForm({ prefillEmail }: { prefillEmail?: string }) {
 				JSON.stringify({ step1: data }),
 			);
 
-			// Send magic link with callback to set-password page
-			const callbackURL = new URL(
-				`${window.location.origin}/auth/set-password`,
-			);
+			// Send OTP (using direct fetch due to client/server path mismatch)
+			await sendOtp(data.email);
 
-			const { error } = await authClient.signIn.magicLink({
-				email: data.email,
-				name: `${data.firstName} ${data.lastName}`,
-				callbackURL: callbackURL.toString(),
-			});
-
-			if (error) {
-				throw error;
-			}
-
-			setCurrentStep(2); // Show magic link sent confirmation
+			setCurrentStep(2); // Show OTP input
 		} catch (e) {
 			step1Form.setError("root", {
 				message: getAuthErrorMessage(
@@ -200,6 +163,48 @@ export function SignupForm({ prefillEmail }: { prefillEmail?: string }) {
 			});
 		}
 	});
+
+	const sendOtp = async (email: string) => {
+		const response = await fetch("/api/auth/email-otp/send-verification-otp", {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({
+				email,
+				type: "sign-in",
+			}),
+		});
+
+		if (!response.ok) {
+			const errorData = await response.json().catch(() => ({}));
+			throw new Error(errorData.message || "Failed to send verification code");
+		}
+	};
+
+	const verifyOtp = async (code: string) => {
+		if (!signupData.step1?.email || isVerifying) return;
+
+		setIsVerifying(true);
+		setOtpError(null);
+		
+		try {
+			const { error } = await authClient.signIn.emailOtp({
+				email: signupData.step1.email,
+				otp: code,
+			});
+
+			if (error) {
+				setOtpError(error.message || "Invalid code");
+				setIsVerifying(false);
+				return;
+			}
+
+			// Success! Navigate to set password
+			router.push("/auth/set-password");
+		} catch (e) {
+			setOtpError("An error occurred. Please try again.");
+			setIsVerifying(false);
+		}
+	};
 
 	return (
 		<div>
@@ -377,74 +382,77 @@ export function SignupForm({ prefillEmail }: { prefillEmail?: string }) {
 			)}
 
 			{/* Step 2: Magic Link Sent */}
+			{/* Step 2: OTP Verification */}
 			{currentStep === 2 && (
-				<div className="space-y-6">
+				<div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
 					<div className="flex flex-col items-center text-center space-y-4">
-						<div className="flex size-16 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30">
-							<MailboxIcon className="size-8 text-green-600 dark:text-green-400" />
+						<div className="flex size-16 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/30">
+							<MailboxIcon className="size-8 text-blue-600 dark:text-blue-400" />
 						</div>
 						<div>
 							<h2 className="text-xl font-semibold">
-								Check your email
+								Enter verification code
 							</h2>
 							<p className="mt-2 text-muted-foreground">
-								We sent a verification link to
-							</p>
-							<p className="mt-1 font-medium">
-								{signupData.step1?.email}
+								We sent a code to <span className="font-medium text-foreground">{signupData.step1?.email}</span>
 							</p>
 						</div>
 					</div>
 
-					<div className="rounded-lg border p-4 text-center text-sm text-muted-foreground">
-						Click the link in the email to continue setting up your
-						account. The link will expire in 15 minutes.
+					<div className="flex justify-center py-4">
+						<InputOTP
+							maxLength={6}
+							value={otp}
+							onChange={(value) => {
+								setOtp(value);
+								if (value.length === 6) {
+									verifyOtp(value);
+								}
+							}}
+						>
+							<InputOTPGroup>
+								<InputOTPSlot index={0} />
+								<InputOTPSlot index={1} />
+								<InputOTPSlot index={2} />
+								<InputOTPSlot index={3} />
+								<InputOTPSlot index={4} />
+								<InputOTPSlot index={5} />
+							</InputOTPGroup>
+						</InputOTP>
 					</div>
+
+					{otpError && (
+						<Alert variant="destructive">
+							<AlertTriangleIcon />
+							<AlertDescription>{otpError}</AlertDescription>
+						</Alert>
+					)}
+
+					<Button
+						onClick={() => verifyOtp(otp)}
+						disabled={otp.length !== 6 || isVerifying}
+						className="w-full"
+					>
+						{isVerifying ? "Verifying..." : "Verify Code"}
+					</Button>
 
 					<div className="text-center">
 						<p className="text-sm text-muted-foreground mb-3">
-							Didn't receive the email?
+							Didn't receive the code?
 						</p>
 						<Button
 							variant="outline"
 							onClick={async () => {
-								if (signupData.step1) {
-									try {
-										const callbackURL = new URL(
-											`${window.location.origin}/auth/signup`,
-										);
-										callbackURL.searchParams.set(
-											"verified",
-											"true",
-										);
-										callbackURL.searchParams.set(
-											"email",
-											signupData.step1.email,
-										);
-										callbackURL.searchParams.set(
-											"firstName",
-											signupData.step1.firstName,
-										);
-										callbackURL.searchParams.set(
-											"lastName",
-											signupData.step1.lastName,
-										);
-
-										await authClient.signIn.magicLink({
-											email: signupData.step1.email,
-											name: `${signupData.step1.firstName} ${signupData.step1.lastName}`,
-											callbackURL: callbackURL.toString(),
-										});
-									} catch (error) {
-										console.error(
-											"Failed to resend:",
-											error,
-										);
-									}
-								}
-							}}
+					if (signupData.step1) {
+						try {
+							await sendOtp(signupData.step1.email);
+						} catch (error) {
+							console.error("Failed to resend:", error);
+						}
+					}
+				}}
 						>
-							Resend Email
+							Resend Code
 						</Button>
 					</div>
 				</div>
