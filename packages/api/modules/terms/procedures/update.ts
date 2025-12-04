@@ -24,6 +24,7 @@ export const update = protectedProcedure
 			status: z.enum(["DRAFT", "PUBLISHED"]).optional(),
 			translations: z
 				.record(
+					z.string(),
 					z.object({
 						label: z.string(),
 						linkText: z.string(),
