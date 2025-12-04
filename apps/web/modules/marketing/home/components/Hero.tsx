@@ -3,8 +3,8 @@ import { Button } from "@ui/components/button";
 import { ArrowRightIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import heroImage from "../../../../public/images/hero-image.png";
-import heroImageDark from "../../../../public/images/hero-image-dark.png";
+import heroImageDark from "../../../../public/images/hero-image-dark-new.png";
+import heroImage from "../../../../public/images/hero-image-new.png";
 
 export function Hero() {
 	return (
