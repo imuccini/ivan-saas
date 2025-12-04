@@ -127,15 +127,11 @@ export function TermEditorDialog({
 
 		if (isEdit) {
 			updateMutation.mutate({
-				input: {
-					id: term.id,
-					...data,
-				},
+				id: term.id,
+				...data,
 			});
 		} else {
-			createMutation.mutate({
-				input: data,
-			});
+			createMutation.mutate(data);
 		}
 	};
 
