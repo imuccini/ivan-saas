@@ -21,6 +21,7 @@ export const create = protectedProcedure
 			isPreChecked: z.boolean().default(false),
 			status: z.enum(["DRAFT", "PUBLISHED"]).default("DRAFT"),
 			translations: z.record(
+				z.string(),
 				z.object({
 					label: z.string(),
 					linkText: z.string(),
