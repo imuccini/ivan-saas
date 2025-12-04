@@ -9,9 +9,11 @@ import { oAuthProviders } from "../constants/oauth-providers";
 export function SocialSigninButton({
 	provider,
 	className,
+	disabled = false,
 }: {
 	provider: keyof typeof oAuthProviders;
 	className?: string;
+	disabled?: boolean;
 }) {
 	const [invitationId] = useQueryState("invitationId", parseAsString);
 	const providerData = oAuthProviders[provider];
@@ -34,6 +36,7 @@ export function SocialSigninButton({
 			variant="outline"
 			type="button"
 			className={className}
+			disabled={disabled}
 		>
 			{providerData.icon && (
 				<i className="mr-2 text-primary">

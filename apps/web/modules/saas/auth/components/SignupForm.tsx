@@ -368,7 +368,7 @@ export function SignupForm({ prefillEmail }: { prefillEmail?: string }) {
 									</p>
 								</div>
 
-								<div className="grid grid-cols-1 items-stretch gap-2 sm:grid-cols-2">
+								<div className="grid grid-cols-1 items-stretch gap-2">
 									{Object.keys(oAuthProviders).map(
 										(providerId) => (
 											<SocialSigninButton
@@ -376,6 +376,7 @@ export function SignupForm({ prefillEmail }: { prefillEmail?: string }) {
 												provider={
 													providerId as OAuthProvider
 												}
+												disabled={true}
 											/>
 										),
 									)}

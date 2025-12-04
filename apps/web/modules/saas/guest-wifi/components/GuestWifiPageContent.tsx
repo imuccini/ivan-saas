@@ -122,8 +122,10 @@ export function GuestWifiPageContent() {
 									Performance
 								</div>
 								<p className="text-sm text-muted-foreground">
-									Network throughput is optimal. Peak usage
-									observed at 2:00 PM.
+									You have a total of 4341 total Users in the
+									account, 621 connected during the last 28
+									days. 62% of user consent to your marketing
+									terms.
 								</p>
 							</div>
 						</div>
@@ -138,7 +140,11 @@ export function GuestWifiPageContent() {
 									Configuration
 								</div>
 								<p className="text-sm text-muted-foreground">
-									Guest portal active. Social login enabled.
+									Your branded WiFi Portal is deployed on 4
+									locations, with the SSID “Free Guest WiFi”.
+									Users register with First Name and Email and
+									need to accept T&C and also a Marketing
+									Opt-in. Passpoint onboarding is enabled.
 								</p>
 							</div>
 						</div>

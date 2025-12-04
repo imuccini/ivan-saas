@@ -1,5 +1,6 @@
 import { config } from "@repo/config";
 import { Avatar, AvatarFallback, AvatarImage } from "@ui/components/avatar";
+import { User } from "lucide-react";
 import { useMemo } from "react";
 
 export const UserAvatar = ({
@@ -35,8 +36,8 @@ export const UserAvatar = ({
 	return (
 		<Avatar ref={ref} className={className}>
 			<AvatarImage src={avatarSrc} />
-			<AvatarFallback className="bg-secondary/10 text-secondary">
-				{initials}
+			<AvatarFallback className="bg-primary/10 text-primary">
+				{initials || <User className="size-4" />}
 			</AvatarFallback>
 		</Avatar>
 	);

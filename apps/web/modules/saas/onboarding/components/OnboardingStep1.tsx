@@ -60,18 +60,25 @@ export function OnboardingStep1({
 
 	// Fetch company data when component mounts
 	useEffect(() => {
+		console.log(
+			"OnboardingStep1 useEffect triggered, user email:",
+			user?.email,
+		);
 		if (user?.email) {
+			console.log("Fetching company data for:", user.email);
 			setIsLoadingCompany(true);
 			fetch(
 				`/api/companies/by-email?email=${encodeURIComponent(user.email)}`,
 			)
 				.then((response) => {
+					console.log("API response status:", response.status);
 					if (response.ok) {
 						return response.json();
 					}
 					throw new Error("Failed to fetch");
 				})
 				.then((companyData) => {
+					console.log("Company data received:", companyData);
 					if (companyData.name) {
 						form.setValue("companyName", companyData.name);
 					}
@@ -85,12 +92,15 @@ export function OnboardingStep1({
 						form.setValue("country", companyData.country);
 					}
 				})
-				.catch(() => {
+				.catch((error) => {
+					console.error("Error fetching company data:", error);
 					// Silently fail if company data fetch fails
 				})
 				.finally(() => {
 					setIsLoadingCompany(false);
 				});
+		} else {
+			console.log("No user email available yet");
 		}
 	}, [user?.email]);
 
@@ -109,17 +119,20 @@ export function OnboardingStep1({
 			let orgData = null;
 			let orgError = null;
 			const slug = slugify(companyName, { lower: true, strict: true });
-			
+
 			if (!slug) {
-				throw new Error("Invalid company name. Please try a different name.");
+				throw new Error(
+					"Invalid company name. Please try a different name.",
+				);
 			}
 
 			let attempt = 0;
 
 			while (attempt < 5) {
-				const currentSlug = attempt === 0 
-					? slug 
-					: `${slug}-${Math.floor(1000 + Math.random() * 9000)}`;
+				const currentSlug =
+					attempt === 0
+						? slug
+						: `${slug}-${Math.floor(1000 + Math.random() * 9000)}`;
 
 				const result = await authClient.organization.create({
 					name: companyName,
@@ -131,7 +144,10 @@ export function OnboardingStep1({
 					break;
 				}
 
-				console.error("Organization creation failed (attempt " + attempt + "):", result.error);
+				console.error(
+					"Organization creation failed (attempt " + attempt + "):",
+					result.error,
+				);
 				orgError = result.error;
 				attempt++;
 			}

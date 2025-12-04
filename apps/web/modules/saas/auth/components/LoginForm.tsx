@@ -113,25 +113,24 @@ export function LoginForm() {
 					queryKey: sessionQueryKey,
 				});
 
-                // Redirect logic
-                if (invitationId) {
-                    router.replace(`/organization-invitation/${invitationId}`);
-                    return;
-                }
+				// Redirect logic
+				if (invitationId) {
+					router.replace(`/organization-invitation/${invitationId}`);
+					return;
+				}
 
-                if (redirectTo) {
-                    router.replace(redirectTo);
-                    return;
-                }
+				if (redirectTo) {
+					router.replace(redirectTo);
+					return;
+				}
 
-                // Fetch organizations to redirect to the first one
-                const { data: orgs } = await authClient.organization.list();
-                if (orgs && orgs.length > 0) {
-                    router.replace(`/app/${orgs[0].slug}`);
-                } else {
-                    router.replace(config.auth.redirectAfterSignIn);
-                }
-
+				// Fetch organizations to redirect to the first one
+				const { data: orgs } = await authClient.organization.list();
+				if (orgs && orgs.length > 0) {
+					router.replace(`/app/${orgs[0].slug}`);
+				} else {
+					router.replace(config.auth.redirectAfterSignIn);
+				}
 			} else {
 				const { error } = await authClient.signIn.magicLink({
 					...values,
@@ -334,6 +333,7 @@ export function LoginForm() {
 												provider={
 													providerId as OAuthProvider
 												}
+												disabled={true}
 											/>
 										),
 									)}
