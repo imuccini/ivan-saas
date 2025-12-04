@@ -173,14 +173,14 @@ export function NavBar() {
 									))}
 
 									<NextLink
-										key={user ? "start" : "login"}
-										href={user ? "/app" : "/auth/login"}
+										key={user ? "start" : "signup"}
+										href={user ? "/app" : "/auth/signup"}
 										className="block px-3 py-2 text-base"
 										prefetch={!user}
 									>
 										{user
 											? t("common.menu.dashboard")
-											: t("common.menu.login")}
+											: "Get Started"}
 									</NextLink>
 								</div>
 							</SheetContent>
@@ -200,13 +200,13 @@ export function NavBar() {
 								</Button>
 							) : (
 								<Button
-									key="login"
+									key="signup"
 									className="hidden lg:flex"
 									asChild
 									variant="secondary"
 								>
-									<NextLink href="/auth/login" prefetch>
-										{t("common.menu.login")}
+									<NextLink href="/auth/signup" prefetch>
+										Get Started
 									</NextLink>
 								</Button>
 							))}
