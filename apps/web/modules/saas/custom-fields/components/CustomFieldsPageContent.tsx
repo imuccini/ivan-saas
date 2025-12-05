@@ -91,13 +91,13 @@ export function CustomFieldsPageContent() {
 		}),
 	);
 
-	const handleEdit = (field: CustomField) => {
-		setSelectedField(field);
+	const handleEdit = (field: (typeof customFields)[number]) => {
+		setSelectedField(field as unknown as CustomField);
 		setEditorOpen(true);
 	};
 
-	const handleDelete = (field: CustomField) => {
-		setSelectedField(field);
+	const handleDelete = (field: (typeof customFields)[number]) => {
+		setSelectedField(field as unknown as CustomField);
 		setDeleteDialogOpen(true);
 	};
 
@@ -107,9 +107,14 @@ export function CustomFieldsPageContent() {
 	};
 
 	const filteredFields = customFields.filter(
-		(field: CustomField) =>
+		(field) =>
 			field.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-			Object.values(field.translations).some(
+			Object.values(
+				field.translations as unknown as Record<
+					string,
+					CustomFieldTranslation
+				>,
+			).some(
 				(t) =>
 					t.label.toLowerCase().includes(searchQuery.toLowerCase()) ||
 					t.placeholder
@@ -177,7 +182,7 @@ export function CustomFieldsPageContent() {
 						</TableRow>
 					</TableHeader>
 					<TableBody>
-						{filteredFields.map((field: CustomField) => (
+						{filteredFields.map((field) => (
 							<TableRow key={field.id}>
 								<TableCell className="font-medium">
 									{field.name}
@@ -192,17 +197,20 @@ export function CustomFieldsPageContent() {
 								</TableCell>
 								<TableCell>
 									<div className="flex gap-1 flex-wrap">
-										{Object.keys(field.translations).map(
-											(lang) => (
-												<Badge
-													key={lang}
-													variant="outline"
-													className="text-xs"
-												>
-													{lang.toUpperCase()}
-												</Badge>
-											),
-										)}
+										{Object.keys(
+											field.translations as unknown as Record<
+												string,
+												CustomFieldTranslation
+											>,
+										).map((lang) => (
+											<Badge
+												key={lang}
+												variant="outline"
+												className="text-xs"
+											>
+												{lang.toUpperCase()}
+											</Badge>
+										))}
 									</div>
 								</TableCell>
 								<TableCell>
