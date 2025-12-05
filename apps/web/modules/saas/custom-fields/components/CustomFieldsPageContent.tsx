@@ -50,7 +50,7 @@ interface CustomField {
 	id: string;
 	name: string;
 	type: string;
-	validationType?: string;
+	validationType: string | null;
 	options?: string[];
 	translations: Record<string, CustomFieldTranslation>;
 	isRequired: boolean;
