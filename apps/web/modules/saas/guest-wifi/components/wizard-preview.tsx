@@ -282,14 +282,14 @@ export function WizardPreview({
 			</div>
 
 			{/* Preview Frame */}
-			<div className="flex items-center justify-center flex-1 p-8 overflow-hidden">
+			<div className="flex items-center justify-center flex-1 p-8 overflow-y-auto">
 				<div
 					className={`bg-background rounded-lg border shadow-lg transition-all ${
 						previewMode === "mobile"
 							? "w-[393px] h-[852px] overflow-y-auto"
 							: previewMode === "tablet"
-								? "w-[768px] min-h-[1024px] overflow-hidden"
-								: "w-full max-w-4xl min-h-[600px] overflow-hidden"
+								? "w-[768px] min-h-[1024px]"
+								: "w-full max-w-4xl min-h-[600px]"
 					}`}
 					style={{
 						fontFamily:
