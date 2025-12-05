@@ -26,15 +26,14 @@ import { prismaAdapter } from "better-auth/adapters/prisma";
 import {
 	admin,
 	createAuthMiddleware,
+	emailOTP,
 	magicLink,
 	openAPI,
 	organization,
+	passkey,
 	twoFactor,
 	username,
-	emailOTP,
 } from "better-auth/plugins";
-// Import the passkey plugin for passwordless authentication
-import { passkey } from "better-auth/plugins/passkey";
 // Import cookie parsing utility
 import { parse as parseCookies } from "cookie";
 // Import utility for updating organization subscription seats
