@@ -112,7 +112,10 @@ export function OtpForm() {
 										autoComplete="one-time-code"
 										onChange={(value) => {
 											field.onChange(value);
-											onSubmit();
+											// Only auto-submit when all 6 digits are entered
+											if (value.length === 6) {
+												onSubmit();
+											}
 										}}
 									>
 										<InputOTPGroup>
