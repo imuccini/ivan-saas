@@ -32,6 +32,7 @@ interface TermEditorDialogProps {
 	onClose: () => void;
 	term?: any;
 	workspaceId: string;
+	onSuccess?: (term: any) => void;
 }
 
 export function TermEditorDialog({
@@ -39,6 +40,7 @@ export function TermEditorDialog({
 	onClose,
 	term,
 	workspaceId,
+	onSuccess,
 }: TermEditorDialogProps) {
 	const queryClient = useQueryClient();
 	const isEdit = !!term;
@@ -88,12 +90,13 @@ export function TermEditorDialog({
 	// Create mutation
 	const createMutation = useMutation(
 		orpc.terms.create.mutationOptions({
-			onSuccess: () => {
+			onSuccess: (data) => {
 				queryClient.invalidateQueries({
 					queryKey: orpc.terms.list.queryKey({
 						input: { workspaceId },
 					}),
 				});
+				onSuccess?.(data);
 				onClose();
 			},
 		}),
@@ -102,12 +105,13 @@ export function TermEditorDialog({
 	// Update mutation
 	const updateMutation = useMutation(
 		orpc.terms.update.mutationOptions({
-			onSuccess: () => {
+			onSuccess: (data) => {
 				queryClient.invalidateQueries({
 					queryKey: orpc.terms.list.queryKey({
 						input: { workspaceId },
 					}),
 				});
+				onSuccess?.(data);
 				onClose();
 			},
 		}),

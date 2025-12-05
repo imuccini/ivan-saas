@@ -18,6 +18,8 @@ import {
 	XIcon,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { useAiSuggestions } from "@saas/ai/hooks/use-ai-suggestions";
+import { SuggestionChips } from "@saas/ai/components/SuggestionChips";
 
 interface Message {
 	id: string;
@@ -104,6 +106,12 @@ export function RightPanel({
 			setMessages((prev) => [...prev, aiMessage]);
 			setIsLoading(false);
 		}, 1500);
+	};
+
+	const suggestions = useAiSuggestions();
+
+	const handleSuggestionClick = (suggestion: string) => {
+		setInput(suggestion);
 	};
 
 	return (
@@ -226,6 +234,14 @@ export function RightPanel({
 												Start a conversation with the AI
 												assistant
 											</p>
+											{suggestions.length > 0 && (
+												<div className="mt-6 w-full px-4">
+													<SuggestionChips
+														suggestions={suggestions}
+														onSelect={handleSuggestionClick}
+													/>
+												</div>
+											)}
 										</div>
 									)}
 

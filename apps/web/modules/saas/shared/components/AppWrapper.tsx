@@ -3,6 +3,8 @@
 import { config } from "@repo/config";
 import { NavBar } from "@saas/shared/components/NavBar";
 import { AppSidebar } from "@ui/components/app-sidebar";
+import { MobileBottomNav } from "@ui/components/mobile-bottom-nav";
+import { MobileChatDrawer } from "@ui/components/mobile-chat-drawer";
 import { RightPanel } from "@ui/components/right-panel";
 import { SettingsSidebar } from "@ui/components/settings-sidebar";
 import {
@@ -17,12 +19,17 @@ import * as React from "react";
 import { type PropsWithChildren, useEffect, useState } from "react";
 
 function AppLayout({ children }: PropsWithChildren) {
-	const { setOpen, open } = useSidebar();
+	const { setOpen, open, isMobile } = useSidebar();
 	const [isChatOpen, setIsChatOpen] = useState(false);
 	const [initialMessage, setInitialMessage] = useState("");
 	const insetRef = React.useRef<HTMLElement>(null);
 
 	const openRef = React.useRef(open);
+
+	// Handler to open AI chat from mobile bottom nav
+	const handleOpenChat = React.useCallback(() => {
+		setIsChatOpen(true);
+	}, []);
 
 	// Keep ref in sync with state
 	React.useEffect(() => {
@@ -102,15 +109,29 @@ function AppLayout({ children }: PropsWithChildren) {
 	return (
 		<>
 			<SidebarInset ref={insetRef}>
-				<main className="flex-1 overflow-auto p-4 md:p-6">
+				<main className="flex-1 overflow-auto p-4 md:p-6 pb-20 md:pb-6">
 					{children}
 				</main>
 			</SidebarInset>
-			<RightPanel
-				isOpen={isChatOpen}
-				onOpenChange={setIsChatOpen}
-				initialMessage={initialMessage}
-			/>
+			{/* Desktop: Right side panel for AI chat */}
+			{!isMobile && (
+				<RightPanel
+					isOpen={isChatOpen}
+					onOpenChange={setIsChatOpen}
+					initialMessage={initialMessage}
+				/>
+			)}
+			{/* Mobile: Bottom drawer for AI chat + bottom navigation bar */}
+			{isMobile && (
+				<>
+					<MobileChatDrawer
+						isOpen={isChatOpen}
+						onOpenChange={setIsChatOpen}
+						initialMessage={initialMessage}
+					/>
+					<MobileBottomNav onOpenChat={handleOpenChat} />
+				</>
+			)}
 		</>
 	);
 }

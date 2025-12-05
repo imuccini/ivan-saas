@@ -95,12 +95,8 @@ export function SignupForm({ prefillEmail }: { prefillEmail?: string }) {
 	const invitationId = searchParams.get("invitationId");
 	const email = searchParams.get("email");
 
-	// Prefetch the set-password page when showing email verification (step 2)
-	useEffect(() => {
-		if (currentStep === 2) {
-			router.prefetch("/auth/set-password");
-		}
-	}, [currentStep, router]);
+
+
 
 	// Step 1 Form
 	const step1Form = useForm<Step1Data>({
@@ -202,30 +198,11 @@ export function SignupForm({ prefillEmail }: { prefillEmail?: string }) {
 				return;
 			}
 
-			// Wait for session to be fully established before navigating
-			// This prevents race condition with middleware
-			let sessionVerified = false;
-			let retries = 0;
-			const maxRetries = 5;
-
-			while (!sessionVerified && retries < maxRetries) {
-				const session = await authClient.getSession();
-				if (session.data?.session) {
-					sessionVerified = true;
-				} else {
-					// Wait 200ms before retrying
-					await new Promise((resolve) => setTimeout(resolve, 200));
-					retries++;
-				}
-			}
-
-			if (sessionVerified) {
-				// Session confirmed, safe to navigate
-				router.push("/auth/set-password");
-			} else {
-				// Fallback: use full page navigation to ensure session is picked up
-				window.location.href = "/auth/set-password";
-			}
+			// IMPORTANT: Use full page navigation (not router.push)
+			// The set-password page is a Server Component that calls getSession()
+			// With client-side navigation, the server won't see the new session cookie
+			// Full page navigation forces a new HTTP request with all cookies included
+			window.location.href = "/auth/set-password";
 		} catch (e) {
 			setOtpError("An error occurred. Please try again.");
 			setIsVerifying(false);

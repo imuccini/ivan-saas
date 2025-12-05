@@ -1,5 +1,8 @@
 "use client";
 
+import { useActiveWorkspace } from "@saas/workspaces/hooks/use-active-workspace";
+import { orpc } from "@shared/lib/orpc-query-utils";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@ui/components/button";
 import {
 	Dialog,
@@ -16,8 +19,11 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@ui/components/select";
+import { Skeleton } from "@ui/components/skeleton";
 import { ExternalLink, GripVertical, Plus, Trash2 } from "lucide-react";
+import Link from "next/link";
 import { useState } from "react";
+import { TermEditorDialog } from "../../terms/components/TermEditorDialog";
 
 // Represents a term definition from the Terms Management section
 interface TermDefinition {
@@ -40,30 +46,6 @@ interface ConfigureTermsDialogProps {
 	onSave?: (terms: SelectedTerm[]) => void;
 }
 
-// Mock available terms - in production, these would come from the Terms Management section
-const AVAILABLE_TERMS: TermDefinition[] = [
-	{
-		id: "term-1",
-		title: "Privacy Policy",
-		label: "I accept the Privacy Policy",
-	},
-	{
-		id: "term-2",
-		title: "Marketing Opt-In",
-		label: "I agree to receive marketing communications",
-	},
-	{
-		id: "term-3",
-		title: "Terms of Service",
-		label: "I agree to the Terms of Service",
-	},
-	{
-		id: "term-4",
-		title: "Cookie Policy",
-		label: "I accept the use of cookies",
-	},
-];
-
 export function ConfigureTermsDialog({
 	open,
 	onOpenChange,
@@ -81,9 +63,27 @@ export function ConfigureTermsDialog({
 	],
 	onSave,
 }: ConfigureTermsDialogProps) {
+	const { activeWorkspace: workspace } = useActiveWorkspace();
 	const [selectedTerms, setSelectedTerms] =
 		useState<SelectedTerm[]>(initialTerms);
 	const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+
+	// Fetch available terms from the workspace
+	const { data: termsData = [], isLoading: isLoadingTerms } = useQuery(
+		orpc.terms.list.queryOptions({
+			input: {
+				workspaceId: workspace?.id || "",
+				status: "PUBLISHED", // Only show published terms
+			},
+		}),
+	);
+
+	// Map terms to the format expected by the dialog
+	const availableTerms: TermDefinition[] = termsData.map((term: any) => ({
+		id: term.id,
+		title: term.name,
+		label: term.translations?.en?.label || term.name,
+	}));
 
 	const handleDragStart = (index: number) => {
 		setDraggedIndex(index);
@@ -139,17 +139,29 @@ export function ConfigureTermsDialog({
 	};
 
 	const getTermDefinition = (termDefinitionId: string) => {
-		return AVAILABLE_TERMS.find((t) => t.id === termDefinitionId);
+		return availableTerms.find((t) => t.id === termDefinitionId);
 	};
 
 	const getAvailableTermsToAdd = () => {
 		const selectedIds = selectedTerms.map((t) => t.termDefinitionId);
-		return AVAILABLE_TERMS.filter((t) => !selectedIds.includes(t.id));
+		return availableTerms.filter((t) => !selectedIds.includes(t.id));
 	};
 
 	const handleSave = () => {
 		onSave?.(selectedTerms);
 		onOpenChange(false);
+	};
+
+	const [isTermEditorOpen, setIsTermEditorOpen] = useState(false);
+
+	const handleTermCreated = (newTerm: any) => {
+		// Add the new term to the selected terms
+		const newSelectedTerm: SelectedTerm = {
+			id: Date.now().toString(),
+			termDefinitionId: newTerm.id,
+			required: newTerm.isMandatory || false,
+		};
+		setSelectedTerms([...selectedTerms, newSelectedTerm]);
 	};
 
 	return (
@@ -164,70 +176,77 @@ export function ConfigureTermsDialog({
 				</DialogHeader>
 
 				<div className="space-y-3 py-4">
-					{selectedTerms.map((term, index) => {
-						const definition = getTermDefinition(
-							term.termDefinitionId,
-						);
-						if (!definition) return null;
+					{isLoadingTerms ? (
+						<div className="space-y-3">
+							<Skeleton className="h-20 w-full" />
+							<Skeleton className="h-20 w-full" />
+						</div>
+					) : (
+						selectedTerms.map((term, index) => {
+							const definition = getTermDefinition(
+								term.termDefinitionId,
+							);
+							if (!definition) return null;
 
-						return (
-							<div
-								key={term.id}
-								role="button"
-								tabIndex={0}
-								draggable
-								onDragStart={() => handleDragStart(index)}
-								onDragOver={(e) => handleDragOver(e, index)}
-								onDragEnd={handleDragEnd}
-								className="flex items-start gap-3 rounded-lg border bg-card p-4 transition-colors hover:bg-accent/50 cursor-move"
-							>
-								<GripVertical className="h-5 w-5 text-muted-foreground mt-2 flex-shrink-0" />
+							return (
+								<div
+									key={term.id}
+									role="button"
+									tabIndex={0}
+									draggable
+									onDragStart={() => handleDragStart(index)}
+									onDragOver={(e) => handleDragOver(e, index)}
+									onDragEnd={handleDragEnd}
+									className="flex items-start gap-3 rounded-lg border bg-card p-4 transition-colors hover:bg-accent/50 cursor-move"
+								>
+									<GripVertical className="h-5 w-5 text-muted-foreground mt-2 flex-shrink-0" />
 
-								<div className="flex-1 space-y-1">
-									<div className="font-medium">
-										{definition.title}
+									<div className="flex-1 space-y-1">
+										<div className="font-medium">
+											{definition.title}
+										</div>
+										<div className="text-sm text-muted-foreground">
+											{definition.label}
+										</div>
 									</div>
-									<div className="text-sm text-muted-foreground">
-										{definition.label}
+
+									<div className="flex items-center gap-2 mt-0">
+										<button
+											type="button"
+											onClick={(e) => {
+												e.stopPropagation();
+												toggleRequired(term.id);
+											}}
+											className={`rounded-full px-3 py-1 text-sm font-medium transition-colors ${
+												term.required
+													? "bg-foreground text-background"
+													: "bg-muted text-muted-foreground hover:bg-muted/80"
+											}`}
+										>
+											{term.required
+												? "Required"
+												: "Optional"}
+										</button>
+										<Button
+											variant="ghost"
+											size="icon"
+											onClick={(e) => {
+												e.stopPropagation();
+												deleteTerm(term.id);
+											}}
+											className="h-8 w-8"
+										>
+											<Trash2 className="h-4 w-4" />
+										</Button>
 									</div>
 								</div>
-
-								<div className="flex items-center gap-2 mt-0">
-									<button
-										type="button"
-										onClick={(e) => {
-											e.stopPropagation();
-											toggleRequired(term.id);
-										}}
-										className={`rounded-full px-3 py-1 text-sm font-medium transition-colors ${
-											term.required
-												? "bg-foreground text-background"
-												: "bg-muted text-muted-foreground hover:bg-muted/80"
-										}`}
-									>
-										{term.required
-											? "Required"
-											: "Optional"}
-									</button>
-									<Button
-										variant="ghost"
-										size="icon"
-										onClick={(e) => {
-											e.stopPropagation();
-											deleteTerm(term.id);
-										}}
-										className="h-8 w-8"
-									>
-										<Trash2 className="h-4 w-4" />
-									</Button>
-								</div>
-							</div>
-						);
-					})}
+							);
+						})
+					)}
 
 					{/* Add Term and Terms Management Row */}
 					<div className="flex items-center gap-3">
-						<Select onValueChange={addTerm}>
+						<Select onValueChange={addTerm} disabled={isLoadingTerms}>
 							<SelectTrigger className="flex-1">
 								<div className="flex items-center gap-2">
 									<Plus className="h-4 w-4" />
@@ -235,6 +254,22 @@ export function ConfigureTermsDialog({
 								</div>
 							</SelectTrigger>
 							<SelectContent>
+								<div className="p-1">
+									<Button
+										variant="ghost"
+										className="w-full justify-start text-sm font-medium"
+										onClick={(e) => {
+											e.preventDefault();
+											setIsTermEditorOpen(true);
+										}}
+									>
+										<Plus className="mr-2 h-4 w-4" />
+										Create new term
+									</Button>
+								</div>
+								{getAvailableTermsToAdd().length > 0 && (
+									<div className="h-px bg-border my-1" />
+								)}
 								{getAvailableTermsToAdd().length === 0 ? (
 									<div className="px-2 py-1.5 text-sm text-muted-foreground">
 										All terms added
@@ -257,9 +292,15 @@ export function ConfigureTermsDialog({
 							size="sm"
 							className="gap-2 text-muted-foreground hover:text-foreground"
 							type="button"
+							asChild
 						>
-							Terms management
-							<ExternalLink className="h-4 w-4" />
+							<Link
+								href={`/app/${workspace?.slug}/terms`}
+								target="_blank"
+							>
+								Terms management
+								<ExternalLink className="h-4 w-4" />
+							</Link>
 						</Button>
 					</div>
 				</div>
@@ -274,6 +315,15 @@ export function ConfigureTermsDialog({
 					<Button onClick={handleSave}>Update</Button>
 				</DialogFooter>
 			</DialogContent>
+
+			{isTermEditorOpen && workspace && (
+				<TermEditorDialog
+					open={isTermEditorOpen}
+					onClose={() => setIsTermEditorOpen(false)}
+					workspaceId={workspace.id}
+					onSuccess={handleTermCreated}
+				/>
+			)}
 		</Dialog>
 	);
 }

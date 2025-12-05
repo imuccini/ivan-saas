@@ -19,6 +19,9 @@ import { useFormatter } from "next-intl";
 import { useQueryState } from "nuqs";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
+import { useAiSuggestions } from "../hooks/use-ai-suggestions";
+import { SuggestionChips } from "./SuggestionChips";
+
 
 export function AiChat({ organizationId }: { organizationId?: string }) {
 	const formatter = useFormatter();
@@ -46,6 +49,8 @@ export function AiChat({ organizationId }: { organizationId?: string }) {
 	const createChatMutation = useMutation(
 		orpc.ai.chats.create.mutationOptions(),
 	);
+
+	const suggestions = useAiSuggestions();
 
 	const chats = data?.chats ?? [];
 	const currentChat = currentChatQuery.data?.chat ?? null;
@@ -170,6 +175,10 @@ export function AiChat({ organizationId }: { organizationId?: string }) {
 		}
 	}, [messages.length, status]);
 
+	const handleSuggestionClick = (suggestion: string) => {
+		setInput(suggestion);
+	};
+
 	return (
 		<SidebarContentLayout
 			sidebar={
@@ -224,6 +233,15 @@ export function AiChat({ organizationId }: { organizationId?: string }) {
 					ref={messagesContainerRef}
 					className="flex flex-1 flex-col gap-2 overflow-y-auto py-8"
 				>
+					{messages.length === 0 && suggestions.length > 0 && (
+						<div className="mb-4">
+							<SuggestionChips
+								suggestions={suggestions}
+								onSelect={handleSuggestionClick}
+							/>
+						</div>
+					)}
+
 					{messages.map((message, index) => (
 						<div
 							key={index}

@@ -36,7 +36,7 @@ import {
 	Users,
 } from "lucide-react";
 import { useState } from "react";
-import { CustomFieldConfigModal } from "./custom-field-config-modal";
+import { CustomFieldEditorDialog } from "@saas/custom-fields/components/CustomFieldEditorDialog";
 
 interface FormField {
 	id: string;
@@ -121,10 +121,7 @@ export function ConfigureSignupFormDialog({
 	const { activeWorkspace: workspace } = useActiveWorkspace();
 	const [fields, setFields] = useState<FormField[]>(initialFields);
 	const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
-	const [customFieldModalOpen, setCustomFieldModalOpen] = useState(false);
-	const [selectedCustomFieldType, setSelectedCustomFieldType] = useState<
-		"text" | "select" | "boolean" | null
-	>(null);
+	const [customFieldEditorOpen, setCustomFieldEditorOpen] = useState(false);
 
 	// Fetch custom fields from database
 	const { data: savedCustomFields = [] } = useQuery({
@@ -188,27 +185,8 @@ export function ConfigureSignupFormDialog({
 		setFields([...fields, newField]);
 	};
 
-	const openCustomFieldModal = (type: "text" | "select" | "boolean") => {
-		setSelectedCustomFieldType(type);
-		setCustomFieldModalOpen(true);
-	};
-
-	const handleCustomFieldSave = (fieldConfig: {
-		label: string;
-		placeholder: string;
-		type: string;
-		options?: string[];
-	}) => {
-		const newField: FormField = {
-			id: Date.now().toString(),
-			label: fieldConfig.label,
-			placeholder: fieldConfig.placeholder,
-			required: false,
-			type: fieldConfig.type,
-			isCustom: true,
-			options: fieldConfig.options,
-		};
-		setFields([...fields, newField]);
+	const openCustomFieldEditor = () => {
+		setCustomFieldEditorOpen(true);
 	};
 
 	const addSavedCustomField = (customField: {
@@ -242,6 +220,11 @@ export function ConfigureSignupFormDialog({
 	const handleSave = () => {
 		onSave?.(fields);
 		onOpenChange(false);
+	};
+
+	const handleCustomFieldCreated = (newField: any) => {
+		// Add the new custom field to the form
+		addSavedCustomField(newField);
 	};
 
 	return (
@@ -436,30 +419,12 @@ export function ConfigureSignupFormDialog({
 											<DropdownMenuSeparator />
 										</>
 									)}
-									{/* Create new custom field options */}
+									{/* Create new custom field */}
 									<DropdownMenuItem
-										onClick={() =>
-											openCustomFieldModal("text")
-										}
+										onClick={openCustomFieldEditor}
 									>
 										<Plus className="h-4 w-4 mr-2" />
-										New Text Field
-									</DropdownMenuItem>
-									<DropdownMenuItem
-										onClick={() =>
-											openCustomFieldModal("select")
-										}
-									>
-										<Plus className="h-4 w-4 mr-2" />
-										New Select Dropdown
-									</DropdownMenuItem>
-									<DropdownMenuItem
-										onClick={() =>
-											openCustomFieldModal("boolean")
-										}
-									>
-										<Plus className="h-4 w-4 mr-2" />
-										New Checkbox
+										Create New Field
 									</DropdownMenuItem>
 								</DropdownMenuContent>
 							</DropdownMenu>
@@ -478,12 +443,12 @@ export function ConfigureSignupFormDialog({
 				</DialogContent>
 			</Dialog>
 
-			{/* Custom Field Configuration Modal */}
-			<CustomFieldConfigModal
-				open={customFieldModalOpen}
-				onOpenChange={setCustomFieldModalOpen}
-				fieldType={selectedCustomFieldType}
-				onSave={handleCustomFieldSave}
+			{/* Custom Field Editor Dialog */}
+			<CustomFieldEditorDialog
+				open={customFieldEditorOpen}
+				onClose={() => setCustomFieldEditorOpen(false)}
+				workspaceId={workspace?.id || ""}
+				onSuccess={handleCustomFieldCreated}
 			/>
 		</>
 	);

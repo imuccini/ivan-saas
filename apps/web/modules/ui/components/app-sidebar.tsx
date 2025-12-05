@@ -18,6 +18,8 @@ import {
 } from "@ui/components/sidebar";
 import {
 	ActivityIcon,
+	BellIcon,
+	BookOpenIcon,
 	ClockIcon,
 	CpuIcon,
 	RocketIcon,
@@ -183,6 +185,19 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 	];
 
 	const navSecondary = [
+		{
+			title: "Documentation",
+			url: "https://supastarter.dev/docs/nextjs",
+			icon: BookOpenIcon,
+			isActive: false,
+			external: true,
+		},
+		{
+			title: "Notifications",
+			url: "#",
+			icon: BellIcon,
+			isActive: false,
+		},
 		{
 			title: "Upgrade to Pro",
 			url: "#",

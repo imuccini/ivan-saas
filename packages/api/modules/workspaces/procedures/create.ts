@@ -88,6 +88,68 @@ export const createWorkspace = protectedProcedure
 			},
 		});
 
+		// Create default terms for the workspace
+		const defaultTerms = [
+			{
+				name: "Privacy Policy",
+				version: "1.0",
+				category: "PRIVACY_POLICY" as const,
+				isMandatory: true,
+				isPreChecked: true,
+				status: "PUBLISHED" as const,
+				translations: {
+					en: {
+						label: "I accept the Privacy Policy",
+						linkText: "Read Privacy Policy",
+						documentTitle: "Privacy Policy",
+						documentContent:
+							"This is the default privacy policy. Please update this content to reflect your organization's privacy practices and compliance requirements.",
+					},
+				},
+			},
+			{
+				name: "Terms of Use",
+				version: "1.0",
+				category: "TERMS_OF_USE" as const,
+				isMandatory: true,
+				isPreChecked: true,
+				status: "PUBLISHED" as const,
+				translations: {
+					en: {
+						label: "I agree to the Terms of Use",
+						linkText: "Read Terms of Use",
+						documentTitle: "Terms of Use",
+						documentContent:
+							"These are the default terms of use. Please update this content to reflect your organization's terms and conditions.",
+					},
+				},
+			},
+			{
+				name: "Marketing Consent",
+				version: "1.0",
+				category: "OTHER" as const,
+				isMandatory: false,
+				isPreChecked: false,
+				status: "PUBLISHED" as const,
+				translations: {
+					en: {
+						label: "I agree to receive marketing communications",
+						linkText: "Read Marketing Policy",
+						documentTitle: "Marketing Consent",
+						documentContent:
+							"By checking this box, you agree to receive marketing communications from us. You can unsubscribe at any time.",
+					},
+				},
+			},
+		];
+
+		await db.term.createMany({
+			data: defaultTerms.map((term) => ({
+				workspaceId: workspace.id,
+				...term,
+			})),
+		});
+
 		// Create default Guest WiFi config with pre-configured look and feel
 		await db.guestWifiConfig.create({
 			data: {
