@@ -157,9 +157,32 @@ export function WizardPreview({
 		<div className="flex flex-col h-full bg-muted/30">
 			{/* Preview Toolbar */}
 			<div className="flex items-center justify-between border-b bg-background px-4 py-2">
-				<div className="flex items-center gap-2">
+				{/* Left side: Preview text + Page selector */}
+				<div className="flex items-center gap-3">
 					<span className="text-sm font-medium">Preview</span>
+					<select
+						className="h-8 rounded-md border border-input bg-background px-3 py-1 text-sm"
+						value={selectedPage}
+						onChange={(e) => setSelectedPage(e.target.value)}
+					>
+						<option value="home">Home Page</option>
+						{sponsorshipEnabled && (
+							<option value="sponsor">Sponsor Request</option>
+						)}
+						{easyWifiEnabled && (
+							<option value="easy-wifi">Easy WiFi</option>
+						)}
+						{phoneValidationEnabled && (
+							<option value="validation">Validation</option>
+						)}
+						{successRedirectMode === "text" && (
+							<option value="success">Success Page</option>
+						)}
+						<option value="blocked">Blocked Access</option>
+					</select>
 				</div>
+
+				{/* Right side: Device mode switches */}
 				<div className="flex items-center gap-2 bg-muted/50 p-1 rounded-lg">
 					<Button
 						variant={
@@ -180,6 +203,7 @@ export function WizardPreview({
 							strokeLinecap="round"
 							strokeLinejoin="round"
 						>
+							<title>Mobile Icon</title>
 							<rect
 								width="14"
 								height="20"
@@ -210,6 +234,7 @@ export function WizardPreview({
 							strokeLinecap="round"
 							strokeLinejoin="round"
 						>
+							<title>Tablet Icon</title>
 							<rect
 								width="16"
 								height="20"
@@ -240,6 +265,7 @@ export function WizardPreview({
 							strokeLinecap="round"
 							strokeLinejoin="round"
 						>
+							<title>Desktop Icon</title>
 							<rect
 								width="20"
 								height="14"
@@ -253,39 +279,17 @@ export function WizardPreview({
 						</svg>
 					</Button>
 				</div>
-				<div className="w-[100px]">
-					<select
-						className="h-8 w-full rounded-md border border-input bg-background px-2 py-1 text-xs"
-						value={selectedPage}
-						onChange={(e) => setSelectedPage(e.target.value)}
-					>
-						<option value="home">Home Page</option>
-						{sponsorshipEnabled && (
-							<option value="sponsor">Sponsor Request</option>
-						)}
-						{easyWifiEnabled && (
-							<option value="easy-wifi">Easy WiFi</option>
-						)}
-						{phoneValidationEnabled && (
-							<option value="validation">Validation</option>
-						)}
-						{successRedirectMode === "text" && (
-							<option value="success">Success Page</option>
-						)}
-						<option value="blocked">Blocked Access</option>
-					</select>
-				</div>
 			</div>
 
 			{/* Preview Frame */}
-			<div className="flex items-center justify-center flex-1 p-8 overflow-y-auto">
+			<div className="flex items-center justify-center flex-1 p-8 overflow-hidden">
 				<div
-					className={`bg-background rounded-lg border shadow-lg transition-all overflow-hidden flex flex-col ${
+					className={`bg-background rounded-lg border shadow-lg transition-all ${
 						previewMode === "mobile"
-							? "w-[375px] min-h-[667px]"
+							? "w-[393px] h-[852px] overflow-y-auto"
 							: previewMode === "tablet"
-								? "w-[768px] min-h-[1024px]"
-								: "w-full max-w-4xl min-h-[600px]"
+								? "w-[768px] min-h-[1024px] overflow-hidden"
+								: "w-full max-w-4xl min-h-[600px] overflow-hidden"
 					}`}
 					style={{
 						fontFamily:
