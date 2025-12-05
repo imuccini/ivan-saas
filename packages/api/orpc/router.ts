@@ -8,6 +8,7 @@ import { guestWifiRouter } from "../modules/guest-wifi/router";
 import { newsletterRouter } from "../modules/newsletter/router";
 import { organizationsRouter } from "../modules/organizations/router";
 import { paymentsRouter } from "../modules/payments/router";
+import { sponsorsRouter } from "../modules/sponsors/router";
 import { termsRouter } from "../modules/terms/router";
 import { usersRouter } from "../modules/users/router";
 import { workspacesRouter } from "../modules/workspaces/router";
@@ -29,6 +30,7 @@ export const router = publicProcedure
 		terms: termsRouter,
 		customFields: customFieldsRouter,
 		guestWifi: guestWifiRouter,
+		sponsors: sponsorsRouter,
 	});
 
 export type ApiRouterClient = RouterClient<typeof router>;

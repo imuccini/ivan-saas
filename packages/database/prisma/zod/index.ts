@@ -58,6 +58,12 @@ export const WorkspaceScalarFieldEnumSchema = z.enum(['id', 'organizationId', 'n
 
 export type WorkspaceScalarFieldEnum = z.infer<typeof WorkspaceScalarFieldEnumSchema>;
 
+// File: SponsorScalarFieldEnum.schema.ts
+
+export const SponsorScalarFieldEnumSchema = z.enum(['id', 'workspaceId', 'fullName', 'email', 'createdAt', 'updatedAt'])
+
+export type SponsorScalarFieldEnum = z.infer<typeof SponsorScalarFieldEnumSchema>;
+
 // File: GuestWifiConfigScalarFieldEnum.schema.ts
 
 export const GuestWifiConfigScalarFieldEnumSchema = z.enum(['id', 'workspaceId', 'name', 'isActive', 'config', 'createdAt', 'updatedAt'])
@@ -351,6 +357,20 @@ export const WorkspaceSchema = z.object({
 });
 
 export type WorkspaceType = z.infer<typeof WorkspaceSchema>;
+
+
+// File: Sponsor.schema.ts
+
+export const SponsorSchema = z.object({
+  id: z.string(),
+  workspaceId: z.string(),
+  fullName: z.string(),
+  email: z.string(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
+export type SponsorType = z.infer<typeof SponsorSchema>;
 
 
 // File: GuestWifiConfig.schema.ts
