@@ -58,6 +58,18 @@ export const WorkspaceScalarFieldEnumSchema = z.enum(['id', 'organizationId', 'n
 
 export type WorkspaceScalarFieldEnum = z.infer<typeof WorkspaceScalarFieldEnumSchema>;
 
+// File: GuestWifiConfigScalarFieldEnum.schema.ts
+
+export const GuestWifiConfigScalarFieldEnumSchema = z.enum(['id', 'workspaceId', 'name', 'isActive', 'config', 'createdAt', 'updatedAt'])
+
+export type GuestWifiConfigScalarFieldEnum = z.infer<typeof GuestWifiConfigScalarFieldEnumSchema>;
+
+// File: CustomFieldScalarFieldEnum.schema.ts
+
+export const CustomFieldScalarFieldEnumSchema = z.enum(['id', 'workspaceId', 'name', 'type', 'validationType', 'options', 'translations', 'isRequired', 'createdAt', 'updatedAt'])
+
+export type CustomFieldScalarFieldEnum = z.infer<typeof CustomFieldScalarFieldEnumSchema>;
+
 // File: WorkspaceMemberScalarFieldEnum.schema.ts
 
 export const WorkspaceMemberScalarFieldEnumSchema = z.enum(['id', 'workspaceId', 'userId', 'createdAt'])
@@ -153,6 +165,12 @@ export type SortOrder = z.infer<typeof SortOrderSchema>;
 export const JsonNullValueInputSchema = z.enum(['JsonNull'])
 
 export type JsonNullValueInput = z.infer<typeof JsonNullValueInputSchema>;
+
+// File: NullableJsonNullValueInput.schema.ts
+
+export const NullableJsonNullValueInputSchema = z.enum(['DbNull', 'JsonNull'])
+
+export type NullableJsonNullValueInput = z.infer<typeof NullableJsonNullValueInputSchema>;
 
 // File: QueryMode.schema.ts
 
@@ -333,6 +351,39 @@ export const WorkspaceSchema = z.object({
 });
 
 export type WorkspaceType = z.infer<typeof WorkspaceSchema>;
+
+
+// File: GuestWifiConfig.schema.ts
+
+export const GuestWifiConfigSchema = z.object({
+  id: z.string(),
+  workspaceId: z.string(),
+  name: z.string().default("Default"),
+  isActive: z.boolean().default(true),
+  config: z.unknown().refine((val) => { const getDepth = (obj: unknown, depth: number = 0): number => { if (depth > 10) return depth; if (obj === null || typeof obj !== 'object') return depth; const values = Object.values(obj as Record<string, unknown>); if (values.length === 0) return depth; return Math.max(...values.map(v => getDepth(v, depth + 1))); }; return getDepth(val) <= 10; }, "JSON nesting depth exceeds maximum of 10"),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
+export type GuestWifiConfigType = z.infer<typeof GuestWifiConfigSchema>;
+
+
+// File: CustomField.schema.ts
+
+export const CustomFieldSchema = z.object({
+  id: z.string(),
+  workspaceId: z.string(),
+  name: z.string(),
+  type: z.string(),
+  validationType: z.string().nullish(),
+  options: z.unknown().refine((val) => { const getDepth = (obj: unknown, depth: number = 0): number => { if (depth > 10) return depth; if (obj === null || typeof obj !== 'object') return depth; const values = Object.values(obj as Record<string, unknown>); if (values.length === 0) return depth; return Math.max(...values.map(v => getDepth(v, depth + 1))); }; return getDepth(val) <= 10; }, "JSON nesting depth exceeds maximum of 10").nullish(),
+  translations: z.unknown().refine((val) => { const getDepth = (obj: unknown, depth: number = 0): number => { if (depth > 10) return depth; if (obj === null || typeof obj !== 'object') return depth; const values = Object.values(obj as Record<string, unknown>); if (values.length === 0) return depth; return Math.max(...values.map(v => getDepth(v, depth + 1))); }; return getDepth(val) <= 10; }, "JSON nesting depth exceeds maximum of 10"),
+  isRequired: z.boolean(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
+export type CustomFieldType = z.infer<typeof CustomFieldSchema>;
 
 
 // File: WorkspaceMember.schema.ts

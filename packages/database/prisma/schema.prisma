@@ -166,9 +166,42 @@ model Workspace {
   workspaceMembers       WorkspaceMember[]
   communicationTemplates CommunicationTemplate[]
   terms                  Term[]
+  customFields           CustomField[]
+  guestWifiConfigs       GuestWifiConfig[]
 
   @@unique([organizationId, slug])
   @@map("workspace")
+}
+
+model GuestWifiConfig {
+  id          String    @id @default(cuid())
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  name        String    @default("Default")
+  isActive    Boolean   @default(true)
+  config      Json      // All wizard settings as structured JSON
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@unique([workspaceId, name])
+  @@map("guest_wifi_config")
+}
+
+model CustomField {
+  id             String    @id @default(cuid())
+  workspaceId    String
+  workspace      Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  name           String    // Internal identifier
+  type           String    // text, select, boolean
+  validationType String?   // email, number, tel, url (for text fields)
+  options        Json?     // Array of options for select fields
+  translations   Json      // { en: { label, placeholder }, it: { label, placeholder } }
+  isRequired     Boolean   @default(false)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@unique([workspaceId, name])
+  @@map("custom_field")
 }
 
 model WorkspaceMember {

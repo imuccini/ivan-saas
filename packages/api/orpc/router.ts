@@ -3,6 +3,8 @@ import { adminRouter } from "../modules/admin/router";
 import { aiRouter } from "../modules/ai/router";
 import { communicationsRouter } from "../modules/communications/router";
 import { contactRouter } from "../modules/contact/router";
+import { customFieldsRouter } from "../modules/custom-fields/router";
+import { guestWifiRouter } from "../modules/guest-wifi/router";
 import { newsletterRouter } from "../modules/newsletter/router";
 import { organizationsRouter } from "../modules/organizations/router";
 import { paymentsRouter } from "../modules/payments/router";
@@ -25,6 +27,8 @@ export const router = publicProcedure
 		ai: aiRouter,
 		communications: communicationsRouter,
 		terms: termsRouter,
+		customFields: customFieldsRouter,
+		guestWifi: guestWifiRouter,
 	});
 
 export type ApiRouterClient = RouterClient<typeof router>;

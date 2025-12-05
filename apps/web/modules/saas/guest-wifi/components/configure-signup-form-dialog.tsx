@@ -1,5 +1,8 @@
 "use client";
 
+import { useActiveWorkspace } from "@saas/workspaces/hooks/use-active-workspace";
+import { orpc } from "@shared/lib/orpc-query-utils";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@ui/components/button";
 import {
 	Dialog,
@@ -13,6 +16,7 @@ import {
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuItem,
+	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@ui/components/dropdown-menu";
 import { Input } from "@ui/components/input";
@@ -20,11 +24,14 @@ import { Label } from "@ui/components/label";
 import {
 	Building2,
 	Calendar,
+	CheckSquare,
 	ChevronDown,
 	GripVertical,
 	Hash,
+	List,
 	Plus,
 	Trash2,
+	Type,
 	User,
 	Users,
 } from "lucide-react";
@@ -111,12 +118,27 @@ export function ConfigureSignupFormDialog({
 	],
 	onSave,
 }: ConfigureSignupFormDialogProps) {
+	const { activeWorkspace: workspace } = useActiveWorkspace();
 	const [fields, setFields] = useState<FormField[]>(initialFields);
 	const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
 	const [customFieldModalOpen, setCustomFieldModalOpen] = useState(false);
 	const [selectedCustomFieldType, setSelectedCustomFieldType] = useState<
 		"text" | "select" | "boolean" | null
 	>(null);
+
+	// Fetch custom fields from database
+	const { data: savedCustomFields = [] } = useQuery({
+		...orpc.customFields.list.queryOptions({
+			input: {
+				workspaceId: workspace?.id || "",
+			},
+		}),
+		enabled: !!workspace?.id,
+	});
+
+	// Debug: log what custom fields are fetched
+	console.log("Workspace ID:", workspace?.id);
+	console.log("Saved Custom Fields:", savedCustomFields);
 
 	const handleDragStart = (index: number) => {
 		setDraggedIndex(index);
@@ -185,6 +207,34 @@ export function ConfigureSignupFormDialog({
 			type: fieldConfig.type,
 			isCustom: true,
 			options: fieldConfig.options,
+		};
+		setFields([...fields, newField]);
+	};
+
+	const addSavedCustomField = (customField: {
+		id: string;
+		name: string;
+		type: string;
+		validationType?: string | null;
+		options?: string[] | null;
+		translations: Record<string, { label: string; placeholder?: string }>;
+		isRequired: boolean;
+	}) => {
+		// Get the label from translations (default to English or first available)
+		const translation =
+			customField.translations.en ||
+			Object.values(customField.translations)[0];
+		const newField: FormField = {
+			id: Date.now().toString(),
+			label: translation?.label || customField.name,
+			placeholder: translation?.placeholder || "",
+			required: customField.isRequired,
+			type:
+				customField.type === "text" && customField.validationType
+					? customField.validationType
+					: customField.type,
+			isCustom: true,
+			options: customField.options || undefined,
 		};
 		setFields([...fields, newField]);
 	};
@@ -349,26 +399,67 @@ export function ConfigureSignupFormDialog({
 									align="end"
 									className="w-56"
 								>
+									{/* Saved Custom Fields from Database */}
+									{savedCustomFields.length > 0 && (
+										<>
+											{savedCustomFields.map(
+												(cf: any) => {
+													const translation =
+														cf.translations?.en ||
+														Object.values(
+															cf.translations ||
+																{},
+														)[0];
+													const IconComponent =
+														cf.type === "text"
+															? Type
+															: cf.type ===
+																	"select"
+																? List
+																: CheckSquare;
+													return (
+														<DropdownMenuItem
+															key={cf.id}
+															onClick={() =>
+																addSavedCustomField(
+																	cf,
+																)
+															}
+														>
+															<IconComponent className="h-4 w-4 mr-2" />
+															{translation?.label ||
+																cf.name}
+														</DropdownMenuItem>
+													);
+												},
+											)}
+											<DropdownMenuSeparator />
+										</>
+									)}
+									{/* Create new custom field options */}
 									<DropdownMenuItem
 										onClick={() =>
 											openCustomFieldModal("text")
 										}
 									>
-										Text Field
+										<Plus className="h-4 w-4 mr-2" />
+										New Text Field
 									</DropdownMenuItem>
 									<DropdownMenuItem
 										onClick={() =>
 											openCustomFieldModal("select")
 										}
 									>
-										Select Dropdown
+										<Plus className="h-4 w-4 mr-2" />
+										New Select Dropdown
 									</DropdownMenuItem>
 									<DropdownMenuItem
 										onClick={() =>
 											openCustomFieldModal("boolean")
 										}
 									>
-										Checkbox
+										<Plus className="h-4 w-4 mr-2" />
+										New Checkbox
 									</DropdownMenuItem>
 								</DropdownMenuContent>
 							</DropdownMenu>

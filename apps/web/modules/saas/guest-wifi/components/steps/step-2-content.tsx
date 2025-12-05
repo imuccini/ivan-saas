@@ -1,5 +1,6 @@
 "use client";
 
+import { LanguageSelector } from "@shared/components/language-selector";
 import { Button } from "@ui/components/button";
 import {
 	Collapsible,
@@ -31,6 +32,19 @@ interface FormField {
 	options?: string[];
 }
 
+interface ContentPerLanguage {
+	title: string;
+	description: string;
+	signupButtonText: string;
+	loginButtonText: string;
+	sponsorMessage: string;
+	phoneValidationMessage: string;
+	successMessage: string;
+	blockedMessage: string;
+	easyWifiCtaMessage: string;
+	easyWifiSkipMessage: string;
+}
+
 interface StepContentProps {
 	registrationFields: FormField[];
 	easyWifiEnabled?: boolean;
@@ -52,10 +66,6 @@ interface StepContentProps {
 	setLogo: (logo: string | null) => void;
 	logoSize: number;
 	setLogoSize: (size: number) => void;
-	title: string;
-	setTitle: (title: string) => void;
-	description: string;
-	setDescription: (description: string) => void;
 	backgroundType: string;
 	setBackgroundType: (type: string) => void;
 	backgroundImage: string | null;
@@ -66,22 +76,15 @@ interface StepContentProps {
 	setGradientColor1: (color: string) => void;
 	gradientColor2: string;
 	setGradientColor2: (color: string) => void;
-	signupButtonText: string;
-	setSignupButtonText: (text: string) => void;
-	loginButtonText: string;
-	setLoginButtonText: (text: string) => void;
-	sponsorMessage: string;
-	setSponsorMessage: (message: string) => void;
-	phoneValidationMessage: string;
-	setPhoneValidationMessage: (message: string) => void;
-	successMessage: string;
-	setSuccessMessage: (message: string) => void;
-	blockedMessage: string;
-	setBlockedMessage: (message: string) => void;
-	easyWifiCtaMessage: string;
-	setEasyWifiCtaMessage: (message: string) => void;
-	easyWifiSkipMessage: string;
-	setEasyWifiSkipMessage: (message: string) => void;
+	// Multi-language content
+	content: Record<string, ContentPerLanguage>;
+	setContent: React.Dispatch<
+		React.SetStateAction<Record<string, ContentPerLanguage>>
+	>;
+	selectedLanguages: string[];
+	setSelectedLanguages: React.Dispatch<React.SetStateAction<string[]>>;
+	activeLanguage: string;
+	setActiveLanguage: React.Dispatch<React.SetStateAction<string>>;
 }
 
 export function StepContent({
@@ -104,10 +107,6 @@ export function StepContent({
 	setLogo,
 	logoSize,
 	setLogoSize,
-	title,
-	setTitle,
-	description,
-	setDescription,
 	backgroundType,
 	setBackgroundType,
 	backgroundImage,
@@ -118,25 +117,46 @@ export function StepContent({
 	setGradientColor1,
 	gradientColor2,
 	setGradientColor2,
-	signupButtonText,
-	setSignupButtonText,
-	loginButtonText,
-	setLoginButtonText,
-	sponsorMessage,
-	setSponsorMessage,
-	phoneValidationMessage,
-	setPhoneValidationMessage,
-	successMessage,
-	setSuccessMessage,
-	blockedMessage,
-	setBlockedMessage,
-	easyWifiCtaMessage,
-	setEasyWifiCtaMessage,
-	easyWifiSkipMessage,
-	setEasyWifiSkipMessage,
+	content,
+	setContent,
+	selectedLanguages,
+	setSelectedLanguages,
+	activeLanguage,
+	setActiveLanguage,
 }: StepContentProps) {
 	const [selectedTab, setSelectedTab] = useState("content");
 	const [selectedPage, setSelectedPage] = useState("home");
+
+	// Default content structure
+	const defaultContent: ContentPerLanguage = {
+		title: "Get online with free WiFi",
+		description: "How do you want to connect?",
+		signupButtonText: "Register",
+		loginButtonText: "Login with your account",
+		sponsorMessage: "You need to wait that your host approves your access",
+		phoneValidationMessage: "You need to validate your phone number",
+		successMessage: "You're all set! Enjoy your WiFi connection.",
+		blockedMessage:
+			"Sorry, you have used all your WiFi time allowance for today.",
+		easyWifiCtaMessage:
+			"You need to wait that your host approves your access",
+		easyWifiSkipMessage: "I'll take my chances",
+	};
+
+	// Get content for active language with fallback
+	const activeContent =
+		content[activeLanguage] || content.en || defaultContent;
+
+	// Update content for active language
+	const updateContent = (field: keyof ContentPerLanguage, value: string) => {
+		setContent((prev) => ({
+			...prev,
+			[activeLanguage]: {
+				...(prev[activeLanguage] || defaultContent),
+				[field]: value,
+			},
+		}));
+	};
 
 	const logoInputRef = useRef<HTMLInputElement>(null);
 	const bgInputRef = useRef<HTMLInputElement>(null);
@@ -163,10 +183,6 @@ export function StepContent({
 		}
 	};
 
-	const handlePageChange = (page: string) => {
-		setSelectedPage(page);
-	};
-
 	return (
 		<div className="h-full p-6">
 			<Tabs
@@ -179,8 +195,29 @@ export function StepContent({
 					<TabsTrigger value="style">Style</TabsTrigger>
 				</TabsList>
 
+				{/* Language Selector */}
+				<div className="flex items-center gap-2 mt-4 mb-2">
+					<span className="text-sm font-medium">Language:</span>
+					<LanguageSelector
+						selectedLanguages={selectedLanguages}
+						activeLanguage={activeLanguage}
+						onActiveLanguageChange={setActiveLanguage}
+						onAddLanguage={(code) => {
+							setSelectedLanguages([...selectedLanguages, code]);
+							setActiveLanguage(code);
+						}}
+						onRemoveLanguage={(code) => {
+							setSelectedLanguages(
+								selectedLanguages.filter((c) => c !== code),
+							);
+						}}
+						showRemoveButton={true}
+						minLanguages={1}
+					/>
+				</div>
+
 				{/* Content Tab */}
-				<TabsContent value="content" className="space-y-4 mt-6">
+				<TabsContent value="content" className="space-y-4 mt-4">
 					{/* Home Page Section */}
 					<Collapsible
 						open={selectedPage === "home"}
@@ -233,8 +270,18 @@ export function StepContent({
 										}
 										type="button"
 									>
-										Change
+										{logo ? "Change" : "Upload"}
 									</Button>
+									{logo && (
+										<Button
+											variant="ghost"
+											size="sm"
+											onClick={() => setLogo(null)}
+											type="button"
+										>
+											Remove
+										</Button>
+									)}
 								</div>
 							</div>
 
@@ -255,8 +302,10 @@ export function StepContent({
 							<div className="space-y-2">
 								<Label>Title</Label>
 								<Input
-									value={title}
-									onChange={(e) => setTitle(e.target.value)}
+									value={activeContent.title}
+									onChange={(e) =>
+										updateContent("title", e.target.value)
+									}
 								/>
 							</div>
 
@@ -264,9 +313,12 @@ export function StepContent({
 							<div className="space-y-2">
 								<Label>Description</Label>
 								<Textarea
-									value={description}
+									value={activeContent.description}
 									onChange={(e) =>
-										setDescription(e.target.value)
+										updateContent(
+											"description",
+											e.target.value,
+										)
 									}
 									rows={3}
 								/>
@@ -276,9 +328,12 @@ export function StepContent({
 							<div className="space-y-2">
 								<Label>Sign Up button</Label>
 								<Input
-									value={signupButtonText}
+									value={activeContent.signupButtonText}
 									onChange={(e) =>
-										setSignupButtonText(e.target.value)
+										updateContent(
+											"signupButtonText",
+											e.target.value,
+										)
 									}
 								/>
 							</div>
@@ -287,9 +342,12 @@ export function StepContent({
 							<div className="space-y-2">
 								<Label>Login button</Label>
 								<Input
-									value={loginButtonText}
+									value={activeContent.loginButtonText}
 									onChange={(e) =>
-										setLoginButtonText(e.target.value)
+										updateContent(
+											"loginButtonText",
+											e.target.value,
+										)
 									}
 								/>
 							</div>
@@ -354,8 +412,22 @@ export function StepContent({
 											}
 											type="button"
 										>
-											Change
+											{backgroundImage
+												? "Change"
+												: "Upload"}
 										</Button>
+										{backgroundImage && (
+											<Button
+												variant="ghost"
+												size="sm"
+												onClick={() =>
+													setBackgroundImage(null)
+												}
+												type="button"
+											>
+												Remove
+											</Button>
+										)}
 									</div>
 								</div>
 							)}
@@ -497,9 +569,12 @@ export function StepContent({
 								<div className="space-y-2">
 									<Label>Sponsorship required message</Label>
 									<Textarea
-										value={sponsorMessage}
+										value={activeContent.sponsorMessage}
 										onChange={(e) =>
-											setSponsorMessage(e.target.value)
+											updateContent(
+												"sponsorMessage",
+												e.target.value,
+											)
 										}
 										rows={3}
 									/>
@@ -531,9 +606,10 @@ export function StepContent({
 								<div className="space-y-2">
 									<Label>Call to action message</Label>
 									<Textarea
-										value={easyWifiCtaMessage}
+										value={activeContent.easyWifiCtaMessage}
 										onChange={(e) =>
-											setEasyWifiCtaMessage(
+											updateContent(
+												"easyWifiCtaMessage",
 												e.target.value,
 											)
 										}
@@ -543,9 +619,12 @@ export function StepContent({
 								<div className="space-y-2">
 									<Label>Skip message</Label>
 									<Input
-										value={easyWifiSkipMessage}
+										value={
+											activeContent.easyWifiSkipMessage
+										}
 										onChange={(e) =>
-											setEasyWifiSkipMessage(
+											updateContent(
+												"easyWifiSkipMessage",
 												e.target.value,
 											)
 										}
@@ -580,9 +659,12 @@ export function StepContent({
 								<div className="space-y-2">
 									<Label>Phone validation notice</Label>
 									<Textarea
-										value={phoneValidationMessage}
+										value={
+											activeContent.phoneValidationMessage
+										}
 										onChange={(e) =>
-											setPhoneValidationMessage(
+											updateContent(
+												"phoneValidationMessage",
 												e.target.value,
 											)
 										}
@@ -616,9 +698,12 @@ export function StepContent({
 								<div className="space-y-2">
 									<Label>Success message</Label>
 									<Textarea
-										value={successMessage}
+										value={activeContent.successMessage}
 										onChange={(e) =>
-											setSuccessMessage(e.target.value)
+											updateContent(
+												"successMessage",
+												e.target.value,
+											)
 										}
 										rows={3}
 									/>
@@ -651,9 +736,12 @@ export function StepContent({
 							<div className="space-y-2">
 								<Label>Blocked access notice</Label>
 								<Textarea
-									value={blockedMessage}
+									value={activeContent.blockedMessage}
 									onChange={(e) =>
-										setBlockedMessage(e.target.value)
+										updateContent(
+											"blockedMessage",
+											e.target.value,
+										)
 									}
 									rows={3}
 								/>

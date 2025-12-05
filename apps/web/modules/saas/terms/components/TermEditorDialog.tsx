@@ -1,8 +1,8 @@
 "use client";
 
+import { LanguageSelector } from "@shared/components/language-selector";
 import { orpc } from "@shared/lib/orpc-query-utils";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Badge } from "@ui/components/badge";
 import { Button } from "@ui/components/button";
 import {
 	Dialog,
@@ -254,46 +254,33 @@ export function TermEditorDialog({
 					<TabsContent value="content" className="space-y-4">
 						{/* Language Selector */}
 						<div className="flex items-center gap-2">
-							<Label>Language:</Label>
-							<div className="flex gap-2">
-								{Object.keys(translations).map((lang) => (
-									<Badge
-										key={lang}
-										variant={
-											activeLanguage === lang
-												? "default"
-												: "outline"
-										}
-										className="cursor-pointer"
-										onClick={() => setActiveLanguage(lang)}
-									>
-										{lang.toUpperCase()}
-									</Badge>
-								))}
-								<Button
-									variant="outline"
-									size="sm"
-									onClick={() => {
-										const newLang = prompt(
-											"Enter language code (e.g., es, fr):",
-										);
-										if (newLang && !translations[newLang]) {
-											setTranslations({
-												...translations,
-												[newLang]: {
-													label: "",
-													linkText: "",
-													documentTitle: "",
-													documentContent: "",
-												},
-											});
-											setActiveLanguage(newLang);
-										}
-									}}
-								>
-									+ Add Language
-								</Button>
-							</div>
+							<span className="text-sm font-medium">
+								Language:
+							</span>
+							<LanguageSelector
+								selectedLanguages={Object.keys(translations)}
+								activeLanguage={activeLanguage}
+								onActiveLanguageChange={setActiveLanguage}
+								onAddLanguage={(code) => {
+									setTranslations({
+										...translations,
+										[code]: {
+											label: "",
+											linkText: "",
+											documentTitle: "",
+											documentContent: "",
+										},
+									});
+									setActiveLanguage(code);
+								}}
+								onRemoveLanguage={(code) => {
+									const newTranslations = { ...translations };
+									delete newTranslations[code];
+									setTranslations(newTranslations);
+								}}
+								showRemoveButton={true}
+								minLanguages={1}
+							/>
 						</div>
 
 						{/* Translation Fields */}

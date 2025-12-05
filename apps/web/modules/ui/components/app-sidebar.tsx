@@ -167,6 +167,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 					isActive: currentPath === `${basePath}/manage/terms`,
 				},
 				{
+					title: "Custom Fields",
+					url: `${basePath}/manage/custom-fields`,
+					isActive:
+						currentPath === `${basePath}/manage/custom-fields`,
+				},
+				{
 					title: "Communications",
 					url: `${basePath}/manage/communications`,
 					isActive:

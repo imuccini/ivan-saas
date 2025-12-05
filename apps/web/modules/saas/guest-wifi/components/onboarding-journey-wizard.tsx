@@ -1,8 +1,11 @@
 "use client";
 
+import { useActiveWorkspace } from "@saas/workspaces/hooks/use-active-workspace";
+import { orpc } from "@shared/lib/orpc-query-utils";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@ui/components/button";
-import { ArrowRight } from "lucide-react";
-import { useState } from "react";
+import { ArrowRight, Loader2 } from "lucide-react";
+import { useEffect, useState } from "react";
 import { StepAuthentication } from "./steps/step-1-authentication";
 import { StepContent } from "./steps/step-2-content";
 import { StepJourney } from "./steps/step-3-journey";
@@ -39,9 +42,19 @@ export function OnboardingJourneyWizard({
 	open,
 	onClose,
 }: OnboardingJourneyWizardProps) {
+	const { activeWorkspace: workspace } = useActiveWorkspace();
+	const queryClient = useQueryClient();
 	const [currentStep, setCurrentStep] = useState(1);
 
-	// Shared state across steps
+	// Fetch existing config
+	const { data: savedConfig, isLoading: isLoadingConfig } = useQuery({
+		...orpc.guestWifi.get.queryOptions({
+			input: { workspaceId: workspace?.id || "" },
+		}),
+		enabled: !!workspace?.id && open,
+	});
+
+	// Shared state across steps - initialized from saved config
 	const [easyWifiEnabled, setEasyWifiEnabled] = useState(false);
 	const [sponsorshipEnabled, setSponsorshipEnabled] = useState(false);
 	const [phoneValidationEnabled, setPhoneValidationEnabled] = useState(false);
@@ -57,15 +70,59 @@ export function OnboardingJourneyWizard({
 	// Content State
 	const [logo, setLogo] = useState<string | null>(null);
 	const [logoSize, setLogoSize] = useState(50);
-	const [title, setTitle] = useState("Get online with free WiFi");
-	const [description, setDescription] = useState(
-		"How do you want to connect?",
-	);
 	const [backgroundType, setBackgroundType] = useState("image");
 	const [backgroundImage, setBackgroundImage] = useState<string | null>(null);
 	const [backgroundColor, setBackgroundColor] = useState("#6366f1");
 	const [gradientColor1, setGradientColor1] = useState("#6366f1");
 	const [gradientColor2, setGradientColor2] = useState("#ec4899");
+
+	// Multi-language content state
+	const [selectedLanguages, setSelectedLanguages] = useState<string[]>([
+		"en",
+	]);
+	const [activeLanguage, setActiveLanguage] = useState("en");
+
+	// Default content per language
+	const defaultContent = {
+		title: "Get online with free WiFi",
+		description: "How do you want to connect?",
+		signupButtonText: "Register",
+		loginButtonText: "Login with your account",
+		sponsorMessage: "You need to wait that your host approves your access",
+		phoneValidationMessage: "You need to validate your phone number",
+		successMessage: "You're all set! Enjoy your WiFi connection.",
+		blockedMessage:
+			"Sorry, you have used all your WiFi time allowance for today.",
+		easyWifiCtaMessage:
+			"You need to wait that your host approves your access",
+		easyWifiSkipMessage: "I'll take my chances",
+	};
+
+	const [content, setContent] = useState<
+		Record<string, typeof defaultContent>
+	>({
+		en: { ...defaultContent },
+	});
+
+	// Helper to get content for active language (with fallback to English)
+	const getContentForLanguage = (lang: string) => {
+		return content[lang] || content.en || defaultContent;
+	};
+
+	// Helper to update content for a specific language
+	const updateContentForLanguage = (
+		lang: string,
+		field: keyof typeof defaultContent,
+		value: string,
+	) => {
+		setContent((prev) => ({
+			...prev,
+			[lang]: {
+				...(prev[lang] || defaultContent),
+				[field]: value,
+			},
+		}));
+	};
 
 	// Authentication State
 	const [showLoginOption, setShowLoginOption] = useState(true);
@@ -73,42 +130,7 @@ export function OnboardingJourneyWizard({
 	const [accessCodesEnabled, setAccessCodesEnabled] = useState(false);
 	const [enterpriseIdpEnabled, setEnterpriseIdpEnabled] = useState(false);
 	const [selectedIdps, setSelectedIdps] = useState<string[]>([]);
-	const [terms, setTerms] = useState<SelectedTerm[]>([
-		{
-			id: "1",
-			termDefinitionId: "term-1",
-			required: true,
-		},
-		{
-			id: "2",
-			termDefinitionId: "term-2",
-			required: false,
-		},
-	]);
-
-	// Text & Labels State
-	const [signupButtonText, setSignupButtonText] = useState("Register");
-	const [loginButtonText, setLoginButtonText] = useState(
-		"Login with your account",
-	);
-	const [sponsorMessage, setSponsorMessage] = useState(
-		"You need to wait that your host approves your access",
-	);
-	const [phoneValidationMessage, setPhoneValidationMessage] = useState(
-		"You need to validate your phone number",
-	);
-	const [successMessage, setSuccessMessage] = useState(
-		"You're all set! Enjoy your WiFi connection.",
-	);
-	const [blockedMessage, setBlockedMessage] = useState(
-		"Sorry, you have used all your WiFi time allowance for today.",
-	);
-	const [easyWifiCtaMessage, setEasyWifiCtaMessage] = useState(
-		"You need to wait that your host approves your access",
-	);
-	const [easyWifiSkipMessage, setEasyWifiSkipMessage] = useState(
-		"I'll take my chances",
-	);
+	const [terms, setTerms] = useState<SelectedTerm[]>([]);
 
 	const [registrationFields, setRegistrationFields] = useState<FormField[]>([
 		{
@@ -127,16 +149,156 @@ export function OnboardingJourneyWizard({
 		},
 	]);
 
+	// Load saved config into state when it arrives
+	useEffect(() => {
+		if (savedConfig?.config) {
+			const config = savedConfig.config;
+
+			// Authentication
+			setShowLoginOption(config.authentication.showLoginOption);
+			setAppleIdEnabled(config.authentication.appleIdEnabled);
+			setAccessCodesEnabled(config.authentication.accessCodesEnabled);
+			setEnterpriseIdpEnabled(config.authentication.enterpriseIdpEnabled);
+			setSelectedIdps(config.authentication.selectedIdps);
+			setSponsorshipEnabled(config.authentication.sponsorshipEnabled);
+			setPhoneValidationEnabled(
+				config.authentication.phoneValidationEnabled,
+			);
+			setRegistrationFields(config.authentication.registrationFields);
+			setTerms(config.authentication.terms);
+
+			// Journey
+			setEasyWifiEnabled(config.journey.easyWifiEnabled);
+			setSuccessRedirectMode(config.journey.successRedirectMode);
+
+			// Style
+			setFontFamily(config.style.fontFamily);
+			setBaseFontSize(config.style.baseFontSize);
+			setBaseColor(config.style.baseColor);
+			setPrimaryColor(config.style.primaryColor);
+			setSpacing(config.style.spacing);
+			setBackgroundType(config.style.backgroundType);
+			if (config.style.backgroundColor) {
+				setBackgroundColor(config.style.backgroundColor);
+			}
+			if (config.style.gradientColor1) {
+				setGradientColor1(config.style.gradientColor1);
+			}
+			if (config.style.gradientColor2) {
+				setGradientColor2(config.style.gradientColor2);
+			}
+
+			// Assets
+			setLogoSize(config.assets.logoSize);
+			if (config.assets.logoUrl) setLogo(config.assets.logoUrl);
+			if (config.assets.backgroundImageUrl) {
+				setBackgroundImage(config.assets.backgroundImageUrl);
+			}
+
+			// Languages
+			if (config.languages) {
+				setSelectedLanguages(config.languages);
+			}
+			if (config.defaultLanguage) {
+				setActiveLanguage(config.defaultLanguage);
+			}
+
+			// Content - load all languages
+			if (config.content) {
+				setContent(config.content);
+			}
+		}
+	}, [savedConfig]);
+
+	// Save mutation
+	const saveMutation = useMutation(
+		orpc.guestWifi.save.mutationOptions({
+			onSuccess: () => {
+				queryClient.invalidateQueries({
+					queryKey: orpc.guestWifi.get.queryKey({
+						input: { workspaceId: workspace?.id || "" },
+					}),
+				});
+			},
+		}),
+	);
+
+	const buildConfigFromState = () => ({
+		authentication: {
+			showLoginOption,
+			appleIdEnabled,
+			accessCodesEnabled,
+			enterpriseIdpEnabled,
+			selectedIdps,
+			sponsorshipEnabled,
+			phoneValidationEnabled,
+			registrationFields,
+			terms,
+		},
+		journey: {
+			easyWifiEnabled,
+			successRedirectMode: successRedirectMode as "external" | "text",
+			autoConnectReturning: true,
+			allowBypassWithCode: true,
+			allowExtensionRequest: true,
+		},
+		style: {
+			fontFamily,
+			baseFontSize,
+			baseColor,
+			primaryColor,
+			spacing,
+			backgroundType: backgroundType as "image" | "color" | "gradient",
+			backgroundColor,
+			gradientColor1,
+			gradientColor2,
+		},
+		content,
+		assets: {
+			logoUrl: logo || undefined,
+			logoSize,
+			backgroundImageUrl: backgroundImage || undefined,
+		},
+		languages: selectedLanguages,
+		defaultLanguage: activeLanguage,
+	});
+
 	if (!open) return null;
 
 	const handleSaveAndContinue = () => {
+		// Save current state
+		if (workspace?.id) {
+			saveMutation.mutate({
+				workspaceId: workspace.id,
+				name: "Default",
+				config: buildConfigFromState(),
+			});
+		}
+
 		if (currentStep < STEPS.length) {
 			setCurrentStep(currentStep + 1);
 		} else {
-			// Save and close
+			// Final save and close
 			onClose();
 		}
 	};
+
+	// Show loading while fetching config
+	if (isLoadingConfig) {
+		return (
+			<div
+				className="fixed inset-0 z-40 flex items-center justify-center"
+				style={{ backgroundColor: "var(--sidebar)" }}
+			>
+				<div className="flex flex-col items-center gap-4">
+					<Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+					<p className="text-muted-foreground">
+						Loading configuration...
+					</p>
+				</div>
+			</div>
+		);
+	}
 
 	return (
 		<div
@@ -185,8 +347,14 @@ export function OnboardingJourneyWizard({
 								<Button
 									onClick={handleSaveAndContinue}
 									className="gap-2"
+									disabled={saveMutation.isPending}
 								>
-									Save & Continue
+									{saveMutation.isPending && (
+										<Loader2 className="h-4 w-4 animate-spin" />
+									)}
+									{currentStep === STEPS.length
+										? "Publish"
+										: "Save & Continue"}
 									<ArrowRight className="h-4 w-4" />
 								</Button>
 							</div>
@@ -260,15 +428,10 @@ export function OnboardingJourneyWizard({
 									setPrimaryColor={setPrimaryColor}
 									spacing={spacing}
 									setSpacing={setSpacing}
-									// Content props
 									logo={logo}
 									setLogo={setLogo}
 									logoSize={logoSize}
 									setLogoSize={setLogoSize}
-									title={title}
-									setTitle={setTitle}
-									description={description}
-									setDescription={setDescription}
 									backgroundType={backgroundType}
 									setBackgroundType={setBackgroundType}
 									backgroundImage={backgroundImage}
@@ -279,70 +442,81 @@ export function OnboardingJourneyWizard({
 									setGradientColor1={setGradientColor1}
 									gradientColor2={gradientColor2}
 									setGradientColor2={setGradientColor2}
-									signupButtonText={signupButtonText}
-									setSignupButtonText={setSignupButtonText}
-									loginButtonText={loginButtonText}
-									setLoginButtonText={setLoginButtonText}
-									sponsorMessage={sponsorMessage}
-									setSponsorMessage={setSponsorMessage}
-									phoneValidationMessage={
-										phoneValidationMessage
-									}
-									setPhoneValidationMessage={
-										setPhoneValidationMessage
-									}
-									successMessage={successMessage}
-									setSuccessMessage={setSuccessMessage}
-									blockedMessage={blockedMessage}
-									setBlockedMessage={setBlockedMessage}
-									easyWifiCtaMessage={easyWifiCtaMessage}
-									setEasyWifiCtaMessage={
-										setEasyWifiCtaMessage
-									}
-									easyWifiSkipMessage={easyWifiSkipMessage}
-									setEasyWifiSkipMessage={
-										setEasyWifiSkipMessage
-									}
+									content={content}
+									setContent={setContent}
+									selectedLanguages={selectedLanguages}
+									setSelectedLanguages={setSelectedLanguages}
+									activeLanguage={activeLanguage}
+									setActiveLanguage={setActiveLanguage}
 								/>
 							)}
 						</div>
 
 						{/* Right Panel - Preview */}
-						<div className="w-1/2 bg-muted/30">
+						<div className="w-1/2 overflow-y-auto bg-muted/50">
 							<WizardPreview
 								registrationFields={registrationFields}
-								easyWifiEnabled={easyWifiEnabled}
-								sponsorshipEnabled={sponsorshipEnabled}
-								phoneValidationEnabled={phoneValidationEnabled}
-								successRedirectMode={successRedirectMode}
-								fontFamily={fontFamily}
-								baseFontSize={baseFontSize}
-								baseColor={baseColor}
-								primaryColor={primaryColor}
-								spacing={spacing}
 								logo={logo}
 								logoSize={logoSize}
-								title={title}
-								description={description}
-								backgroundType={backgroundType}
-								backgroundImage={backgroundImage}
-								backgroundColor={backgroundColor}
-								gradientColor1={gradientColor1}
-								gradientColor2={gradientColor2}
-								signupButtonText={signupButtonText}
-								loginButtonText={loginButtonText}
-								sponsorMessage={sponsorMessage}
-								phoneValidationMessage={phoneValidationMessage}
-								successMessage={successMessage}
-								blockedMessage={blockedMessage}
-								easyWifiCtaMessage={easyWifiCtaMessage}
-								easyWifiSkipMessage={easyWifiSkipMessage}
+								title={
+									getContentForLanguage(activeLanguage).title
+								}
+								description={
+									getContentForLanguage(activeLanguage)
+										.description
+								}
+								signupButtonText={
+									getContentForLanguage(activeLanguage)
+										.signupButtonText
+								}
+								loginButtonText={
+									getContentForLanguage(activeLanguage)
+										.loginButtonText
+								}
 								showLoginOption={showLoginOption}
 								appleIdEnabled={appleIdEnabled}
 								accessCodesEnabled={accessCodesEnabled}
 								enterpriseIdpEnabled={enterpriseIdpEnabled}
 								selectedIdps={selectedIdps}
 								terms={terms}
+								fontFamily={fontFamily}
+								baseFontSize={baseFontSize}
+								baseColor={baseColor}
+								primaryColor={primaryColor}
+								spacing={spacing}
+								backgroundType={backgroundType}
+								backgroundColor={backgroundColor}
+								gradientColor1={gradientColor1}
+								gradientColor2={gradientColor2}
+								backgroundImage={backgroundImage}
+								easyWifiEnabled={easyWifiEnabled}
+								sponsorshipEnabled={sponsorshipEnabled}
+								phoneValidationEnabled={phoneValidationEnabled}
+								successRedirectMode={successRedirectMode}
+								sponsorMessage={
+									getContentForLanguage(activeLanguage)
+										.sponsorMessage
+								}
+								phoneValidationMessage={
+									getContentForLanguage(activeLanguage)
+										.phoneValidationMessage
+								}
+								successMessage={
+									getContentForLanguage(activeLanguage)
+										.successMessage
+								}
+								blockedMessage={
+									getContentForLanguage(activeLanguage)
+										.blockedMessage
+								}
+								easyWifiCtaMessage={
+									getContentForLanguage(activeLanguage)
+										.easyWifiCtaMessage
+								}
+								easyWifiSkipMessage={
+									getContentForLanguage(activeLanguage)
+										.easyWifiSkipMessage
+								}
 							/>
 						</div>
 					</div>

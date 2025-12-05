@@ -305,14 +305,18 @@ export function WizardPreview({
 						color: baseColor,
 					}}
 				>
-					{/* Background Area */}
-					<div
-						className="h-48 w-full bg-cover bg-center relative"
-						style={getBackgroundStyle()}
-					>
-						{/* Overlay for better text readability if needed */}
-						<div className="absolute inset-0 bg-black/10" />
-					</div>
+					{/* Background Area - Only show if background is set */}
+					{(backgroundType === "color" ||
+						backgroundType === "gradient" ||
+						(backgroundType === "image" && backgroundImage)) && (
+						<div
+							className="h-48 w-full bg-cover bg-center relative"
+							style={getBackgroundStyle()}
+						>
+							{/* Overlay for better text readability if needed */}
+							<div className="absolute inset-0 bg-black/10" />
+						</div>
+					)}
 
 					<div
 						className={`p-6 flex flex-col flex-1 ${
@@ -323,18 +327,27 @@ export function WizardPreview({
 									: "gap-4"
 						}`}
 					>
-						{/* Logo */}
-						<div
-							className={`flex justify-center -mt-16 relative z-10 ${
-								spacing === "compact"
-									? "mb-2"
-									: spacing === "spacious"
-										? "mb-8"
-										: "mb-6"
-							}`}
-						>
-							<div className="rounded-full bg-background p-2 shadow-sm">
-								{logo ? (
+						{/* Logo - Only show if logo is uploaded */}
+						{logo && (
+							<div
+								className={`flex justify-center ${
+									backgroundType === "color" ||
+									backgroundType === "gradient" ||
+									(
+										backgroundType === "image" &&
+											backgroundImage
+									)
+										? "-mt-16 relative z-10"
+										: ""
+								} ${
+									spacing === "compact"
+										? "mb-2"
+										: spacing === "spacious"
+											? "mb-8"
+											: "mb-6"
+								}`}
+							>
+								<div className="rounded-full bg-background p-2 shadow-sm">
 									<img
 										src={logo}
 										alt="Logo"
@@ -344,21 +357,9 @@ export function WizardPreview({
 											height: `${logoSize}px`,
 										}}
 									/>
-								) : (
-									<div
-										className="rounded-full bg-muted flex items-center justify-center"
-										style={{
-											width: `${logoSize}px`,
-											height: `${logoSize}px`,
-										}}
-									>
-										<span className="text-xs text-muted-foreground">
-											Logo
-										</span>
-									</div>
-								)}
+								</div>
 							</div>
-						</div>
+						)}
 
 						{/* Home Page Preview */}
 						{selectedPage === "home" && (
