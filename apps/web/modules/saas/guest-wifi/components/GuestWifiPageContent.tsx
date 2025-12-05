@@ -221,20 +221,20 @@ export function GuestWifiPageContent() {
 					<ActionRow
 						icon={Users}
 						title="Users"
-						description="Manage guest user accounts and sessions."
-						href="#"
+						description="Directory of all guest users registered via Guest WiFi"
+						href="guest-wifi/users-devices"
 					/>
 					<ActionRow
 						icon={Key}
 						title="Access Codes"
-						description="Generate and manage access codes."
-						href="#"
+						description="Managed Access Codes for access control and extensions"
+						href="guest-wifi/access-codes"
 					/>
 					<ActionRow
 						icon={Shield}
 						title="Sponsors"
-						description="Manage sponsor approvals and settings."
-						href="#"
+						description="Manage directory of Sponsors"
+						href="guest-wifi/sponsors"
 					/>
 				</div>
 			</div>

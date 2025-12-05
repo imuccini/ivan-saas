@@ -24,8 +24,8 @@ interface FormField {
 
 const STEPS = [
 	{ id: 1, name: "Authentication", component: StepAuthentication },
-	{ id: 2, name: "Content", component: StepContent },
-	{ id: 3, name: "Journey", component: StepJourney },
+	{ id: 2, name: "Journey", component: StepJourney },
+	{ id: 3, name: "Content", component: StepContent },
 ];
 
 export function OnboardingJourneyWizard({
@@ -33,6 +33,20 @@ export function OnboardingJourneyWizard({
 	onClose,
 }: OnboardingJourneyWizardProps) {
 	const [currentStep, setCurrentStep] = useState(1);
+
+	// Shared state across steps
+	const [easyWifiEnabled, setEasyWifiEnabled] = useState(false);
+	const [sponsorshipEnabled, setSponsorshipEnabled] = useState(false);
+	const [phoneValidationEnabled, setPhoneValidationEnabled] = useState(false);
+	const [successRedirectMode, setSuccessRedirectMode] = useState("text");
+
+	// Style State
+	const [fontFamily, setFontFamily] = useState("Inter");
+	const [baseFontSize, setBaseFontSize] = useState("16");
+	const [baseColor, setBaseColor] = useState("#1F2937");
+	const [primaryColor, setPrimaryColor] = useState("#111827");
+	const [spacing, setSpacing] = useState("balanced");
+
 	const [registrationFields, setRegistrationFields] = useState<FormField[]>([
 		{
 			id: "1",
@@ -51,10 +65,6 @@ export function OnboardingJourneyWizard({
 	]);
 
 	if (!open) return null;
-
-	const CurrentStepComponent = STEPS.find(
-		(s) => s.id === currentStep,
-	)?.component;
 
 	const handleSaveAndContinue = () => {
 		if (currentStep < STEPS.length) {
@@ -126,14 +136,41 @@ export function OnboardingJourneyWizard({
 							<StepAuthentication
 								registrationFields={registrationFields}
 								setRegistrationFields={setRegistrationFields}
+								sponsorshipEnabled={sponsorshipEnabled}
+								setSponsorshipEnabled={setSponsorshipEnabled}
+								phoneValidationEnabled={phoneValidationEnabled}
+								setPhoneValidationEnabled={
+									setPhoneValidationEnabled
+								}
 							/>
 						)}
 						{currentStep === 2 && (
-							<StepContent
-								registrationFields={registrationFields}
+							<StepJourney
+								easyWifiEnabled={easyWifiEnabled}
+								setEasyWifiEnabled={setEasyWifiEnabled}
+								successRedirectMode={successRedirectMode}
+								setSuccessRedirectMode={setSuccessRedirectMode}
 							/>
 						)}
-						{currentStep === 3 && <StepJourney />}
+						{currentStep === 3 && (
+							<StepContent
+								registrationFields={registrationFields}
+								easyWifiEnabled={easyWifiEnabled}
+								sponsorshipEnabled={sponsorshipEnabled}
+								phoneValidationEnabled={phoneValidationEnabled}
+								successRedirectMode={successRedirectMode}
+								fontFamily={fontFamily}
+								setFontFamily={setFontFamily}
+								baseFontSize={baseFontSize}
+								setBaseFontSize={setBaseFontSize}
+								baseColor={baseColor}
+								setBaseColor={setBaseColor}
+								primaryColor={primaryColor}
+								setPrimaryColor={setPrimaryColor}
+								spacing={spacing}
+								setSpacing={setSpacing}
+							/>
+						)}
 					</div>
 				</div>
 			</div>

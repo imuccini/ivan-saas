@@ -30,8 +30,9 @@ export function NavMain({
 		isActive?: boolean;
 		items?: {
 			title: string;
-			url: string;
+			url?: string;
 			isActive?: boolean;
+			onClick?: () => void;
 		}[];
 	}[];
 	collapsible?: "auto" | "manual";
@@ -117,21 +118,39 @@ export function NavMain({
 												key={subItem.title}
 											>
 												<SidebarMenuSubButton
-													asChild
+													asChild={!subItem.onClick}
 													isActive={subItem.isActive}
 												>
-													<Link
-														href={subItem.url}
-														onClick={() =>
-															onNavigate?.(
-																subItem.url,
-															)
-														}
-													>
-														<span>
-															{subItem.title}
-														</span>
-													</Link>
+													{subItem.onClick ? (
+														<button
+															type="button"
+															onClick={
+																subItem.onClick
+															}
+															className="w-full"
+														>
+															<span>
+																{subItem.title}
+															</span>
+														</button>
+													) : (
+														<Link
+															href={
+																subItem.url ||
+																"#"
+															}
+															onClick={() =>
+																subItem.url &&
+																onNavigate?.(
+																	subItem.url,
+																)
+															}
+														>
+															<span>
+																{subItem.title}
+															</span>
+														</Link>
+													)}
 												</SidebarMenuSubButton>
 											</SidebarMenuSubItem>
 										))}

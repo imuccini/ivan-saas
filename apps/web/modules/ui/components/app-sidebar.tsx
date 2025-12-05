@@ -1,6 +1,7 @@
 "use client";
 
 import { useSession } from "@saas/auth/hooks/use-session";
+
 import { useActiveOrganization } from "@saas/organizations/hooks/use-active-organization";
 import { UnifiedWorkspaceSwitcher } from "@saas/shared/components/UnifiedWorkspaceSwitcher";
 import { useActiveWorkspace } from "@saas/workspaces/hooks/use-active-workspace";
@@ -61,6 +62,26 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 			url: `${basePath}/guest-wifi`,
 			icon: WifiIcon,
 			isActive: currentPath.startsWith(`${basePath}/guest-wifi`),
+			items: [
+				{
+					title: "Users & Devices",
+					url: `${basePath}/guest-wifi/users-devices`,
+					isActive:
+						currentPath === `${basePath}/guest-wifi/users-devices`,
+				},
+
+				{
+					title: "Sponsors",
+					url: `${basePath}/guest-wifi/sponsors`,
+					isActive: currentPath === `${basePath}/guest-wifi/sponsors`,
+				},
+				{
+					title: "Access Codes",
+					url: `${basePath}/guest-wifi/access-codes`,
+					isActive:
+						currentPath === `${basePath}/guest-wifi/access-codes`,
+				},
+			],
 		},
 		{
 			title: "Employees",
@@ -130,12 +151,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 			url: "#",
 			icon: Settings2Icon,
 			items: [
-				{
-					title: "Users & Devices",
-					url: `${basePath}/manage/users-devices`,
-					isActive:
-						currentPath === `${basePath}/manage/users-devices`,
-				},
 				{
 					title: "Networks",
 					url: `${basePath}/manage/networks`,

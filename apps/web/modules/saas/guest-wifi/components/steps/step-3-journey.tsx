@@ -7,10 +7,21 @@ import { Label } from "@ui/components/label";
 import { RadioGroup, RadioGroupItem } from "@ui/components/radio-group";
 import { Switch } from "@ui/components/switch";
 import { Tabs, TabsList, TabsTrigger } from "@ui/components/tabs";
-import { Textarea } from "@ui/components/textarea";
 import { useState } from "react";
 
-export function StepJourney() {
+interface StepJourneyProps {
+	easyWifiEnabled?: boolean;
+	setEasyWifiEnabled?: (enabled: boolean) => void;
+	successRedirectMode?: string;
+	setSuccessRedirectMode?: (mode: string) => void;
+}
+
+export function StepJourney({
+	easyWifiEnabled = false,
+	setEasyWifiEnabled,
+	successRedirectMode = "external",
+	setSuccessRedirectMode,
+}: StepJourneyProps) {
 	const [previewMode, setPreviewMode] = useState<
 		"mobile" | "tablet" | "desktop"
 	>("mobile");
@@ -20,10 +31,10 @@ export function StepJourney() {
 			{/* Left Panel - Configuration */}
 			<div className="w-1/2 overflow-y-auto p-6 space-y-6">
 				{/* Easy WiFi onboarding */}
-				<div className="space-y-4">
+				<div className="rounded-lg border bg-card p-4 space-y-4">
 					<div className="flex items-center justify-between">
-						<div>
-							<div className="font-medium">
+						<div className="space-y-1">
+							<div className="font-semibold">
 								Easy WiFi onboarding
 							</div>
 							<p className="text-sm text-muted-foreground">
@@ -31,39 +42,30 @@ export function StepJourney() {
 								simplified returning experience
 							</p>
 						</div>
-						<Switch />
-					</div>
-
-					<div className="space-y-3 pl-6">
-						<div className="space-y-2">
-							<Label>Call to action message</Label>
-							<Textarea
-								defaultValue="You need to wait that your host approves your access"
-								rows={3}
-							/>
-						</div>
-
-						<div className="space-y-2">
-							<Label>Skip message</Label>
-							<Input defaultValue="I'll take my chances" />
-						</div>
+						<Switch
+							checked={easyWifiEnabled}
+							onCheckedChange={setEasyWifiEnabled}
+						/>
 					</div>
 				</div>
 
 				{/* Success page */}
-				<div className="space-y-4">
-					<div>
-						<div className="font-medium">Success page</div>
+				<div className="rounded-lg border bg-card p-4 space-y-4">
+					<div className="space-y-1">
+						<div className="font-semibold">Success page</div>
 						<p className="text-sm text-muted-foreground">
 							Set up the user experience after they log in (most
 							Androids skip this part)
 						</p>
 					</div>
 
-					<div className="space-y-4 pl-6">
+					<div className="space-y-4">
 						<div className="space-y-3">
 							<Label>Select your redirect mode</Label>
-							<RadioGroup defaultValue="external">
+							<RadioGroup
+								value={successRedirectMode}
+								onValueChange={setSuccessRedirectMode}
+							>
 								<div className="flex items-center space-x-2">
 									<RadioGroupItem
 										value="external"
@@ -82,34 +84,36 @@ export function StepJourney() {
 										htmlFor="text"
 										className="font-normal"
 									>
-										Text page
+										Success page
 									</Label>
 								</div>
 							</RadioGroup>
 						</div>
 
-						<div className="space-y-2">
-							<Label>Redirect URL</Label>
-							<Input
-								type="url"
-								defaultValue="https://mybusinessite.com"
-								placeholder="https://"
-							/>
-						</div>
+						{successRedirectMode === "external" && (
+							<div className="space-y-2">
+								<Label>Redirect URL</Label>
+								<Input
+									type="url"
+									defaultValue="https://mybusinessite.com"
+									placeholder="https://"
+								/>
+							</div>
+						)}
 					</div>
 				</div>
 
 				{/* Returning users */}
-				<div className="space-y-4">
-					<div>
-						<div className="font-medium">Returning users</div>
+				<div className="rounded-lg border bg-card p-4 space-y-4">
+					<div className="space-y-1">
+						<div className="font-semibold">Returning users</div>
 						<p className="text-sm text-muted-foreground">
 							Set the experience for users coming back to the
 							network with recognized devices
 						</p>
 					</div>
 
-					<div className="flex items-center gap-2 pl-6">
+					<div className="flex items-center gap-2">
 						<Checkbox id="auto-connect" defaultChecked />
 						<Label htmlFor="auto-connect" className="font-normal">
 							Automatically connect returning user (no captive
@@ -119,9 +123,9 @@ export function StepJourney() {
 				</div>
 
 				{/* Users with expired access */}
-				<div className="space-y-4">
-					<div>
-						<div className="font-medium">
+				<div className="rounded-lg border bg-card p-4 space-y-4">
+					<div className="space-y-1">
+						<div className="font-semibold">
 							Users with expired access
 						</div>
 						<p className="text-sm text-muted-foreground">
@@ -129,7 +133,7 @@ export function StepJourney() {
 						</p>
 					</div>
 
-					<div className="space-y-3 pl-6">
+					<div className="space-y-3">
 						<div className="flex items-center gap-2">
 							<Checkbox id="bypass-limits" defaultChecked />
 							<Label
