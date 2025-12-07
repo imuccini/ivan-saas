@@ -21,28 +21,7 @@ interface SelectedTerm {
 }
 
 // Mock available terms - matching ConfigureTermsDialog
-const AVAILABLE_TERMS = [
-	{
-		id: "term-1",
-		title: "Privacy Policy",
-		label: "I accept the Privacy Policy",
-	},
-	{
-		id: "term-2",
-		title: "Marketing Opt-In",
-		label: "I agree to receive marketing communications",
-	},
-	{
-		id: "term-3",
-		title: "Terms of Service",
-		label: "I agree to the Terms of Service",
-	},
-	{
-		id: "term-4",
-		title: "Cookie Policy",
-		label: "I accept the use of cookies",
-	},
-];
+// Mock available terms removed - using props instead
 
 interface WizardPreviewProps {
 	registrationFields: FormField[];
@@ -88,6 +67,7 @@ interface WizardPreviewProps {
 	terms?: SelectedTerm[];
 	previewPage: string;
 	setPreviewPage: (page: string) => void;
+	availableTerms: { id: string; title: string; label: string }[];
 }
 
 export function WizardPreview({
@@ -131,6 +111,7 @@ export function WizardPreview({
 	terms = [],
 	previewPage,
 	setPreviewPage,
+	availableTerms = [],
 }: WizardPreviewProps) {
 	const [previewMode, setPreviewMode] = useState<
 		"mobile" | "tablet" | "desktop"
@@ -562,7 +543,7 @@ export function WizardPreview({
 												<div className="space-y-2">
 													{terms.map((term) => {
 														const definition =
-															AVAILABLE_TERMS.find(
+															availableTerms.find(
 																(t) =>
 																	t.id ===
 																	term.termDefinitionId,
@@ -725,7 +706,7 @@ export function WizardPreview({
 									<div className="space-y-2">
 										{terms.map((term) => {
 											const definition =
-												AVAILABLE_TERMS.find(
+												availableTerms.find(
 													(t) =>
 														t.id ===
 														term.termDefinitionId,

@@ -65,6 +65,23 @@ export function OnboardingJourneyWizard({
 		enabled: !!workspace?.id && open,
 	});
 
+	// Fetch available terms
+	const { data: termsData = [] } = useQuery(
+		orpc.terms.list.queryOptions({
+			input: {
+				workspaceId: workspace?.id || "",
+				status: "PUBLISHED",
+			},
+			enabled: !!workspace?.id,
+		}),
+	);
+
+	const availableTerms = termsData.map((term) => ({
+		id: term.id,
+		title: term.name,
+		label: term.translations?.en?.label || term.name,
+	}));
+
 	// Shared state across steps - initialized from saved config
 	const [easyWifiEnabled, setEasyWifiEnabled] = useState(false);
 	const [sponsorshipEnabled, setSponsorshipEnabled] = useState(false);
@@ -568,6 +585,7 @@ export function OnboardingJourneyWizard({
 								}
 								previewPage={previewPage}
 								setPreviewPage={setPreviewPage}
+								availableTerms={availableTerms}
 							/>
 						</div>
 					</div>
