@@ -11,7 +11,17 @@ import {
 	Palette,
 	Workflow,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
+import {
+	AlertDialog,
+	AlertDialogAction,
+	AlertDialogCancel,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogHeader,
+	AlertDialogTitle,
+} from "@ui/components/alert-dialog";
 import { StepAuthentication } from "./steps/step-1-authentication";
 import { StepContent } from "./steps/step-2-content";
 import { StepJourney } from "./steps/step-3-journey";
@@ -305,6 +315,64 @@ export function OnboardingJourneyWizard({
 		defaultLanguage: activeLanguage,
 	});
 
+
+
+	// Check for unsaved changes
+	const hasUnsavedChanges = useMemo(() => {
+		if (!savedConfig?.config) return false;
+		
+		const currentConfig = buildConfigFromState();
+		const saved = savedConfig.config;
+
+		// Deep comparison logic or simple JSON stringify for now
+		// Note: Order of keys matters for JSON.stringify, but buildConfigFromState structure is consistent
+		// Ideally we would use lodash.isEqual but let's try a simpler approach first or just assume any change is dirty
+		// Since we don't have a simple way to deep compare without a library, let's rely on JSON.stringify
+		// We need to ensure the saved config has the same structure/order as buildConfigFromState
+		
+		return JSON.stringify(currentConfig) !== JSON.stringify(saved);
+	}, [
+		guestRegistrationEnabled,
+		registrationMode,
+		showLoginOption,
+		appleIdEnabled,
+		accessCodesEnabled,
+		enterpriseIdpEnabled,
+		selectedIdps,
+		sponsorshipEnabled,
+		phoneValidationEnabled,
+		registrationFields,
+		terms,
+		easyWifiEnabled,
+		successRedirectMode,
+		fontFamily,
+		baseFontSize,
+		baseColor,
+		primaryColor,
+		spacing,
+		backgroundType,
+		backgroundColor,
+		gradientColor1,
+		gradientColor2,
+		content,
+		logo,
+		logoSize,
+		backgroundImage,
+		selectedLanguages,
+		activeLanguage,
+		savedConfig
+	]);
+
+	const [showUnsavedChangesDialog, setShowUnsavedChangesDialog] = useState(false);
+
+	const handleClose = () => {
+		if (hasUnsavedChanges) {
+			setShowUnsavedChangesDialog(true);
+		} else {
+			onClose();
+		}
+	};
+
 	if (!open) return null;
 
 	const handleSaveAndContinue = () => {
@@ -384,7 +452,7 @@ export function OnboardingJourneyWizard({
 
 							{/* Actions */}
 							<div className="flex items-center gap-2">
-								<Button variant="ghost" onClick={onClose}>
+								<Button variant="ghost" onClick={handleClose}>
 									Exit
 								</Button>
 								<Button
@@ -591,6 +659,22 @@ export function OnboardingJourneyWizard({
 					</div>
 				</div>
 			</div>
+
+
+			<AlertDialog open={showUnsavedChangesDialog} onOpenChange={setShowUnsavedChangesDialog}>
+				<AlertDialogContent>
+					<AlertDialogHeader>
+						<AlertDialogTitle>Unsaved Changes</AlertDialogTitle>
+						<AlertDialogDescription>
+							You have unsaved changes. Are you sure you want to leave? Your changes will be lost.
+						</AlertDialogDescription>
+					</AlertDialogHeader>
+					<AlertDialogFooter>
+						<AlertDialogCancel>Cancel</AlertDialogCancel>
+						<AlertDialogAction onClick={onClose}>Leave without saving</AlertDialogAction>
+					</AlertDialogFooter>
+				</AlertDialogContent>
+			</AlertDialog>
 		</div>
 	);
 }
