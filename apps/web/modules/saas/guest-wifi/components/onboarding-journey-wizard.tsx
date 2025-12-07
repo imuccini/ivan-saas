@@ -11,6 +11,7 @@ import {
 	Palette,
 	Workflow,
 } from "lucide-react";
+import equal from "fast-deep-equal";
 import { useEffect, useState, useMemo } from "react";
 import {
 	AlertDialog,
@@ -324,13 +325,10 @@ export function OnboardingJourneyWizard({
 		const currentConfig = buildConfigFromState();
 		const saved = savedConfig.config;
 
-		// Deep comparison logic or simple JSON stringify for now
-		// Note: Order of keys matters for JSON.stringify, but buildConfigFromState structure is consistent
-		// Ideally we would use lodash.isEqual but let's try a simpler approach first or just assume any change is dirty
-		// Since we don't have a simple way to deep compare without a library, let's rely on JSON.stringify
-		// We need to ensure the saved config has the same structure/order as buildConfigFromState
-		
-		return JSON.stringify(currentConfig) !== JSON.stringify(saved);
+
+
+		// Use fast-deep-equal for comparison
+		return !equal(currentConfig, saved);
 	}, [
 		guestRegistrationEnabled,
 		registrationMode,

@@ -295,8 +295,7 @@ export function ConfigureTermsDialog({
 							asChild
 						>
 							<Link
-								href={`/app/${workspace?.slug}/settings/terms`}
-								target="_blank"
+								href={`/app/${workspace?.slug}/manage/terms`}
 							>
 								Terms management
 								<ExternalLink className="h-4 w-4" />
