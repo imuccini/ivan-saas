@@ -175,7 +175,9 @@ export function OnboardingJourneyWizard({
 	const [enterpriseIdpEnabled, setEnterpriseIdpEnabled] = useState(false);
 	const [selectedIdps, setSelectedIdps] = useState<string[]>([]);
 	const [terms, setTerms] = useState<SelectedTerm[]>([]);
+
 	const [previewPage, setPreviewPage] = useState("home");
+	const [initialConfig, setInitialConfig] = useState<any>(null);
 
 	const [registrationFields, setRegistrationFields] = useState<FormField[]>([
 		{
@@ -256,8 +258,52 @@ export function OnboardingJourneyWizard({
 
 			// Content - load all languages
 			if (config.content) {
+
 				setContent(config.content);
 			}
+
+			// Set initial config for dirty checking
+			setInitialConfig({
+				authentication: {
+					guestRegistrationEnabled: config.authentication.guestRegistrationEnabled ?? true,
+					registrationMode: config.authentication.registrationMode || "form",
+					showLoginOption: config.authentication.showLoginOption,
+					appleIdEnabled: config.authentication.appleIdEnabled,
+					accessCodesEnabled: config.authentication.accessCodesEnabled,
+					enterpriseIdpEnabled: config.authentication.enterpriseIdpEnabled,
+					selectedIdps: config.authentication.selectedIdps,
+					sponsorshipEnabled: config.authentication.sponsorshipEnabled,
+					phoneValidationEnabled: config.authentication.phoneValidationEnabled,
+					registrationFields: config.authentication.registrationFields,
+					terms: config.authentication.terms,
+				},
+				journey: {
+					easyWifiEnabled: config.journey.easyWifiEnabled,
+					successRedirectMode: config.journey.successRedirectMode,
+					autoConnectReturning: true,
+					allowBypassWithCode: true,
+					allowExtensionRequest: true,
+				},
+				style: {
+					fontFamily: config.style.fontFamily,
+					baseFontSize: config.style.baseFontSize,
+					baseColor: config.style.baseColor,
+					primaryColor: config.style.primaryColor,
+					spacing: config.style.spacing,
+					backgroundType: config.style.backgroundType,
+					backgroundColor: config.style.backgroundColor || "#6366f1",
+					gradientColor1: config.style.gradientColor1 || "#6366f1",
+					gradientColor2: config.style.gradientColor2 || "#ec4899",
+				},
+				content: config.content || { en: { ...defaultContent } },
+				assets: {
+					logoUrl: config.assets.logoUrl || undefined,
+					logoSize: config.assets.logoSize,
+					backgroundImageUrl: config.assets.backgroundImageUrl || undefined,
+				},
+				languages: config.languages || ["en"],
+				defaultLanguage: config.defaultLanguage || "en",
+			});
 		}
 	}, [savedConfig]);
 
@@ -320,16 +366,14 @@ export function OnboardingJourneyWizard({
 
 	// Check for unsaved changes
 	const hasUnsavedChanges = useMemo(() => {
-		if (!savedConfig?.config) return false;
+		if (!initialConfig) return false;
 		
 		const currentConfig = buildConfigFromState();
-		const saved = savedConfig.config;
-
-
 
 		// Use fast-deep-equal for comparison
-		return !equal(currentConfig, saved);
+		return !equal(currentConfig, initialConfig);
 	}, [
+		initialConfig,
 		guestRegistrationEnabled,
 		registrationMode,
 		showLoginOption,
