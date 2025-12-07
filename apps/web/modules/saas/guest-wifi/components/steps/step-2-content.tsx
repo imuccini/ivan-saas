@@ -37,6 +37,9 @@ interface ContentPerLanguage {
 	description: string;
 	signupButtonText: string;
 	loginButtonText: string;
+	registrationTitle: string;
+	registrationDescription: string;
+	registrationSubmitButtonText: string;
 	sponsorMessage: string;
 	phoneValidationMessage: string;
 	successMessage: string;
@@ -51,6 +54,9 @@ interface StepContentProps {
 	sponsorshipEnabled?: boolean;
 	phoneValidationEnabled?: boolean;
 	successRedirectMode?: string;
+	guestRegistrationEnabled?: boolean;
+	registrationMode?: "form" | "button";
+	showLoginOption?: boolean;
 	fontFamily: string;
 	setFontFamily: (font: string) => void;
 	baseFontSize: string;
@@ -85,6 +91,8 @@ interface StepContentProps {
 	setSelectedLanguages: React.Dispatch<React.SetStateAction<string[]>>;
 	activeLanguage: string;
 	setActiveLanguage: React.Dispatch<React.SetStateAction<string>>;
+	previewPage: string;
+	setPreviewPage: (page: string) => void;
 }
 
 export function StepContent({
@@ -93,6 +101,9 @@ export function StepContent({
 	sponsorshipEnabled,
 	phoneValidationEnabled,
 	successRedirectMode,
+	guestRegistrationEnabled = true,
+	registrationMode = "form",
+	showLoginOption = true,
 	fontFamily,
 	setFontFamily,
 	baseFontSize,
@@ -123,9 +134,10 @@ export function StepContent({
 	setSelectedLanguages,
 	activeLanguage,
 	setActiveLanguage,
+	previewPage,
+	setPreviewPage,
 }: StepContentProps) {
 	const [selectedTab, setSelectedTab] = useState("content");
-	const [selectedPage, setSelectedPage] = useState("home");
 
 	// Default content structure
 	const defaultContent: ContentPerLanguage = {
@@ -133,6 +145,9 @@ export function StepContent({
 		description: "How do you want to connect?",
 		signupButtonText: "Register",
 		loginButtonText: "Login with your account",
+		registrationTitle: "Register for WiFi",
+		registrationDescription: "Please fill in your details to get online",
+		registrationSubmitButtonText: "Register",
 		sponsorMessage: "You need to wait that your host approves your access",
 		phoneValidationMessage: "You need to validate your phone number",
 		successMessage: "You're all set! Enjoy your WiFi connection.",
@@ -220,9 +235,9 @@ export function StepContent({
 				<TabsContent value="content" className="space-y-4 mt-4">
 					{/* Home Page Section */}
 					<Collapsible
-						open={selectedPage === "home"}
+						open={previewPage === "home"}
 						onOpenChange={(open) =>
-							setSelectedPage(open ? "home" : "")
+							setPreviewPage(open ? "home" : "")
 						}
 						className="rounded-lg border bg-card"
 					>
@@ -230,7 +245,7 @@ export function StepContent({
 							<span className="font-semibold">Home Page</span>
 							<ChevronDown
 								className={`h-4 w-4 transition-transform ${
-									selectedPage === "home" ? "rotate-180" : ""
+									previewPage === "home" ? "rotate-180" : ""
 								}`}
 							/>
 						</CollapsibleTrigger>
@@ -324,33 +339,43 @@ export function StepContent({
 								/>
 							</div>
 
-							{/* Sign Up Button */}
-							<div className="space-y-2">
-								<Label>Sign Up button</Label>
-								<Input
-									value={activeContent.signupButtonText}
-									onChange={(e) =>
-										updateContent(
-											"signupButtonText",
-											e.target.value,
-										)
-									}
-								/>
-							</div>
+							{/* Sign Up Button - Only show when button mode */}
+					{registrationMode === "button" && guestRegistrationEnabled && (
+						<div className="space-y-2">
+							<Label>Register button label</Label>
+							<Input
+								value={activeContent.signupButtonText}
+								onChange={(e) =>
+									updateContent(
+										"signupButtonText",
+										e.target.value,
+									)
+								}
+							/>
+							<p className="text-xs text-muted-foreground">
+								Label for the registration button shown on home page
+							</p>
+						</div>
+					)}
 
-							{/* Login Button */}
-							<div className="space-y-2">
-								<Label>Login button</Label>
-								<Input
-									value={activeContent.loginButtonText}
-									onChange={(e) =>
-										updateContent(
-											"loginButtonText",
-											e.target.value,
-										)
-									}
-								/>
-							</div>
+					{/* Login Button - Only show when login option is enabled */}
+					{showLoginOption && (
+						<div className="space-y-2">
+							<Label>Login button label</Label>
+							<Input
+								value={activeContent.loginButtonText}
+								onChange={(e) =>
+									updateContent(
+										"loginButtonText",
+										e.target.value,
+									)
+								}
+							/>
+							<p className="text-xs text-muted-foreground">
+								Label for the login button shown on home page
+							</p>
+						</div>
+					)}
 
 							{/* Background type */}
 							<div className="space-y-2">
@@ -544,12 +569,79 @@ export function StepContent({
 						</CollapsibleContent>
 					</Collapsible>
 
+				{/* Registration Page Section - Only show when button mode */}
+				{guestRegistrationEnabled && registrationMode === "button" && (
+					<Collapsible
+						open={previewPage === "registration"}
+						onOpenChange={(open) =>
+							setPreviewPage(open ? "registration" : "")
+						}
+						className="rounded-lg border bg-card"
+					>
+						<CollapsibleTrigger className="flex w-full items-center justify-between p-4 hover:bg-accent/50 rounded-lg">
+							<span className="font-semibold">Registration Page</span>
+							<ChevronDown
+								className={`h-4 w-4 transition-transform ${
+									previewPage === "registration" ? "rotate-180" : ""
+								}`}
+							/>
+						</CollapsibleTrigger>
+						<CollapsibleContent className="border-t p-4 space-y-6">
+							{/* Title */}
+							<div className="space-y-2">
+								<Label>Title</Label>
+								<Input
+									value={activeContent.registrationTitle}
+									onChange={(e) =>
+										updateContent(
+											"registrationTitle",
+											e.target.value,
+										)
+									}
+								/>
+							</div>
+
+							{/* Description */}
+							<div className="space-y-2">
+								<Label>Description</Label>
+								<Textarea
+									value={activeContent.registrationDescription}
+									onChange={(e) =>
+										updateContent(
+											"registrationDescription",
+											e.target.value,
+										)
+									}
+									rows={3}
+								/>
+							</div>
+
+							{/* Submit Button */}
+							<div className="space-y-2">
+								<Label>Submit button label</Label>
+								<Input
+									value={activeContent.registrationSubmitButtonText}
+									onChange={(e) =>
+										updateContent(
+											"registrationSubmitButtonText",
+											e.target.value,
+										)
+									}
+								/>
+								<p className="text-xs text-muted-foreground">
+									Label for the submit button on the registration form
+								</p>
+							</div>
+						</CollapsibleContent>
+					</Collapsible>
+				)}
+
 					{/* Sponsor Request Section */}
 					{sponsorshipEnabled && (
 						<Collapsible
-							open={selectedPage === "sponsor"}
+							open={previewPage === "sponsor"}
 							onOpenChange={(open) =>
-								setSelectedPage(open ? "sponsor" : "")
+								setPreviewPage(open ? "sponsor" : "")
 							}
 							className="rounded-lg border bg-card"
 						>
@@ -559,7 +651,7 @@ export function StepContent({
 								</span>
 								<ChevronDown
 									className={`h-4 w-4 transition-transform ${
-										selectedPage === "sponsor"
+										previewPage === "sponsor"
 											? "rotate-180"
 											: ""
 									}`}
@@ -586,9 +678,9 @@ export function StepContent({
 					{/* Easy WiFi Section */}
 					{easyWifiEnabled && (
 						<Collapsible
-							open={selectedPage === "easy-wifi"}
+							open={previewPage === "easy-wifi"}
 							onOpenChange={(open) =>
-								setSelectedPage(open ? "easy-wifi" : "")
+								setPreviewPage(open ? "easy-wifi" : "")
 							}
 							className="rounded-lg border bg-card"
 						>
@@ -596,7 +688,7 @@ export function StepContent({
 								<span className="font-semibold">Easy WiFi</span>
 								<ChevronDown
 									className={`h-4 w-4 transition-transform ${
-										selectedPage === "easy-wifi"
+										previewPage === "easy-wifi"
 											? "rotate-180"
 											: ""
 									}`}
@@ -637,9 +729,9 @@ export function StepContent({
 					{/* Validation Section */}
 					{phoneValidationEnabled && (
 						<Collapsible
-							open={selectedPage === "validation"}
+							open={previewPage === "validation"}
 							onOpenChange={(open) =>
-								setSelectedPage(open ? "validation" : "")
+								setPreviewPage(open ? "validation" : "")
 							}
 							className="rounded-lg border bg-card"
 						>
@@ -649,7 +741,7 @@ export function StepContent({
 								</span>
 								<ChevronDown
 									className={`h-4 w-4 transition-transform ${
-										selectedPage === "validation"
+										previewPage === "validation"
 											? "rotate-180"
 											: ""
 									}`}
@@ -678,9 +770,9 @@ export function StepContent({
 					{/* Success Section */}
 					{successRedirectMode === "text" && (
 						<Collapsible
-							open={selectedPage === "success"}
+							open={previewPage === "success"}
 							onOpenChange={(open) =>
-								setSelectedPage(open ? "success" : "")
+								setPreviewPage(open ? "success" : "")
 							}
 							className="rounded-lg border bg-card"
 						>
@@ -688,7 +780,7 @@ export function StepContent({
 								<span className="font-semibold">Success</span>
 								<ChevronDown
 									className={`h-4 w-4 transition-transform ${
-										selectedPage === "success"
+										previewPage === "success"
 											? "rotate-180"
 											: ""
 									}`}
@@ -714,9 +806,9 @@ export function StepContent({
 
 					{/* Blocked Access Section */}
 					<Collapsible
-						open={selectedPage === "blocked"}
+						open={previewPage === "blocked"}
 						onOpenChange={(open) =>
-							setSelectedPage(open ? "blocked" : "")
+							setPreviewPage(open ? "blocked" : "")
 						}
 						className="rounded-lg border bg-card"
 					>
@@ -726,7 +818,7 @@ export function StepContent({
 							</span>
 							<ChevronDown
 								className={`h-4 w-4 transition-transform ${
-									selectedPage === "blocked"
+									previewPage === "blocked"
 										? "rotate-180"
 										: ""
 								}`}

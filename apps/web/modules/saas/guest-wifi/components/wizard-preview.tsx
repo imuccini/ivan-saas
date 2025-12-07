@@ -68,6 +68,9 @@ interface WizardPreviewProps {
 	gradientColor2: string;
 	signupButtonText: string;
 	loginButtonText: string;
+	registrationTitle: string;
+	registrationDescription: string;
+	registrationSubmitButtonText: string;
 	sponsorMessage: string;
 	phoneValidationMessage: string;
 	successMessage: string;
@@ -75,13 +78,16 @@ interface WizardPreviewProps {
 	easyWifiCtaMessage: string;
 	easyWifiSkipMessage: string;
 	// Auth props
-	// Auth props
+	guestRegistrationEnabled?: boolean;
+	registrationMode?: "form" | "button";
 	showLoginOption?: boolean;
 	appleIdEnabled?: boolean;
 	accessCodesEnabled?: boolean;
 	enterpriseIdpEnabled?: boolean;
 	selectedIdps?: string[];
 	terms?: SelectedTerm[];
+	previewPage: string;
+	setPreviewPage: (page: string) => void;
 }
 
 export function WizardPreview({
@@ -106,23 +112,29 @@ export function WizardPreview({
 	gradientColor2,
 	signupButtonText,
 	loginButtonText,
+	registrationTitle,
+	registrationDescription,
+	registrationSubmitButtonText,
 	sponsorMessage,
 	phoneValidationMessage,
 	successMessage,
 	blockedMessage,
 	easyWifiCtaMessage,
 	easyWifiSkipMessage,
+	guestRegistrationEnabled = true,
+	registrationMode = "form",
 	showLoginOption = true,
 	appleIdEnabled = false,
 	accessCodesEnabled = false,
 	enterpriseIdpEnabled = false,
 	selectedIdps = [],
 	terms = [],
+	previewPage,
+	setPreviewPage,
 }: WizardPreviewProps) {
 	const [previewMode, setPreviewMode] = useState<
 		"mobile" | "tablet" | "desktop"
 	>("mobile");
-	const [selectedPage, setSelectedPage] = useState("home");
 
 	const getBackgroundStyle = () => {
 		switch (backgroundType) {
@@ -162,10 +174,13 @@ export function WizardPreview({
 					<span className="text-sm font-medium">Preview</span>
 					<select
 						className="h-8 rounded-md border border-input bg-background px-3 py-1 text-sm"
-						value={selectedPage}
-						onChange={(e) => setSelectedPage(e.target.value)}
+						value={previewPage}
+						onChange={(e) => setPreviewPage(e.target.value)}
 					>
 						<option value="home">Home Page</option>
+						{guestRegistrationEnabled && registrationMode === "button" && (
+							<option value="registration">Registration</option>
+						)}
 						{sponsorshipEnabled && (
 							<option value="sponsor">Sponsor Request</option>
 						)}
@@ -362,7 +377,7 @@ export function WizardPreview({
 						)}
 
 						{/* Home Page Preview */}
-						{selectedPage === "home" && (
+						{previewPage === "home" && (
 							<>
 								<div
 									className={`text-center ${
@@ -519,75 +534,89 @@ export function WizardPreview({
 											</>
 										)}
 
-									<div
-										className={`flex flex-col ${
-											spacing === "compact"
-												? "gap-2"
-												: spacing === "spacious"
-													? "gap-5"
-													: "gap-3"
-										}`}
-									>
-										{registrationFields.map((field) => (
-											<Input
-												key={field.id}
-												type={field.type}
-												placeholder={
-													field.placeholder ||
-													field.label
-												}
+									{registrationMode === "form" && (
+										<div
+											className={`flex flex-col ${
+												spacing === "compact"
+													? "gap-2"
+													: spacing === "spacious"
+														? "gap-5"
+														: "gap-3"
+											}`}
+										>
+											{registrationFields.map((field) => (
+												<Input
+													key={field.id}
+													type={field.type}
+													placeholder={
+														field.placeholder ||
+														field.label
+													}
+													style={{
+														fontSize: `${baseFontSize}px`,
+													}}
+												/>
+											))}
+
+											{terms.length > 0 && (
+												<div className="space-y-2">
+													{terms.map((term) => {
+														const definition =
+															AVAILABLE_TERMS.find(
+																(t) =>
+																	t.id ===
+																	term.termDefinitionId,
+															);
+														if (!definition)
+															return null;
+
+														return (
+															<div
+																key={term.id}
+																className="flex items-start gap-2"
+															>
+																<input
+																	type="checkbox"
+																	id={`term-${term.id}`}
+																	className="mt-1 h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+																	required={
+																		term.required
+																	}
+																/>
+																<label
+																	htmlFor={`term-${term.id}`}
+																	className="text-sm text-muted-foreground leading-tight"
+																	style={{
+																		fontSize: `${Number.parseInt(baseFontSize) * 0.875}px`,
+																	}}
+																>
+																	{
+																		definition.label
+																	}
+																	{term.required && (
+																		<span className="text-red-500 ml-0.5">
+																			*
+																		</span>
+																	)}
+																</label>
+															</div>
+														);
+													})}
+												</div>
+											)}
+											<Button
+												className="w-full"
 												style={{
+													backgroundColor: primaryColor,
 													fontSize: `${baseFontSize}px`,
 												}}
-											/>
-										))}
+											>
+												{signupButtonText}
+											</Button>
+										</div>
+									)}
 
-										{terms.length > 0 && (
-											<div className="space-y-2">
-												{terms.map((term) => {
-													const definition =
-														AVAILABLE_TERMS.find(
-															(t) =>
-																t.id ===
-																term.termDefinitionId,
-														);
-													if (!definition)
-														return null;
-
-													return (
-														<div
-															key={term.id}
-															className="flex items-start gap-2"
-														>
-															<input
-																type="checkbox"
-																id={`term-${term.id}`}
-																className="mt-1 h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
-																required={
-																	term.required
-																}
-															/>
-															<label
-																htmlFor={`term-${term.id}`}
-																className="text-sm text-muted-foreground leading-tight"
-																style={{
-																	fontSize: `${Number.parseInt(baseFontSize) * 0.875}px`,
-																}}
-															>
-																{
-																	definition.label
-																}
-																{term.required && (
-																	<span className="text-red-500 ml-0.5">
-																		*
-																	</span>
-																)}
-															</label>
-														</div>
-													);
-												})}
-											</div>
-										)}
+									{registrationMode === "button" && (
 										<Button
 											className="w-full"
 											style={{
@@ -597,33 +626,21 @@ export function WizardPreview({
 										>
 											{signupButtonText}
 										</Button>
+									)}
 
-										{accessCodesEnabled && (
-											<>
-												<div className="relative">
-													<div className="absolute inset-0 flex items-center">
-														<span className="w-full border-t" />
-													</div>
-													<div className="relative flex justify-center text-xs uppercase">
-														<span className="bg-background px-2 text-muted-foreground">
-															or
-														</span>
-													</div>
+									{accessCodesEnabled && (
+										<>
+											<div className="relative">
+												<div className="absolute inset-0 flex items-center">
+													<span className="w-full border-t" />
 												</div>
+												<div className="relative flex justify-center text-xs uppercase">
+													<span className="bg-background px-2 text-muted-foreground">
+														or
+													</span>
+												</div>
+											</div>
 
-												<Button
-													variant="outline"
-													className="w-full"
-													style={{
-														fontSize: `${baseFontSize}px`,
-													}}
-												>
-													Enter an Access Code
-												</Button>
-											</>
-										)}
-
-										{showLoginOption && (
 											<Button
 												variant="outline"
 												className="w-full"
@@ -631,16 +648,140 @@ export function WizardPreview({
 													fontSize: `${baseFontSize}px`,
 												}}
 											>
-												{loginButtonText}
+												Enter an Access Code
 											</Button>
-										)}
-									</div>
+										</>
+									)}
+
+									{showLoginOption && (
+										<Button
+											variant="outline"
+											className="w-full"
+											style={{
+												fontSize: `${baseFontSize}px`,
+											}}
+										>
+											{loginButtonText}
+										</Button>
+									)}
 								</div>
 							</>
 						)}
 
-						{/* Sponsor Request Preview */}
-						{selectedPage === "sponsor" && sponsorshipEnabled && (
+					{/* Registration Page Preview */}
+					{previewPage === "registration" && registrationMode === "button" && (
+						<>
+							<div
+								className={`text-center ${
+									spacing === "compact"
+										? "space-y-1"
+										: spacing === "spacious"
+											? "space-y-4"
+											: "space-y-2"
+								}`}
+							>
+								<h2
+									className="font-bold"
+									style={{
+										fontSize: `${Number.parseInt(baseFontSize) * 1.25}px`,
+									}}
+								>
+									{registrationTitle}
+								</h2>
+								<p
+									className="text-muted-foreground"
+									style={{
+										fontSize: `${baseFontSize}px`,
+									}}
+								>
+									{registrationDescription}
+								</p>
+							</div>
+
+							<div
+								className={`flex flex-col ${
+									spacing === "compact"
+										? "gap-2"
+										: spacing === "spacious"
+											? "gap-5"
+											: "gap-3"
+								}`}
+							>
+								{registrationFields.map((field) => (
+									<Input
+										key={field.id}
+										type={field.type}
+										placeholder={
+											field.placeholder ||
+											field.label
+										}
+										style={{
+											fontSize: `${baseFontSize}px`,
+										}}
+									/>
+								))}
+
+								{terms.length > 0 && (
+									<div className="space-y-2">
+										{terms.map((term) => {
+											const definition =
+												AVAILABLE_TERMS.find(
+													(t) =>
+														t.id ===
+														term.termDefinitionId,
+												);
+											if (!definition)
+												return null;
+
+											return (
+												<div
+													key={term.id}
+													className="flex items-start gap-2"
+												>
+													<input
+														type="checkbox"
+														id={`term-${term.id}`}
+														className="mt-1 h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+														required={
+															term.required
+														}
+													/>
+													<label
+														htmlFor={`term-${term.id}`}
+														className="text-sm text-muted-foreground leading-tight"
+														style={{
+															fontSize: `${Number.parseInt(baseFontSize) * 0.875}px`,
+														}}
+													>
+														{
+															definition.label
+														}
+														{term.required && (
+															<span className="text-red-500 ml-0.5">
+																*
+															</span>
+														)}
+													</label>
+												</div>
+											);
+										})}
+									</div>
+								)}
+								<Button
+									className="w-full"
+									style={{
+										backgroundColor: primaryColor,
+										fontSize: `${baseFontSize}px`,
+									}}
+								>
+									{registrationSubmitButtonText}
+								</Button>
+							</div>
+						</>
+					)}
+
+					{/* Sponsor Request Preview */}
+						{previewPage === "sponsor" && sponsorshipEnabled && (
 							<div
 								className={`text-center ${
 									spacing === "compact"
@@ -678,7 +819,7 @@ export function WizardPreview({
 						)}
 
 						{/* Easy WiFi Preview */}
-						{selectedPage === "easy-wifi" && easyWifiEnabled && (
+						{previewPage === "easy-wifi" && easyWifiEnabled && (
 							<div
 								className={`text-center ${
 									spacing === "compact"
@@ -736,7 +877,7 @@ export function WizardPreview({
 						)}
 
 						{/* Validation Preview */}
-						{selectedPage === "validation" &&
+						{previewPage === "validation" &&
 							phoneValidationEnabled && (
 								<div
 									className={`text-center ${
@@ -792,7 +933,7 @@ export function WizardPreview({
 							)}
 
 						{/* Success Preview */}
-						{selectedPage === "success" &&
+						{previewPage === "success" &&
 							successRedirectMode === "text" && (
 								<div
 									className={`text-center ${
@@ -841,7 +982,7 @@ export function WizardPreview({
 							)}
 
 						{/* Blocked Access Preview */}
-						{selectedPage === "blocked" && (
+						{previewPage === "blocked" && (
 							<div
 								className={`text-center ${
 									spacing === "compact"

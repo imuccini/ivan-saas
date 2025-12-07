@@ -22,7 +22,7 @@ import {
 } from "@ui/components/select";
 import { Switch } from "@ui/components/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@ui/components/tabs";
-import { ChevronDown, FileText } from "lucide-react";
+import { ChevronDown, FileText, LayoutTemplate, MousePointerClick } from "lucide-react";
 import { useState } from "react";
 import { ConfigureSignupFormDialog } from "../configure-signup-form-dialog";
 import { ConfigureTermsDialog } from "../configure-terms-dialog";
@@ -62,6 +62,10 @@ interface StepAuthenticationProps {
 	setSelectedIdps: (idps: string[]) => void;
 	terms: SelectedTerm[];
 	setTerms: (terms: SelectedTerm[]) => void;
+	guestRegistrationEnabled: boolean;
+	setGuestRegistrationEnabled: (enabled: boolean) => void;
+	registrationMode: "form" | "button";
+	setRegistrationMode: (mode: "form" | "button") => void;
 }
 
 export function StepAuthentication({
@@ -83,6 +87,10 @@ export function StepAuthentication({
 	setSelectedIdps,
 	terms,
 	setTerms,
+	guestRegistrationEnabled,
+	setGuestRegistrationEnabled,
+	registrationMode,
+	setRegistrationMode,
 }: StepAuthenticationProps) {
 	const [signupFormDialogOpen, setSignupFormDialogOpen] = useState(false);
 	const [termsDialogOpen, setTermsDialogOpen] = useState(false);
@@ -93,9 +101,11 @@ export function StepAuthentication({
 	>([{ id: "1", start: "09:00", end: "17:00" }]);
 
 	const idpOptions = [
-		{ id: "azure", label: "Azure AD" },
-		{ id: "google", label: "Google Workspace" },
-		{ id: "okta", label: "Okta" },
+		{ id: "azure", label: "Entra ID", category: "enterprise" },
+		{ id: "google", label: "Google Workspace", category: "enterprise" },
+		{ id: "opera", label: "Opera Cloud", category: "pms" },
+		{ id: "mews", label: "Mews", category: "pms" },
+		{ id: "apaleo", label: "Apaleo", category: "pms" },
 	];
 
 	const addTimeSlot = () => {
@@ -120,108 +130,125 @@ export function StepAuthentication({
 
 				{/* Sign Up / Sign In Tab */}
 				<TabsContent value="signup" className="space-y-4 mt-6">
-					{/* 1. Guests Registration Card */}
+					{/* 1. Guest Accounts Card */}
 					<div className="rounded-lg border bg-card p-4 space-y-4">
-						<div className="font-semibold">Guests Registration</div>
+						<div className="flex items-center justify-between">
+							<div className="space-y-1">
+								<div className="font-semibold">Guest Accounts</div>
+								<p className="text-sm text-muted-foreground">
+									Define how guests register or log in using built-in credentials.
+								</p>
+							</div>
+						</div>
 
-						<div className="space-y-3">
-							<div className="flex items-center gap-2">
-								<Checkbox
-									id="show-login"
-									checked={showLoginOption}
-									onCheckedChange={(checked) =>
-										setShowLoginOption(checked === true)
-									}
-								/>
-								<Label
-									htmlFor="show-login"
-									className="font-normal"
-								>
-									Show option to login
+						<div className="space-y-4 pt-2">
+							<div className="flex items-center justify-between">
+								<Label className="text-base font-medium">
+									Allow Guest Registration
 								</Label>
+								<Switch
+									checked={guestRegistrationEnabled}
+									onCheckedChange={setGuestRegistrationEnabled}
+								/>
 							</div>
 
-							<div className="space-y-1">
-								<div className="flex items-center gap-2">
-									<Checkbox
-										id="apple-id"
-										checked={appleIdEnabled}
-										onCheckedChange={(checked) =>
-											setAppleIdEnabled(checked === true)
-										}
-									/>
-									<Label
-										htmlFor="apple-id"
-										className="font-normal"
+							{guestRegistrationEnabled && (
+								<div className="space-y-4 pl-4 border-l-2 border-muted ml-2">
+									<div className="space-y-3">
+										<Label className="text-sm font-medium">Display</Label>
+										<div className="flex bg-muted p-1 rounded-lg">
+											<button
+												type="button"
+												onClick={() => setRegistrationMode("button")}
+												className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 text-sm font-medium rounded-md transition-all ${
+													registrationMode === "button"
+														? "bg-background text-foreground shadow-sm"
+														: "text-muted-foreground hover:bg-background/50"
+												}`}
+											>
+												<MousePointerClick className="w-4 h-4" />
+												Show Button
+											</button>
+											<button
+												type="button"
+												onClick={() => setRegistrationMode("form")}
+												className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 text-sm font-medium rounded-md transition-all ${
+													registrationMode === "form"
+														? "bg-background text-foreground shadow-sm"
+														: "text-muted-foreground hover:bg-background/50"
+												}`}
+											>
+												<LayoutTemplate className="w-4 h-4" />
+												Show Form on Homepage
+											</button>
+										</div>
+										{registrationMode === "button" && (
+											<p className="text-xs text-muted-foreground">
+												Home page will show only a registration button. A separate registration page will be added to the journey.
+											</p>
+										)}
+									</div>
+
+									<div className="space-y-1">
+										<div className="flex items-center gap-2">
+											<Checkbox
+												id="apple-id"
+												checked={appleIdEnabled}
+												onCheckedChange={(checked) =>
+													setAppleIdEnabled(checked === true)
+												}
+											/>
+											<Label
+												htmlFor="apple-id"
+												className="font-normal"
+											>
+												Enable Apple ID for quick sign-up (Apple devices only)
+											</Label>
+										</div>
+									</div>
+
+									<Button
+										variant="outline"
+										size="sm"
+										className="gap-2 w-full"
+										onClick={() => setSignupFormDialogOpen(true)}
+										type="button"
 									>
-										Apple ID
+										Configure Registration Form fields
+									</Button>
+
+									<ConfigureSignupFormDialog
+										open={signupFormDialogOpen}
+										onOpenChange={setSignupFormDialogOpen}
+										initialFields={registrationFields}
+										onSave={setRegistrationFields}
+									/>
+								</div>
+							)}
+
+							<div className="flex items-center justify-between pt-4 border-t">
+								<div className="space-y-0.5">
+									<Label className="text-base">
+										Allows users with existing credentials to sign in.
 									</Label>
 								</div>
-								<p className="text-xs text-muted-foreground pl-6">
-									Description apple ID for erming directily to
-									Apple ID.
-								</p>
+								<Switch
+									checked={showLoginOption}
+									onCheckedChange={setShowLoginOption}
+								/>
 							</div>
-
-							<Button
-								variant="outline"
-								size="sm"
-								className="gap-2 w-full"
-								onClick={() => setSignupFormDialogOpen(true)}
-								type="button"
-							>
-								Configure Sign-Up Form
-							</Button>
-
-							<ConfigureSignupFormDialog
-								open={signupFormDialogOpen}
-								onOpenChange={setSignupFormDialogOpen}
-								initialFields={registrationFields}
-								onSave={setRegistrationFields}
-							/>
 						</div>
 					</div>
 
-					{/* 2. Terms and agreements Card */}
-					<div className="rounded-lg border bg-card p-4 space-y-3">
-						<div className="flex items-center justify-between">
-							<div className="space-y-1">
-								<div className="font-semibold">
-									Terms and agreements
-								</div>
-								<p className="text-sm text-muted-foreground">
-									Define what terms and consent you want to
-									collect from the user
-								</p>
-							</div>
-							<Button
-								variant="outline"
-								size="sm"
-								onClick={() => setTermsDialogOpen(true)}
-								type="button"
-							>
-								Configure Terms
-							</Button>
-						</div>
-
-						<ConfigureTermsDialog
-							open={termsDialogOpen}
-							onOpenChange={setTermsDialogOpen}
-							initialTerms={terms}
-							onSave={setTerms}
-						/>
-					</div>
-
-					{/* 3. Enterprise IdP Card */}
+					{/* 2. Third-Party Authentication Card */}
 					<div className="rounded-lg border bg-card p-4 space-y-4">
 						<div className="flex items-center justify-between">
 							<div className="space-y-1">
 								<div className="font-semibold">
-									Enterprise IdP
+									Third-Party Authentication
 								</div>
 								<p className="text-sm text-muted-foreground">
-									Allow users to authenticate with their
-									corporate accounts
+									Allow users to authenticate via external systems
 								</p>
 							</div>
 							<Switch
@@ -233,7 +260,7 @@ export function StepAuthentication({
 						{enterpriseIdpEnabled && (
 							<div className="space-y-2 pt-2">
 								<Label className="text-sm">
-									Select Identity Providers
+									Select Identity Sources
 								</Label>
 								<DropdownMenu>
 									<DropdownMenuTrigger asChild>
@@ -262,8 +289,7 @@ export function StepAuthentication({
 													})
 												) : (
 													<span className="text-muted-foreground font-normal">
-														Select Identity
-														Providers...
+														Select Identity Sources...
 													</span>
 												)}
 											</div>
@@ -272,39 +298,102 @@ export function StepAuthentication({
 									</DropdownMenuTrigger>
 									<DropdownMenuContent className="w-[--radix-dropdown-menu-trigger-width] min-w-[200px]">
 										<DropdownMenuLabel>
-											Identity Providers
+											Enterprise
 										</DropdownMenuLabel>
 										<DropdownMenuSeparator />
-										{idpOptions.map((option) => (
-											<DropdownMenuCheckboxItem
-												key={option.id}
-												checked={selectedIdps.includes(
-													option.id,
-												)}
-												onCheckedChange={(checked) => {
-													if (checked) {
-														setSelectedIdps([
-															...selectedIdps,
-															option.id,
-														]);
-													} else {
-														setSelectedIdps(
-															selectedIdps.filter(
-																(id) =>
-																	id !==
-																	option.id,
-															),
-														);
-													}
-												}}
-											>
-												{option.label}
-											</DropdownMenuCheckboxItem>
-										))}
+										{idpOptions
+											.filter((option) => option.category === "enterprise")
+											.map((option) => (
+												<DropdownMenuCheckboxItem
+													key={option.id}
+													checked={selectedIdps.includes(
+														option.id,
+													)}
+													onCheckedChange={(checked) => {
+														if (checked) {
+															setSelectedIdps([
+																...selectedIdps,
+																option.id,
+															]);
+														} else {
+															setSelectedIdps(
+																selectedIdps.filter(
+																	(id) =>
+																		id !==
+																		option.id,
+																),
+															);
+														}
+													}}
+												>
+													{option.label}
+												</DropdownMenuCheckboxItem>
+											))}
+										<DropdownMenuLabel className="mt-2">
+											PMS
+										</DropdownMenuLabel>
+										<DropdownMenuSeparator />
+										{idpOptions
+											.filter((option) => option.category === "pms")
+											.map((option) => (
+												<DropdownMenuCheckboxItem
+													key={option.id}
+													checked={selectedIdps.includes(
+														option.id,
+													)}
+													onCheckedChange={(checked) => {
+														if (checked) {
+															setSelectedIdps([
+																...selectedIdps,
+																option.id,
+															]);
+														} else {
+															setSelectedIdps(
+																selectedIdps.filter(
+																	(id) =>
+																		id !==
+																		option.id,
+																),
+															);
+														}
+													}}
+												>
+													{option.label}
+												</DropdownMenuCheckboxItem>
+											))}
 									</DropdownMenuContent>
 								</DropdownMenu>
 							</div>
 						)}
+					</div>
+
+					{/* 3. Terms and agreements Card */}
+					<div className="rounded-lg border bg-card p-4 space-y-3">
+						<div className="flex items-center justify-between">
+							<div className="space-y-1">
+								<div className="font-semibold">
+									Terms and agreements
+								</div>
+								<p className="text-sm text-muted-foreground">
+									Define terms and consents to collect from users joining the service, for all registration and identification methods.
+								</p>
+							</div>
+							<Button
+								variant="outline"
+								size="sm"
+								onClick={() => setTermsDialogOpen(true)}
+								type="button"
+							>
+								Configure Terms
+							</Button>
+						</div>
+
+						<ConfigureTermsDialog
+							open={termsDialogOpen}
+							onOpenChange={setTermsDialogOpen}
+							initialTerms={terms}
+							onSave={setTerms}
+						/>
 					</div>
 
 					{/* 4. Access Codes Card */}

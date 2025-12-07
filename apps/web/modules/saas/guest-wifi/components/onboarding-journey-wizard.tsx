@@ -99,6 +99,9 @@ export function OnboardingJourneyWizard({
 		description: "How do you want to connect?",
 		signupButtonText: "Register",
 		loginButtonText: "Login with your account",
+		registrationTitle: "Register for WiFi",
+		registrationDescription: "Please fill in your details to get online",
+		registrationSubmitButtonText: "Register",
 		sponsorMessage: "You need to wait that your host approves your access",
 		phoneValidationMessage: "You need to validate your phone number",
 		successMessage: "You're all set! Enjoy your WiFi connection.",
@@ -136,12 +139,15 @@ export function OnboardingJourneyWizard({
 	};
 
 	// Authentication State
+	const [guestRegistrationEnabled, setGuestRegistrationEnabled] = useState(true);
+	const [registrationMode, setRegistrationMode] = useState<"form" | "button">("form");
 	const [showLoginOption, setShowLoginOption] = useState(true);
 	const [appleIdEnabled, setAppleIdEnabled] = useState(false);
 	const [accessCodesEnabled, setAccessCodesEnabled] = useState(false);
 	const [enterpriseIdpEnabled, setEnterpriseIdpEnabled] = useState(false);
 	const [selectedIdps, setSelectedIdps] = useState<string[]>([]);
 	const [terms, setTerms] = useState<SelectedTerm[]>([]);
+	const [previewPage, setPreviewPage] = useState("home");
 
 	const [registrationFields, setRegistrationFields] = useState<FormField[]>([
 		{
@@ -166,6 +172,12 @@ export function OnboardingJourneyWizard({
 			const config = savedConfig.config;
 
 			// Authentication
+			if (config.authentication.guestRegistrationEnabled !== undefined) {
+				setGuestRegistrationEnabled(config.authentication.guestRegistrationEnabled);
+			}
+			if (config.authentication.registrationMode) {
+				setRegistrationMode(config.authentication.registrationMode as "form" | "button");
+			}
 			setShowLoginOption(config.authentication.showLoginOption);
 			setAppleIdEnabled(config.authentication.appleIdEnabled);
 			setAccessCodesEnabled(config.authentication.accessCodesEnabled);
@@ -236,6 +248,8 @@ export function OnboardingJourneyWizard({
 
 	const buildConfigFromState = () => ({
 		authentication: {
+			guestRegistrationEnabled,
+			registrationMode,
 			showLoginOption,
 			appleIdEnabled,
 			accessCodesEnabled,
@@ -409,6 +423,10 @@ export function OnboardingJourneyWizard({
 									setSelectedIdps={setSelectedIdps}
 									terms={terms}
 									setTerms={setTerms}
+									guestRegistrationEnabled={guestRegistrationEnabled}
+									setGuestRegistrationEnabled={setGuestRegistrationEnabled}
+									registrationMode={registrationMode}
+									setRegistrationMode={setRegistrationMode}
 								/>
 							)}
 							{currentStep === 2 && (
@@ -430,6 +448,9 @@ export function OnboardingJourneyWizard({
 										phoneValidationEnabled
 									}
 									successRedirectMode={successRedirectMode}
+									guestRegistrationEnabled={guestRegistrationEnabled}
+									registrationMode={registrationMode}
+									showLoginOption={showLoginOption}
 									fontFamily={fontFamily}
 									setFontFamily={setFontFamily}
 									baseFontSize={baseFontSize}
@@ -460,6 +481,8 @@ export function OnboardingJourneyWizard({
 									setSelectedLanguages={setSelectedLanguages}
 									activeLanguage={activeLanguage}
 									setActiveLanguage={setActiveLanguage}
+									previewPage={previewPage}
+									setPreviewPage={setPreviewPage}
 								/>
 							)}
 						</div>
@@ -485,6 +508,20 @@ export function OnboardingJourneyWizard({
 									getContentForLanguage(activeLanguage)
 										.loginButtonText
 								}
+								registrationTitle={
+									getContentForLanguage(activeLanguage)
+										.registrationTitle
+								}
+								registrationDescription={
+									getContentForLanguage(activeLanguage)
+										.registrationDescription
+								}
+								registrationSubmitButtonText={
+									getContentForLanguage(activeLanguage)
+										.registrationSubmitButtonText
+								}
+								guestRegistrationEnabled={guestRegistrationEnabled}
+								registrationMode={registrationMode}
 								showLoginOption={showLoginOption}
 								appleIdEnabled={appleIdEnabled}
 								accessCodesEnabled={accessCodesEnabled}
@@ -529,6 +566,8 @@ export function OnboardingJourneyWizard({
 									getContentForLanguage(activeLanguage)
 										.easyWifiSkipMessage
 								}
+								previewPage={previewPage}
+								setPreviewPage={setPreviewPage}
 							/>
 						</div>
 					</div>

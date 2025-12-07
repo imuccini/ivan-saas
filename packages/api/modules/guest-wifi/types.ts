@@ -24,6 +24,9 @@ export const contentPerLanguageSchema = z.object({
 	description: z.string(),
 	signupButtonText: z.string(),
 	loginButtonText: z.string(),
+	registrationTitle: z.string().default("Register for WiFi"),
+	registrationDescription: z.string().default("Please fill in your details to get online"),
+	registrationSubmitButtonText: z.string().default("Register"),
 	sponsorMessage: z.string(),
 	phoneValidationMessage: z.string(),
 	successMessage: z.string(),
@@ -36,6 +39,8 @@ export const contentPerLanguageSchema = z.object({
 export const guestWifiConfigDataSchema = z.object({
 	// Authentication settings
 	authentication: z.object({
+		guestRegistrationEnabled: z.boolean().optional(),
+		registrationMode: z.enum(["form", "button"]).optional(),
 		showLoginOption: z.boolean(),
 		appleIdEnabled: z.boolean(),
 		accessCodesEnabled: z.boolean(),
@@ -94,6 +99,8 @@ export type GuestWifiConfigData = z.infer<typeof guestWifiConfigDataSchema>;
 // Default config
 export const defaultGuestWifiConfig: GuestWifiConfigData = {
 	authentication: {
+		guestRegistrationEnabled: true,
+		registrationMode: "form" as const,
 		showLoginOption: true,
 		appleIdEnabled: false,
 		accessCodesEnabled: false,
