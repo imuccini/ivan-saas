@@ -1,4 +1,5 @@
 import type { RouterClient } from "@orpc/server";
+import { accessCodesRouter } from "../modules/access-codes/router";
 import { adminRouter } from "../modules/admin/router";
 import { aiRouter } from "../modules/ai/router";
 import { communicationsRouter } from "../modules/communications/router";
@@ -31,6 +32,7 @@ export const router = publicProcedure
 		customFields: customFieldsRouter,
 		guestWifi: guestWifiRouter,
 		sponsors: sponsorsRouter,
+		accessCodes: accessCodesRouter,
 	});
 
 export type ApiRouterClient = RouterClient<typeof router>;

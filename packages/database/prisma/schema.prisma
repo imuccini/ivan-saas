@@ -169,9 +169,42 @@ model Workspace {
   customFields           CustomField[]
   guestWifiConfigs       GuestWifiConfig[]
   sponsors               Sponsor[]
+  accessCodeGroups       AccessCodeGroup[]
 
   @@unique([organizationId, slug])
   @@map("workspace")
+}
+
+model AccessCodeGroup {
+  id          String    @id @default(cuid())
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  name        String
+  validFrom   DateTime?
+  validUntil  DateTime?
+  rotateCode  String?   // "NEVER", "DAILY", "WEEKLY", "MONTHLY"
+  timeAllowance String? // "1_DAY", "2_DAYS", "1_WEEK", "1_MONTH", "UNLIMITED"
+  bypassSponsorship Boolean @default(false)
+  
+  codes       AccessCode[]
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@map("access_code_group")
+}
+
+model AccessCode {
+  id              String          @id @default(cuid())
+  groupId         String
+  group           AccessCodeGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  code            String          @unique
+  targetUserGroup String?         
+  
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  @@map("access_code")
 }
 
 model Sponsor {

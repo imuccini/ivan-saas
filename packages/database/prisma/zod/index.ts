@@ -58,6 +58,18 @@ export const WorkspaceScalarFieldEnumSchema = z.enum(['id', 'organizationId', 'n
 
 export type WorkspaceScalarFieldEnum = z.infer<typeof WorkspaceScalarFieldEnumSchema>;
 
+// File: AccessCodeGroupScalarFieldEnum.schema.ts
+
+export const AccessCodeGroupScalarFieldEnumSchema = z.enum(['id', 'workspaceId', 'name', 'validFrom', 'validUntil', 'rotateCode', 'timeAllowance', 'bypassSponsorship', 'createdAt', 'updatedAt'])
+
+export type AccessCodeGroupScalarFieldEnum = z.infer<typeof AccessCodeGroupScalarFieldEnumSchema>;
+
+// File: AccessCodeScalarFieldEnum.schema.ts
+
+export const AccessCodeScalarFieldEnumSchema = z.enum(['id', 'groupId', 'code', 'targetUserGroup', 'createdAt', 'updatedAt'])
+
+export type AccessCodeScalarFieldEnum = z.infer<typeof AccessCodeScalarFieldEnumSchema>;
+
 // File: SponsorScalarFieldEnum.schema.ts
 
 export const SponsorScalarFieldEnumSchema = z.enum(['id', 'workspaceId', 'fullName', 'email', 'createdAt', 'updatedAt'])
@@ -357,6 +369,38 @@ export const WorkspaceSchema = z.object({
 });
 
 export type WorkspaceType = z.infer<typeof WorkspaceSchema>;
+
+
+// File: AccessCodeGroup.schema.ts
+
+export const AccessCodeGroupSchema = z.object({
+  id: z.string(),
+  workspaceId: z.string(),
+  name: z.string(),
+  validFrom: z.date().nullish(),
+  validUntil: z.date().nullish(),
+  rotateCode: z.string().nullish(),
+  timeAllowance: z.string().nullish(),
+  bypassSponsorship: z.boolean(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
+export type AccessCodeGroupType = z.infer<typeof AccessCodeGroupSchema>;
+
+
+// File: AccessCode.schema.ts
+
+export const AccessCodeSchema = z.object({
+  id: z.string(),
+  groupId: z.string(),
+  code: z.string(),
+  targetUserGroup: z.string().nullish(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
+export type AccessCodeType = z.infer<typeof AccessCodeSchema>;
 
 
 // File: Sponsor.schema.ts
