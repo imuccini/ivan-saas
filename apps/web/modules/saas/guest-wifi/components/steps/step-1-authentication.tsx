@@ -324,61 +324,6 @@ export function StepAuthentication({
 							/>
 						</div>
 					</div>
-
-					{/* 5. Verification Card */}
-					<div className="rounded-lg border bg-card p-4 space-y-4">
-						<div className="font-semibold">Verification</div>
-
-						<div className="space-y-3">
-							<div className="space-y-2">
-								<Label>Email verification</Label>
-								<Select defaultValue="soft">
-									<SelectTrigger>
-										<SelectValue />
-									</SelectTrigger>
-									<SelectContent>
-										<SelectItem value="soft">
-											Soft
-										</SelectItem>
-										<SelectItem value="enabled">
-											Enabled
-										</SelectItem>
-										<SelectItem value="disabled">
-											Disabled
-										</SelectItem>
-									</SelectContent>
-								</Select>
-							</div>
-
-							<div className="space-y-2">
-								<Label>Phone verification</Label>
-								<Select
-									value={
-										phoneValidationEnabled
-											? "enabled"
-											: "disabled"
-									}
-									onValueChange={(value) =>
-										setPhoneValidationEnabled(
-											value === "enabled",
-										)
-									}
-								>
-									<SelectTrigger>
-										<SelectValue />
-									</SelectTrigger>
-									<SelectContent>
-										<SelectItem value="enabled">
-											Enabled
-										</SelectItem>
-										<SelectItem value="disabled">
-											Disabled
-										</SelectItem>
-									</SelectContent>
-								</Select>
-							</div>
-						</div>
-					</div>
 				</TabsContent>
 
 				{/* Access Control Tab */}
@@ -523,6 +468,83 @@ export function StepAuthentication({
 							</div>
 						)}
 					</div>
+
+					{/* Verification Card - Only show if email or phone fields exist */}
+					{(() => {
+						const hasEmailField = registrationFields.some(
+							(field) => field.type === "email",
+						);
+						const hasPhoneField = registrationFields.some(
+							(field) => field.type === "tel",
+						);
+
+						// Don't show the card if neither email nor phone fields exist
+						if (!hasEmailField && !hasPhoneField) {
+							return null;
+						}
+
+						return (
+							<div className="rounded-lg border bg-card p-4 space-y-4">
+								<div className="font-semibold">
+									Verification
+								</div>
+
+								<div className="space-y-3">
+									{hasEmailField && (
+										<div className="space-y-2">
+											<Label>Email verification</Label>
+											<Select defaultValue="soft">
+												<SelectTrigger>
+													<SelectValue />
+												</SelectTrigger>
+												<SelectContent>
+													<SelectItem value="soft">
+														Soft
+													</SelectItem>
+													<SelectItem value="enabled">
+														Enabled
+													</SelectItem>
+													<SelectItem value="disabled">
+														Disabled
+													</SelectItem>
+												</SelectContent>
+											</Select>
+										</div>
+									)}
+
+									{hasPhoneField && (
+										<div className="space-y-2">
+											<Label>Phone verification</Label>
+											<Select
+												value={
+													phoneValidationEnabled
+														? "enabled"
+														: "disabled"
+												}
+												onValueChange={(value) =>
+													setPhoneValidationEnabled(
+														value === "enabled",
+													)
+												}
+											>
+												<SelectTrigger>
+													<SelectValue />
+												</SelectTrigger>
+												<SelectContent>
+													<SelectItem value="enabled">
+														Enabled
+													</SelectItem>
+													<SelectItem value="disabled">
+														Disabled
+													</SelectItem>
+												</SelectContent>
+											</Select>
+										</div>
+									)}
+								</div>
+							</div>
+						);
+					})()}
 
 					{/* Access Hours Card */}
 					<div className="rounded-lg border bg-card p-4 space-y-4">

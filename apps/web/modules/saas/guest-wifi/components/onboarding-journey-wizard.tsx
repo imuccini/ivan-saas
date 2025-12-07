@@ -4,7 +4,13 @@ import { useActiveWorkspace } from "@saas/workspaces/hooks/use-active-workspace"
 import { orpc } from "@shared/lib/orpc-query-utils";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@ui/components/button";
-import { ArrowRight, Loader2 } from "lucide-react";
+import {
+	ArrowRight,
+	Fingerprint,
+	Loader2,
+	Palette,
+	Workflow,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { StepAuthentication } from "./steps/step-1-authentication";
 import { StepContent } from "./steps/step-2-content";
@@ -33,9 +39,14 @@ interface SelectedTerm {
 }
 
 const STEPS = [
-	{ id: 1, name: "Authentication", component: StepAuthentication },
-	{ id: 2, name: "Journey", component: StepJourney },
-	{ id: 3, name: "Content", component: StepContent },
+	{
+		id: 1,
+		name: "Authentication",
+		icon: Fingerprint,
+		component: StepAuthentication,
+	},
+	{ id: 2, name: "Journey", icon: Workflow, component: StepJourney },
+	{ id: 3, name: "Content", icon: Palette, component: StepContent },
 ];
 
 export function OnboardingJourneyWizard({
@@ -322,12 +333,13 @@ export function OnboardingJourneyWizard({
 											onClick={() =>
 												setCurrentStep(step.id)
 											}
-											className={`text-sm font-medium transition-colors ${
+											className={`flex items-center gap-2 text-sm transition-colors ${
 												currentStep === step.id
-													? "text-foreground"
-													: "text-muted-foreground hover:text-foreground"
+													? "text-primary font-semibold"
+													: "text-muted-foreground font-medium hover:text-foreground"
 											}`}
 										>
+											<step.icon className="h-4 w-4" />
 											{step.name}
 										</button>
 										{index < STEPS.length - 1 && (
