@@ -232,27 +232,676 @@ export function StepContent({
 				</div>
 
 				{/* Content Tab */}
-				<TabsContent value="content" className="space-y-4 mt-4">
-					{/* Home Page Section */}
+				<TabsContent
+					value="content"
+					className="mt-4 h-[calc(100vh-280px)]"
+				>
+					<div className="flex h-full gap-4">
+						{/* Left Sidebar - Page Navigation (30%) */}
+						<div className="w-[30%] border rounded-lg bg-card p-2">
+							<div className="space-y-1">
+								{/* Home Page */}
+								<button
+									type="button"
+									onClick={() => setPreviewPage("home")}
+									className={`w-full text-left px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+										previewPage === "home"
+											? "bg-primary text-primary-foreground"
+											: "hover:bg-accent"
+									}`}
+								>
+									Home Page
+								</button>
+
+								{/* Registration Page - Only show when button mode */}
+								{guestRegistrationEnabled &&
+									registrationMode === "button" && (
+										<button
+											type="button"
+											onClick={() =>
+												setPreviewPage("registration")
+											}
+											className={`w-full text-left px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+												previewPage === "registration"
+													? "bg-primary text-primary-foreground"
+													: "hover:bg-accent"
+											}`}
+										>
+											Registration Page
+										</button>
+									)}
+
+								{/* Sponsor Request */}
+								{sponsorshipEnabled && (
+									<button
+										type="button"
+										onClick={() =>
+											setPreviewPage("sponsor")
+										}
+										className={`w-full text-left px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+											previewPage === "sponsor"
+												? "bg-primary text-primary-foreground"
+												: "hover:bg-accent"
+										}`}
+									>
+										Sponsor Request
+									</button>
+								)}
+
+								{/* Easy WiFi */}
+								{easyWifiEnabled && (
+									<button
+										type="button"
+										onClick={() =>
+											setPreviewPage("easy-wifi")
+										}
+										className={`w-full text-left px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+											previewPage === "easy-wifi"
+												? "bg-primary text-primary-foreground"
+												: "hover:bg-accent"
+										}`}
+									>
+										Easy WiFi
+									</button>
+								)}
+
+								{/* Validation */}
+								{phoneValidationEnabled && (
+									<button
+										type="button"
+										onClick={() =>
+											setPreviewPage("validation")
+										}
+										className={`w-full text-left px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+											previewPage === "validation"
+												? "bg-primary text-primary-foreground"
+												: "hover:bg-accent"
+										}`}
+									>
+										Validation
+									</button>
+								)}
+
+								{/* Success */}
+								{successRedirectMode === "text" && (
+									<button
+										type="button"
+										onClick={() =>
+											setPreviewPage("success")
+										}
+										className={`w-full text-left px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+											previewPage === "success"
+												? "bg-primary text-primary-foreground"
+												: "hover:bg-accent"
+										}`}
+									>
+										Success
+									</button>
+								)}
+
+								{/* Blocked */}
+								<button
+									type="button"
+									onClick={() => setPreviewPage("blocked")}
+									className={`w-full text-left px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+										previewPage === "blocked"
+											? "bg-primary text-primary-foreground"
+											: "hover:bg-accent"
+									}`}
+								>
+									Blocked
+								</button>
+							</div>
+						</div>
+
+						{/* Right Content Editor (70%) */}
+						<div className="w-[70%] border rounded-lg bg-card p-6 overflow-y-auto">
+							{/* Home Page Content */}
+							{previewPage === "home" && (
+								<div className="space-y-6">
+									<div>
+										<h3 className="text-lg font-semibold mb-4">
+											Home Page
+										</h3>
+										<p className="text-sm text-muted-foreground mb-6">
+											Configure the main landing page
+											content
+										</p>
+									</div>
+
+									{/* Title */}
+									<div className="space-y-2">
+										<Label>Title</Label>
+										<Input
+											value={activeContent.title}
+											onChange={(e) =>
+												updateContent(
+													"title",
+													e.target.value,
+												)
+											}
+										/>
+									</div>
+
+									{/* Description */}
+									<div className="space-y-2">
+										<Label>Description</Label>
+										<Textarea
+											value={activeContent.description}
+											onChange={(e) =>
+												updateContent(
+													"description",
+													e.target.value,
+												)
+											}
+											rows={3}
+										/>
+									</div>
+
+									{/* Sign Up Button - Only show when button mode */}
+									{registrationMode === "button" &&
+										guestRegistrationEnabled && (
+											<div className="space-y-2">
+												<Label>
+													Register button label
+												</Label>
+												<Input
+													value={
+														activeContent.signupButtonText
+													}
+													onChange={(e) =>
+														updateContent(
+															"signupButtonText",
+															e.target.value,
+														)
+													}
+												/>
+												<p className="text-xs text-muted-foreground">
+													Label for the registration
+													button shown on home page
+												</p>
+											</div>
+										)}
+
+									{/* Login Button - Only show when login option is enabled */}
+									{showLoginOption && (
+										<div className="space-y-2">
+											<Label>Login button label</Label>
+											<Input
+												value={
+													activeContent.loginButtonText
+												}
+												onChange={(e) =>
+													updateContent(
+														"loginButtonText",
+														e.target.value,
+													)
+												}
+											/>
+											<p className="text-xs text-muted-foreground">
+												Label for the login button shown
+												on home page
+											</p>
+										</div>
+									)}
+
+									{/* Background type */}
+									<div className="space-y-2">
+										<Label>Background type</Label>
+										<Select
+											value={backgroundType}
+											onValueChange={setBackgroundType}
+										>
+											<SelectTrigger>
+												<SelectValue />
+											</SelectTrigger>
+											<SelectContent>
+												<SelectItem value="image">
+													Image
+												</SelectItem>
+												<SelectItem value="color">
+													Color
+												</SelectItem>
+												<SelectItem value="gradient">
+													Gradient
+												</SelectItem>
+											</SelectContent>
+										</Select>
+									</div>
+
+									{/* Background Image - Only show when type is image */}
+									{backgroundType === "image" && (
+										<div className="space-y-3">
+											<Label>Background image</Label>
+											<p className="text-xs text-muted-foreground">
+												JPG/PNG/SVG, 150px, 5MB
+											</p>
+											<div className="flex items-center gap-3">
+												<div className="h-16 w-16 rounded bg-muted flex items-center justify-center overflow-hidden">
+													{backgroundImage ? (
+														<img
+															src={
+																backgroundImage
+															}
+															alt="Background"
+															className="w-full h-full object-cover"
+														/>
+													) : (
+														<span className="text-xs">
+															BG
+														</span>
+													)}
+												</div>
+												<input
+													ref={bgInputRef}
+													type="file"
+													accept="image/*"
+													onChange={
+														handleBackgroundUpload
+													}
+													className="hidden"
+												/>
+												<Button
+													variant="outline"
+													size="sm"
+													onClick={() =>
+														bgInputRef.current?.click()
+													}
+													type="button"
+												>
+													{backgroundImage
+														? "Change"
+														: "Upload"}
+												</Button>
+												{backgroundImage && (
+													<Button
+														variant="ghost"
+														size="sm"
+														onClick={() =>
+															setBackgroundImage(
+																null,
+															)
+														}
+														type="button"
+													>
+														Remove
+													</Button>
+												)}
+											</div>
+										</div>
+									)}
+
+									{/* Background Color - Only show when type is color */}
+									{backgroundType === "color" && (
+										<div className="space-y-3">
+											<Label>Background color</Label>
+											<div className="flex items-center gap-3">
+												<div
+													className="h-10 w-10 rounded border"
+													style={{
+														backgroundColor:
+															backgroundColor,
+													}}
+												/>
+												<Input
+													type="color"
+													value={backgroundColor}
+													onChange={(e) =>
+														setBackgroundColor(
+															e.target.value,
+														)
+													}
+													className="w-20 h-10"
+												/>
+												<Input
+													type="text"
+													value={backgroundColor}
+													onChange={(e) =>
+														setBackgroundColor(
+															e.target.value,
+														)
+													}
+													className="flex-1"
+													placeholder="#6366f1"
+												/>
+											</div>
+										</div>
+									)}
+
+									{/* Gradient Colors - Only show when type is gradient */}
+									{backgroundType === "gradient" && (
+										<div className="space-y-4">
+											<div className="space-y-3">
+												<Label>Gradient color 1</Label>
+												<div className="flex items-center gap-3">
+													<div
+														className="h-10 w-10 rounded border"
+														style={{
+															backgroundColor:
+																gradientColor1,
+														}}
+													/>
+													<Input
+														type="color"
+														value={gradientColor1}
+														onChange={(e) =>
+															setGradientColor1(
+																e.target.value,
+															)
+														}
+														className="w-20 h-10"
+													/>
+													<Input
+														type="text"
+														value={gradientColor1}
+														onChange={(e) =>
+															setGradientColor1(
+																e.target.value,
+															)
+														}
+														className="flex-1"
+														placeholder="#6366f1"
+													/>
+												</div>
+											</div>
+
+											<div className="space-y-3">
+												<Label>Gradient color 2</Label>
+												<div className="flex items-center gap-3">
+													<div
+														className="h-10 w-10 rounded border"
+														style={{
+															backgroundColor:
+																gradientColor2,
+														}}
+													/>
+													<Input
+														type="color"
+														value={gradientColor2}
+														onChange={(e) =>
+															setGradientColor2(
+																e.target.value,
+															)
+														}
+														className="w-20 h-10"
+													/>
+													<Input
+														type="text"
+														value={gradientColor2}
+														onChange={(e) =>
+															setGradientColor2(
+																e.target.value,
+															)
+														}
+														className="flex-1"
+														placeholder="#ec4899"
+													/>
+												</div>
+											</div>
+										</div>
+									)}
+								</div>
+							)}
+
+							{/* Registration Page Content */}
+							{previewPage === "registration" &&
+								guestRegistrationEnabled &&
+								registrationMode === "button" && (
+									<div className="space-y-6">
+										<div>
+											<h3 className="text-lg font-semibold mb-4">
+												Registration Page
+											</h3>
+											<p className="text-sm text-muted-foreground mb-6">
+												Configure the registration form
+												page
+											</p>
+										</div>
+
+										{/* Title */}
+										<div className="space-y-2">
+											<Label>Title</Label>
+											<Input
+												value={
+													activeContent.registrationTitle
+												}
+												onChange={(e) =>
+													updateContent(
+														"registrationTitle",
+														e.target.value,
+													)
+												}
+											/>
+										</div>
+
+										{/* Description */}
+										<div className="space-y-2">
+											<Label>Description</Label>
+											<Textarea
+												value={
+													activeContent.registrationDescription
+												}
+												onChange={(e) =>
+													updateContent(
+														"registrationDescription",
+														e.target.value,
+													)
+												}
+												rows={3}
+											/>
+										</div>
+
+										{/* Submit Button */}
+										<div className="space-y-2">
+											<Label>Submit button label</Label>
+											<Input
+												value={
+													activeContent.registrationSubmitButtonText
+												}
+												onChange={(e) =>
+													updateContent(
+														"registrationSubmitButtonText",
+														e.target.value,
+													)
+												}
+											/>
+											<p className="text-xs text-muted-foreground">
+												Label for the submit button on
+												the registration form
+											</p>
+										</div>
+									</div>
+								)}
+
+							{/* Sponsor Request Content */}
+							{previewPage === "sponsor" &&
+								sponsorshipEnabled && (
+									<div className="space-y-6">
+										<div>
+											<h3 className="text-lg font-semibold mb-4">
+												Sponsor Request
+											</h3>
+											<p className="text-sm text-muted-foreground mb-6">
+												Configure the sponsorship
+												request page
+											</p>
+										</div>
+
+										<div className="space-y-2">
+											<Label>
+												Sponsorship required message
+											</Label>
+											<Textarea
+												value={
+													activeContent.sponsorMessage
+												}
+												onChange={(e) =>
+													updateContent(
+														"sponsorMessage",
+														e.target.value,
+													)
+												}
+												rows={3}
+											/>
+										</div>
+									</div>
+								)}
+
+							{/* Easy WiFi Content */}
+							{previewPage === "easy-wifi" && easyWifiEnabled && (
+								<div className="space-y-6">
+									<div>
+										<h3 className="text-lg font-semibold mb-4">
+											Easy WiFi
+										</h3>
+										<p className="text-sm text-muted-foreground mb-6">
+											Configure the Easy WiFi page
+										</p>
+									</div>
+
+									<div className="space-y-2">
+										<Label>Call to action message</Label>
+										<Textarea
+											value={
+												activeContent.easyWifiCtaMessage
+											}
+											onChange={(e) =>
+												updateContent(
+													"easyWifiCtaMessage",
+													e.target.value,
+												)
+											}
+											rows={3}
+										/>
+									</div>
+									<div className="space-y-2">
+										<Label>Skip message</Label>
+										<Input
+											value={
+												activeContent.easyWifiSkipMessage
+											}
+											onChange={(e) =>
+												updateContent(
+													"easyWifiSkipMessage",
+													e.target.value,
+												)
+											}
+										/>
+									</div>
+								</div>
+							)}
+
+							{/* Validation Content */}
+							{previewPage === "validation" &&
+								phoneValidationEnabled && (
+									<div className="space-y-6">
+										<div>
+											<h3 className="text-lg font-semibold mb-4">
+												Validation
+											</h3>
+											<p className="text-sm text-muted-foreground mb-6">
+												Configure the phone validation
+												page
+											</p>
+										</div>
+
+										<div className="space-y-2">
+											<Label>
+												Phone validation notice
+											</Label>
+											<Textarea
+												value={
+													activeContent.phoneValidationMessage
+												}
+												onChange={(e) =>
+													updateContent(
+														"phoneValidationMessage",
+														e.target.value,
+													)
+												}
+												rows={3}
+											/>
+										</div>
+									</div>
+								)}
+
+							{/* Success Content */}
+							{previewPage === "success" &&
+								successRedirectMode === "text" && (
+									<div className="space-y-6">
+										<div>
+											<h3 className="text-lg font-semibold mb-4">
+												Success
+											</h3>
+											<p className="text-sm text-muted-foreground mb-6">
+												Configure the success page
+											</p>
+										</div>
+
+										<div className="space-y-2">
+											<Label>Success message</Label>
+											<Textarea
+												value={
+													activeContent.successMessage
+												}
+												onChange={(e) =>
+													updateContent(
+														"successMessage",
+														e.target.value,
+													)
+												}
+												rows={3}
+											/>
+										</div>
+									</div>
+								)}
+
+							{/* Blocked Content */}
+							{previewPage === "blocked" && (
+								<div className="space-y-6">
+									<div>
+										<h3 className="text-lg font-semibold mb-4">
+											Blocked
+										</h3>
+										<p className="text-sm text-muted-foreground mb-6">
+											Configure the blocked/time limit
+											exceeded page
+										</p>
+									</div>
+
+									<div className="space-y-2">
+										<Label>Blocked message</Label>
+										<Textarea
+											value={activeContent.blockedMessage}
+											onChange={(e) =>
+												updateContent(
+													"blockedMessage",
+													e.target.value,
+												)
+											}
+											rows={3}
+										/>
+									</div>
+								</div>
+							)}
+						</div>
+					</div>
+				</TabsContent>
+
+				{/* Style Tab */}
+				<TabsContent value="style" className="space-y-4 mt-6">
+					{/* Logo Settings */}
 					<Collapsible
-						open={previewPage === "home"}
-						onOpenChange={(open) =>
-							setPreviewPage(open ? "home" : "")
-						}
+						defaultOpen
 						className="rounded-lg border bg-card"
 					>
 						<CollapsibleTrigger className="flex w-full items-center justify-between p-4 hover:bg-accent/50 rounded-lg">
-							<span className="font-semibold">Home Page</span>
-							<ChevronDown
-								className={`h-4 w-4 transition-transform ${
-									previewPage === "home" ? "rotate-180" : ""
-								}`}
-							/>
+							<span className="font-semibold">Logo</span>
+							<ChevronDown className="h-4 w-4" />
 						</CollapsibleTrigger>
-						<CollapsibleContent className="border-t p-4 space-y-6">
-							{/* Logo */}
+						<CollapsibleContent className="border-t p-4 space-y-4">
 							<div className="space-y-3">
-								<Label>Logo</Label>
+								<Label>Logo Upload</Label>
 								<p className="text-xs text-muted-foreground">
 									JPG/PNG/SVG, 150px by 30px, 5MB
 								</p>
@@ -299,8 +948,6 @@ export function StepContent({
 									)}
 								</div>
 							</div>
-
-							{/* Logo size */}
 							<div className="space-y-3">
 								<Label>Logo size: {logoSize}px</Label>
 								<Slider
@@ -312,560 +959,11 @@ export function StepContent({
 									step={1}
 								/>
 							</div>
-
-							{/* Title */}
-							<div className="space-y-2">
-								<Label>Title</Label>
-								<Input
-									value={activeContent.title}
-									onChange={(e) =>
-										updateContent("title", e.target.value)
-									}
-								/>
-							</div>
-
-							{/* Description */}
-							<div className="space-y-2">
-								<Label>Description</Label>
-								<Textarea
-									value={activeContent.description}
-									onChange={(e) =>
-										updateContent(
-											"description",
-											e.target.value,
-										)
-									}
-									rows={3}
-								/>
-							</div>
-
-							{/* Sign Up Button - Only show when button mode */}
-							{registrationMode === "button" &&
-								guestRegistrationEnabled && (
-									<div className="space-y-2">
-										<Label>Register button label</Label>
-										<Input
-											value={
-												activeContent.signupButtonText
-											}
-											onChange={(e) =>
-												updateContent(
-													"signupButtonText",
-													e.target.value,
-												)
-											}
-										/>
-										<p className="text-xs text-muted-foreground">
-											Label for the registration button
-											shown on home page
-										</p>
-									</div>
-								)}
-
-							{/* Login Button - Only show when login option is enabled */}
-							{showLoginOption && (
-								<div className="space-y-2">
-									<Label>Login button label</Label>
-									<Input
-										value={activeContent.loginButtonText}
-										onChange={(e) =>
-											updateContent(
-												"loginButtonText",
-												e.target.value,
-											)
-										}
-									/>
-									<p className="text-xs text-muted-foreground">
-										Label for the login button shown on home
-										page
-									</p>
-								</div>
-							)}
-
-							{/* Background type */}
-							<div className="space-y-2">
-								<Label>Background type</Label>
-								<Select
-									value={backgroundType}
-									onValueChange={setBackgroundType}
-								>
-									<SelectTrigger>
-										<SelectValue />
-									</SelectTrigger>
-									<SelectContent>
-										<SelectItem value="image">
-											Image
-										</SelectItem>
-										<SelectItem value="color">
-											Color
-										</SelectItem>
-										<SelectItem value="gradient">
-											Gradient
-										</SelectItem>
-									</SelectContent>
-								</Select>
-							</div>
-
-							{/* Background Image - Only show when type is image */}
-							{backgroundType === "image" && (
-								<div className="space-y-3">
-									<Label>Background image</Label>
-									<p className="text-xs text-muted-foreground">
-										JPG/PNG/SVG, 150px, 5MB
-									</p>
-									<div className="flex items-center gap-3">
-										<div className="h-16 w-16 rounded bg-muted flex items-center justify-center overflow-hidden">
-											{backgroundImage ? (
-												<img
-													src={backgroundImage}
-													alt="Background"
-													className="w-full h-full object-cover"
-												/>
-											) : (
-												<span className="text-xs">
-													BG
-												</span>
-											)}
-										</div>
-										<input
-											ref={bgInputRef}
-											type="file"
-											accept="image/*"
-											onChange={handleBackgroundUpload}
-											className="hidden"
-										/>
-										<Button
-											variant="outline"
-											size="sm"
-											onClick={() =>
-												bgInputRef.current?.click()
-											}
-											type="button"
-										>
-											{backgroundImage
-												? "Change"
-												: "Upload"}
-										</Button>
-										{backgroundImage && (
-											<Button
-												variant="ghost"
-												size="sm"
-												onClick={() =>
-													setBackgroundImage(null)
-												}
-												type="button"
-											>
-												Remove
-											</Button>
-										)}
-									</div>
-								</div>
-							)}
-
-							{/* Background Color - Only show when type is color */}
-							{backgroundType === "color" && (
-								<div className="space-y-3">
-									<Label>Background color</Label>
-									<div className="flex items-center gap-3">
-										<div
-											className="h-10 w-10 rounded border"
-											style={{
-												backgroundColor:
-													backgroundColor,
-											}}
-										/>
-										<Input
-											type="color"
-											value={backgroundColor}
-											onChange={(e) =>
-												setBackgroundColor(
-													e.target.value,
-												)
-											}
-											className="w-20 h-10"
-										/>
-										<Input
-											type="text"
-											value={backgroundColor}
-											onChange={(e) =>
-												setBackgroundColor(
-													e.target.value,
-												)
-											}
-											className="flex-1"
-											placeholder="#6366f1"
-										/>
-									</div>
-								</div>
-							)}
-
-							{/* Gradient Colors - Only show when type is gradient */}
-							{backgroundType === "gradient" && (
-								<div className="space-y-4">
-									<div className="space-y-3">
-										<Label>Gradient color 1</Label>
-										<div className="flex items-center gap-3">
-											<div
-												className="h-10 w-10 rounded border"
-												style={{
-													backgroundColor:
-														gradientColor1,
-												}}
-											/>
-											<Input
-												type="color"
-												value={gradientColor1}
-												onChange={(e) =>
-													setGradientColor1(
-														e.target.value,
-													)
-												}
-												className="w-20 h-10"
-											/>
-											<Input
-												type="text"
-												value={gradientColor1}
-												onChange={(e) =>
-													setGradientColor1(
-														e.target.value,
-													)
-												}
-												className="flex-1"
-												placeholder="#6366f1"
-											/>
-										</div>
-									</div>
-
-									<div className="space-y-3">
-										<Label>Gradient color 2</Label>
-										<div className="flex items-center gap-3">
-											<div
-												className="h-10 w-10 rounded border"
-												style={{
-													backgroundColor:
-														gradientColor2,
-												}}
-											/>
-											<Input
-												type="color"
-												value={gradientColor2}
-												onChange={(e) =>
-													setGradientColor2(
-														e.target.value,
-													)
-												}
-												className="w-20 h-10"
-											/>
-											<Input
-												type="text"
-												value={gradientColor2}
-												onChange={(e) =>
-													setGradientColor2(
-														e.target.value,
-													)
-												}
-												className="flex-1"
-												placeholder="#ec4899"
-											/>
-										</div>
-									</div>
-								</div>
-							)}
 						</CollapsibleContent>
 					</Collapsible>
 
-					{/* Registration Page Section - Only show when button mode */}
-					{guestRegistrationEnabled &&
-						registrationMode === "button" && (
-							<Collapsible
-								open={previewPage === "registration"}
-								onOpenChange={(open) =>
-									setPreviewPage(open ? "registration" : "")
-								}
-								className="rounded-lg border bg-card"
-							>
-								<CollapsibleTrigger className="flex w-full items-center justify-between p-4 hover:bg-accent/50 rounded-lg">
-									<span className="font-semibold">
-										Registration Page
-									</span>
-									<ChevronDown
-										className={`h-4 w-4 transition-transform ${
-											previewPage === "registration"
-												? "rotate-180"
-												: ""
-										}`}
-									/>
-								</CollapsibleTrigger>
-								<CollapsibleContent className="border-t p-4 space-y-6">
-									{/* Title */}
-									<div className="space-y-2">
-										<Label>Title</Label>
-										<Input
-											value={
-												activeContent.registrationTitle
-											}
-											onChange={(e) =>
-												updateContent(
-													"registrationTitle",
-													e.target.value,
-												)
-											}
-										/>
-									</div>
-
-									{/* Description */}
-									<div className="space-y-2">
-										<Label>Description</Label>
-										<Textarea
-											value={
-												activeContent.registrationDescription
-											}
-											onChange={(e) =>
-												updateContent(
-													"registrationDescription",
-													e.target.value,
-												)
-											}
-											rows={3}
-										/>
-									</div>
-
-									{/* Submit Button */}
-									<div className="space-y-2">
-										<Label>Submit button label</Label>
-										<Input
-											value={
-												activeContent.registrationSubmitButtonText
-											}
-											onChange={(e) =>
-												updateContent(
-													"registrationSubmitButtonText",
-													e.target.value,
-												)
-											}
-										/>
-										<p className="text-xs text-muted-foreground">
-											Label for the submit button on the
-											registration form
-										</p>
-									</div>
-								</CollapsibleContent>
-							</Collapsible>
-						)}
-
-					{/* Sponsor Request Section */}
-					{sponsorshipEnabled && (
-						<Collapsible
-							open={previewPage === "sponsor"}
-							onOpenChange={(open) =>
-								setPreviewPage(open ? "sponsor" : "")
-							}
-							className="rounded-lg border bg-card"
-						>
-							<CollapsibleTrigger className="flex w-full items-center justify-between p-4 hover:bg-accent/50 rounded-lg">
-								<span className="font-semibold">
-									Sponsor Request
-								</span>
-								<ChevronDown
-									className={`h-4 w-4 transition-transform ${
-										previewPage === "sponsor"
-											? "rotate-180"
-											: ""
-									}`}
-								/>
-							</CollapsibleTrigger>
-							<CollapsibleContent className="border-t p-4 space-y-6">
-								<div className="space-y-2">
-									<Label>Sponsorship required message</Label>
-									<Textarea
-										value={activeContent.sponsorMessage}
-										onChange={(e) =>
-											updateContent(
-												"sponsorMessage",
-												e.target.value,
-											)
-										}
-										rows={3}
-									/>
-								</div>
-							</CollapsibleContent>
-						</Collapsible>
-					)}
-
-					{/* Easy WiFi Section */}
-					{easyWifiEnabled && (
-						<Collapsible
-							open={previewPage === "easy-wifi"}
-							onOpenChange={(open) =>
-								setPreviewPage(open ? "easy-wifi" : "")
-							}
-							className="rounded-lg border bg-card"
-						>
-							<CollapsibleTrigger className="flex w-full items-center justify-between p-4 hover:bg-accent/50 rounded-lg">
-								<span className="font-semibold">Easy WiFi</span>
-								<ChevronDown
-									className={`h-4 w-4 transition-transform ${
-										previewPage === "easy-wifi"
-											? "rotate-180"
-											: ""
-									}`}
-								/>
-							</CollapsibleTrigger>
-							<CollapsibleContent className="border-t p-4 space-y-6">
-								<div className="space-y-2">
-									<Label>Call to action message</Label>
-									<Textarea
-										value={activeContent.easyWifiCtaMessage}
-										onChange={(e) =>
-											updateContent(
-												"easyWifiCtaMessage",
-												e.target.value,
-											)
-										}
-										rows={3}
-									/>
-								</div>
-								<div className="space-y-2">
-									<Label>Skip message</Label>
-									<Input
-										value={
-											activeContent.easyWifiSkipMessage
-										}
-										onChange={(e) =>
-											updateContent(
-												"easyWifiSkipMessage",
-												e.target.value,
-											)
-										}
-									/>
-								</div>
-							</CollapsibleContent>
-						</Collapsible>
-					)}
-
-					{/* Validation Section */}
-					{phoneValidationEnabled && (
-						<Collapsible
-							open={previewPage === "validation"}
-							onOpenChange={(open) =>
-								setPreviewPage(open ? "validation" : "")
-							}
-							className="rounded-lg border bg-card"
-						>
-							<CollapsibleTrigger className="flex w-full items-center justify-between p-4 hover:bg-accent/50 rounded-lg">
-								<span className="font-semibold">
-									Validation
-								</span>
-								<ChevronDown
-									className={`h-4 w-4 transition-transform ${
-										previewPage === "validation"
-											? "rotate-180"
-											: ""
-									}`}
-								/>
-							</CollapsibleTrigger>
-							<CollapsibleContent className="border-t p-4 space-y-6">
-								<div className="space-y-2">
-									<Label>Phone validation notice</Label>
-									<Textarea
-										value={
-											activeContent.phoneValidationMessage
-										}
-										onChange={(e) =>
-											updateContent(
-												"phoneValidationMessage",
-												e.target.value,
-											)
-										}
-										rows={3}
-									/>
-								</div>
-							</CollapsibleContent>
-						</Collapsible>
-					)}
-
-					{/* Success Section */}
-					{successRedirectMode === "text" && (
-						<Collapsible
-							open={previewPage === "success"}
-							onOpenChange={(open) =>
-								setPreviewPage(open ? "success" : "")
-							}
-							className="rounded-lg border bg-card"
-						>
-							<CollapsibleTrigger className="flex w-full items-center justify-between p-4 hover:bg-accent/50 rounded-lg">
-								<span className="font-semibold">Success</span>
-								<ChevronDown
-									className={`h-4 w-4 transition-transform ${
-										previewPage === "success"
-											? "rotate-180"
-											: ""
-									}`}
-								/>
-							</CollapsibleTrigger>
-							<CollapsibleContent className="border-t p-4 space-y-6">
-								<div className="space-y-2">
-									<Label>Success message</Label>
-									<Textarea
-										value={activeContent.successMessage}
-										onChange={(e) =>
-											updateContent(
-												"successMessage",
-												e.target.value,
-											)
-										}
-										rows={3}
-									/>
-								</div>
-							</CollapsibleContent>
-						</Collapsible>
-					)}
-
-					{/* Blocked Access Section */}
-					<Collapsible
-						open={previewPage === "blocked"}
-						onOpenChange={(open) =>
-							setPreviewPage(open ? "blocked" : "")
-						}
-						className="rounded-lg border bg-card"
-					>
-						<CollapsibleTrigger className="flex w-full items-center justify-between p-4 hover:bg-accent/50 rounded-lg">
-							<span className="font-semibold">
-								Blocked Access
-							</span>
-							<ChevronDown
-								className={`h-4 w-4 transition-transform ${
-									previewPage === "blocked"
-										? "rotate-180"
-										: ""
-								}`}
-							/>
-						</CollapsibleTrigger>
-						<CollapsibleContent className="border-t p-4 space-y-6">
-							<div className="space-y-2">
-								<Label>Blocked access notice</Label>
-								<Textarea
-									value={activeContent.blockedMessage}
-									onChange={(e) =>
-										updateContent(
-											"blockedMessage",
-											e.target.value,
-										)
-									}
-									rows={3}
-								/>
-							</div>
-						</CollapsibleContent>
-					</Collapsible>
-				</TabsContent>
-
-				{/* Style Tab */}
-				<TabsContent value="style" className="space-y-4 mt-6">
 					{/* Global Font Settings */}
-					<Collapsible
-						defaultOpen
-						className="rounded-lg border bg-card"
-					>
+					<Collapsible className="rounded-lg border bg-card">
 						<CollapsibleTrigger className="flex w-full items-center justify-between p-4 hover:bg-accent/50 rounded-lg">
 							<span className="font-semibold">
 								Global Font Settings
