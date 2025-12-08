@@ -88,9 +88,9 @@ interface StepContentProps {
 		React.SetStateAction<Record<string, ContentPerLanguage>>
 	>;
 	selectedLanguages: string[];
-	setSelectedLanguages: React.Dispatch<React.SetStateAction<string[]>>;
+	setSelectedLanguages: (languages: string[]) => void;
 	activeLanguage: string;
-	setActiveLanguage: React.Dispatch<React.SetStateAction<string>>;
+	setActiveLanguage: (language: string) => void;
 	previewPage: string;
 	setPreviewPage: (page: string) => void;
 }
@@ -340,42 +340,47 @@ export function StepContent({
 							</div>
 
 							{/* Sign Up Button - Only show when button mode */}
-					{registrationMode === "button" && guestRegistrationEnabled && (
-						<div className="space-y-2">
-							<Label>Register button label</Label>
-							<Input
-								value={activeContent.signupButtonText}
-								onChange={(e) =>
-									updateContent(
-										"signupButtonText",
-										e.target.value,
-									)
-								}
-							/>
-							<p className="text-xs text-muted-foreground">
-								Label for the registration button shown on home page
-							</p>
-						</div>
-					)}
+							{registrationMode === "button" &&
+								guestRegistrationEnabled && (
+									<div className="space-y-2">
+										<Label>Register button label</Label>
+										<Input
+											value={
+												activeContent.signupButtonText
+											}
+											onChange={(e) =>
+												updateContent(
+													"signupButtonText",
+													e.target.value,
+												)
+											}
+										/>
+										<p className="text-xs text-muted-foreground">
+											Label for the registration button
+											shown on home page
+										</p>
+									</div>
+								)}
 
-					{/* Login Button - Only show when login option is enabled */}
-					{showLoginOption && (
-						<div className="space-y-2">
-							<Label>Login button label</Label>
-							<Input
-								value={activeContent.loginButtonText}
-								onChange={(e) =>
-									updateContent(
-										"loginButtonText",
-										e.target.value,
-									)
-								}
-							/>
-							<p className="text-xs text-muted-foreground">
-								Label for the login button shown on home page
-							</p>
-						</div>
-					)}
+							{/* Login Button - Only show when login option is enabled */}
+							{showLoginOption && (
+								<div className="space-y-2">
+									<Label>Login button label</Label>
+									<Input
+										value={activeContent.loginButtonText}
+										onChange={(e) =>
+											updateContent(
+												"loginButtonText",
+												e.target.value,
+											)
+										}
+									/>
+									<p className="text-xs text-muted-foreground">
+										Label for the login button shown on home
+										page
+									</p>
+								</div>
+							)}
 
 							{/* Background type */}
 							<div className="space-y-2">
@@ -569,72 +574,84 @@ export function StepContent({
 						</CollapsibleContent>
 					</Collapsible>
 
-				{/* Registration Page Section - Only show when button mode */}
-				{guestRegistrationEnabled && registrationMode === "button" && (
-					<Collapsible
-						open={previewPage === "registration"}
-						onOpenChange={(open) =>
-							setPreviewPage(open ? "registration" : "")
-						}
-						className="rounded-lg border bg-card"
-					>
-						<CollapsibleTrigger className="flex w-full items-center justify-between p-4 hover:bg-accent/50 rounded-lg">
-							<span className="font-semibold">Registration Page</span>
-							<ChevronDown
-								className={`h-4 w-4 transition-transform ${
-									previewPage === "registration" ? "rotate-180" : ""
-								}`}
-							/>
-						</CollapsibleTrigger>
-						<CollapsibleContent className="border-t p-4 space-y-6">
-							{/* Title */}
-							<div className="space-y-2">
-								<Label>Title</Label>
-								<Input
-									value={activeContent.registrationTitle}
-									onChange={(e) =>
-										updateContent(
-											"registrationTitle",
-											e.target.value,
-										)
-									}
-								/>
-							</div>
+					{/* Registration Page Section - Only show when button mode */}
+					{guestRegistrationEnabled &&
+						registrationMode === "button" && (
+							<Collapsible
+								open={previewPage === "registration"}
+								onOpenChange={(open) =>
+									setPreviewPage(open ? "registration" : "")
+								}
+								className="rounded-lg border bg-card"
+							>
+								<CollapsibleTrigger className="flex w-full items-center justify-between p-4 hover:bg-accent/50 rounded-lg">
+									<span className="font-semibold">
+										Registration Page
+									</span>
+									<ChevronDown
+										className={`h-4 w-4 transition-transform ${
+											previewPage === "registration"
+												? "rotate-180"
+												: ""
+										}`}
+									/>
+								</CollapsibleTrigger>
+								<CollapsibleContent className="border-t p-4 space-y-6">
+									{/* Title */}
+									<div className="space-y-2">
+										<Label>Title</Label>
+										<Input
+											value={
+												activeContent.registrationTitle
+											}
+											onChange={(e) =>
+												updateContent(
+													"registrationTitle",
+													e.target.value,
+												)
+											}
+										/>
+									</div>
 
-							{/* Description */}
-							<div className="space-y-2">
-								<Label>Description</Label>
-								<Textarea
-									value={activeContent.registrationDescription}
-									onChange={(e) =>
-										updateContent(
-											"registrationDescription",
-											e.target.value,
-										)
-									}
-									rows={3}
-								/>
-							</div>
+									{/* Description */}
+									<div className="space-y-2">
+										<Label>Description</Label>
+										<Textarea
+											value={
+												activeContent.registrationDescription
+											}
+											onChange={(e) =>
+												updateContent(
+													"registrationDescription",
+													e.target.value,
+												)
+											}
+											rows={3}
+										/>
+									</div>
 
-							{/* Submit Button */}
-							<div className="space-y-2">
-								<Label>Submit button label</Label>
-								<Input
-									value={activeContent.registrationSubmitButtonText}
-									onChange={(e) =>
-										updateContent(
-											"registrationSubmitButtonText",
-											e.target.value,
-										)
-									}
-								/>
-								<p className="text-xs text-muted-foreground">
-									Label for the submit button on the registration form
-								</p>
-							</div>
-						</CollapsibleContent>
-					</Collapsible>
-				)}
+									{/* Submit Button */}
+									<div className="space-y-2">
+										<Label>Submit button label</Label>
+										<Input
+											value={
+												activeContent.registrationSubmitButtonText
+											}
+											onChange={(e) =>
+												updateContent(
+													"registrationSubmitButtonText",
+													e.target.value,
+												)
+											}
+										/>
+										<p className="text-xs text-muted-foreground">
+											Label for the submit button on the
+											registration form
+										</p>
+									</div>
+								</CollapsibleContent>
+							</Collapsible>
+						)}
 
 					{/* Sponsor Request Section */}
 					{sponsorshipEnabled && (

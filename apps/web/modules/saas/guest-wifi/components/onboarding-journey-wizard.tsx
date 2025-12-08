@@ -1,31 +1,11 @@
 "use client";
 
-import { useActiveWorkspace } from "@saas/workspaces/hooks/use-active-workspace";
-import { orpc } from "@shared/lib/orpc-query-utils";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-	AlertDialog,
-	AlertDialogAction,
-	AlertDialogCancel,
-	AlertDialogContent,
-	AlertDialogDescription,
-	AlertDialogFooter,
-	AlertDialogHeader,
-	AlertDialogTitle,
-} from "@ui/components/alert-dialog";
-import { Button } from "@ui/components/button";
-import equal from "fast-deep-equal";
-import {
-	ArrowRight,
-	Fingerprint,
-	Loader2,
-	Palette,
-	Workflow,
-} from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { Loader2 } from "lucide-react";
 import { StepAuthentication } from "./steps/step-1-authentication";
 import { StepContent } from "./steps/step-2-content";
 import { StepJourney } from "./steps/step-3-journey";
+import { useWizard, WizardProvider } from "./wizard-context";
+import { WizardHeader } from "./wizard-header";
 import { WizardPreview } from "./wizard-preview";
 
 interface OnboardingJourneyWizardProps {
@@ -33,434 +13,63 @@ interface OnboardingJourneyWizardProps {
 	onClose: () => void;
 }
 
-interface FormField {
-	id: string;
-	label: string;
-	placeholder?: string;
-	required: boolean;
-	type: string;
-	isCustom?: boolean;
-	options?: string[];
-}
-
-interface SelectedTerm {
-	id: string;
-	termDefinitionId: string;
-	required: boolean;
-}
-
-interface TermTranslations {
-	[languageCode: string]: {
-		label: string;
-		linkText: string;
-		documentTitle: string;
-		documentContent: string;
-	};
-}
-
-const STEPS = [
-	{
-		id: 1,
-		name: "Authentication",
-		icon: Fingerprint,
-		component: StepAuthentication,
-	},
-	{ id: 2, name: "Journey", icon: Workflow, component: StepJourney },
-	{ id: 3, name: "Content", icon: Palette, component: StepContent },
-];
-
-export function OnboardingJourneyWizard({
-	open,
-	onClose,
-}: OnboardingJourneyWizardProps) {
-	const { activeWorkspace: workspace } = useActiveWorkspace();
-	const queryClient = useQueryClient();
-	const [currentStep, setCurrentStep] = useState(1);
-
-	// Fetch existing config
-	const { data: savedConfig, isLoading: isLoadingConfig } = useQuery({
-		...orpc.guestWifi.get.queryOptions({
-			input: { workspaceId: workspace?.id || "" },
-		}),
-		enabled: !!workspace?.id && open,
-	});
-
-	// Fetch available terms
-	const { data: termsData = [] } = useQuery(
-		orpc.terms.list.queryOptions({
-			input: {
-				workspaceId: workspace?.id || "",
-				status: "PUBLISHED",
-			},
-			enabled: !!workspace?.id,
-		}),
-	);
-
-	const availableTerms = termsData.map((term) => {
-		const translations = term.translations as TermTranslations;
-		return {
-			id: term.id,
-			title: term.name,
-			label: translations?.en?.label || term.name,
-		};
-	});
-
-	// Shared state across steps - initialized from saved config
-	const [easyWifiEnabled, setEasyWifiEnabled] = useState(false);
-	const [sponsorshipEnabled, setSponsorshipEnabled] = useState(false);
-	const [phoneValidationEnabled, setPhoneValidationEnabled] = useState(false);
-	const [successRedirectMode, setSuccessRedirectMode] = useState("text");
-
-	// Style State
-	const [fontFamily, setFontFamily] = useState("Inter");
-	const [baseFontSize, setBaseFontSize] = useState("16");
-	const [baseColor, setBaseColor] = useState("#1F2937");
-	const [primaryColor, setPrimaryColor] = useState("#111827");
-	const [spacing, setSpacing] = useState("balanced");
-
-	// Content State
-	const [logo, setLogo] = useState<string | null>(null);
-	const [logoSize, setLogoSize] = useState(50);
-	const [backgroundType, setBackgroundType] = useState("image");
-	const [backgroundImage, setBackgroundImage] = useState<string | null>(null);
-	const [backgroundColor, setBackgroundColor] = useState("#6366f1");
-	const [gradientColor1, setGradientColor1] = useState("#6366f1");
-	const [gradientColor2, setGradientColor2] = useState("#ec4899");
-
-	// Multi-language content state
-	const [selectedLanguages, setSelectedLanguages] = useState<string[]>([
-		"en",
-	]);
-	const [activeLanguage, setActiveLanguage] = useState("en");
-
-	// Default content per language
-	const defaultContent = {
-		title: "Get online with free WiFi",
-		description: "How do you want to connect?",
-		signupButtonText: "Register",
-		loginButtonText: "Login with your account",
-		registrationTitle: "Register for WiFi",
-		registrationDescription: "Please fill in your details to get online",
-		registrationSubmitButtonText: "Register",
-		sponsorMessage: "You need to wait that your host approves your access",
-		phoneValidationMessage: "You need to validate your phone number",
-		successMessage: "You're all set! Enjoy your WiFi connection.",
-		blockedMessage:
-			"Sorry, you have used all your WiFi time allowance for today.",
-		easyWifiCtaMessage:
-			"You need to wait that your host approves your access",
-		easyWifiSkipMessage: "I'll take my chances",
-	};
-
-	const [content, setContent] = useState<
-		Record<string, typeof defaultContent>
-	>({
-		en: { ...defaultContent },
-	});
-
-	// Helper to get content for active language (with fallback to English)
-	const getContentForLanguage = (lang: string) => {
-		return content[lang] || content.en || defaultContent;
-	};
-
-	// Helper to update content for a specific language
-	const updateContentForLanguage = (
-		lang: string,
-		field: keyof typeof defaultContent,
-		value: string,
-	) => {
-		setContent((prev) => ({
-			...prev,
-			[lang]: {
-				...(prev[lang] || defaultContent),
-				[field]: value,
-			},
-		}));
-	};
-
-	// Authentication State
-	const [guestRegistrationEnabled, setGuestRegistrationEnabled] =
-		useState(true);
-	const [registrationMode, setRegistrationMode] = useState<"form" | "button">(
-		"form",
-	);
-	const [showLoginOption, setShowLoginOption] = useState(true);
-	const [appleIdEnabled, setAppleIdEnabled] = useState(false);
-	const [accessCodesEnabled, setAccessCodesEnabled] = useState(false);
-	const [enterpriseIdpEnabled, setEnterpriseIdpEnabled] = useState(false);
-	const [selectedIdps, setSelectedIdps] = useState<string[]>([]);
-	const [terms, setTerms] = useState<SelectedTerm[]>([]);
-
-	const [previewPage, setPreviewPage] = useState("home");
-	const [initialConfig, setInitialConfig] = useState<any>(null);
-
-	const [registrationFields, setRegistrationFields] = useState<FormField[]>([
-		{
-			id: "1",
-			label: "First Name",
-			placeholder: "Enter your first name",
-			required: false,
-			type: "text",
-		},
-		{
-			id: "3",
-			label: "Email",
-			placeholder: "Enter your email address",
-			required: true,
-			type: "email",
-		},
-	]);
-
-	// Load saved config into state when it arrives
-	useEffect(() => {
-		if (savedConfig?.config) {
-			const config = savedConfig.config;
-
-			// Authentication
-			if (config.authentication.guestRegistrationEnabled !== undefined) {
-				setGuestRegistrationEnabled(
-					config.authentication.guestRegistrationEnabled,
-				);
-			}
-			if (config.authentication.registrationMode) {
-				setRegistrationMode(
-					config.authentication.registrationMode as "form" | "button",
-				);
-			}
-			setShowLoginOption(config.authentication.showLoginOption);
-			setAppleIdEnabled(config.authentication.appleIdEnabled);
-			setAccessCodesEnabled(config.authentication.accessCodesEnabled);
-			setEnterpriseIdpEnabled(config.authentication.enterpriseIdpEnabled);
-			setSelectedIdps(config.authentication.selectedIdps);
-			setSponsorshipEnabled(config.authentication.sponsorshipEnabled);
-			setPhoneValidationEnabled(
-				config.authentication.phoneValidationEnabled,
-			);
-			setRegistrationFields(config.authentication.registrationFields);
-			setTerms(config.authentication.terms);
-
-			// Journey
-			setEasyWifiEnabled(config.journey.easyWifiEnabled);
-			setSuccessRedirectMode(config.journey.successRedirectMode);
-
-			// Style
-			setFontFamily(config.style.fontFamily);
-			setBaseFontSize(config.style.baseFontSize);
-			setBaseColor(config.style.baseColor);
-			setPrimaryColor(config.style.primaryColor);
-			setSpacing(config.style.spacing);
-			setBackgroundType(config.style.backgroundType);
-			if (config.style.backgroundColor) {
-				setBackgroundColor(config.style.backgroundColor);
-			}
-			if (config.style.gradientColor1) {
-				setGradientColor1(config.style.gradientColor1);
-			}
-			if (config.style.gradientColor2) {
-				setGradientColor2(config.style.gradientColor2);
-			}
-
-			// Assets
-			setLogoSize(config.assets.logoSize);
-			if (config.assets.logoUrl) setLogo(config.assets.logoUrl);
-			if (config.assets.backgroundImageUrl) {
-				setBackgroundImage(config.assets.backgroundImageUrl);
-			}
-
-			// Languages
-			if (config.languages) {
-				setSelectedLanguages(config.languages);
-			}
-			if (config.defaultLanguage) {
-				setActiveLanguage(config.defaultLanguage);
-			}
-
-			// Content - load all languages
-			if (config.content) {
-				setContent(config.content);
-			}
-
-			// Set initial config for dirty checking
-			setInitialConfig({
-				authentication: {
-					guestRegistrationEnabled:
-						config.authentication.guestRegistrationEnabled ?? true,
-					registrationMode:
-						config.authentication.registrationMode || "form",
-					showLoginOption: config.authentication.showLoginOption,
-					appleIdEnabled: config.authentication.appleIdEnabled,
-					accessCodesEnabled:
-						config.authentication.accessCodesEnabled,
-					enterpriseIdpEnabled:
-						config.authentication.enterpriseIdpEnabled,
-					selectedIdps: config.authentication.selectedIdps,
-					sponsorshipEnabled:
-						config.authentication.sponsorshipEnabled,
-					phoneValidationEnabled:
-						config.authentication.phoneValidationEnabled,
-					registrationFields:
-						config.authentication.registrationFields,
-					terms: config.authentication.terms,
-				},
-				journey: {
-					easyWifiEnabled: config.journey.easyWifiEnabled,
-					successRedirectMode: config.journey.successRedirectMode,
-					autoConnectReturning: true,
-					allowBypassWithCode: true,
-					allowExtensionRequest: true,
-				},
-				style: {
-					fontFamily: config.style.fontFamily,
-					baseFontSize: config.style.baseFontSize,
-					baseColor: config.style.baseColor,
-					primaryColor: config.style.primaryColor,
-					spacing: config.style.spacing,
-					backgroundType: config.style.backgroundType,
-					backgroundColor: config.style.backgroundColor || "#6366f1",
-					gradientColor1: config.style.gradientColor1 || "#6366f1",
-					gradientColor2: config.style.gradientColor2 || "#ec4899",
-				},
-				content: config.content || { en: { ...defaultContent } },
-				assets: {
-					logoUrl: config.assets.logoUrl || undefined,
-					logoSize: config.assets.logoSize,
-					backgroundImageUrl:
-						config.assets.backgroundImageUrl || undefined,
-				},
-				languages: config.languages || ["en"],
-				defaultLanguage: config.defaultLanguage || "en",
-			});
-		}
-	}, [savedConfig]);
-
-	// Save mutation
-	const saveMutation = useMutation(
-		orpc.guestWifi.save.mutationOptions({
-			onSuccess: () => {
-				queryClient.invalidateQueries({
-					queryKey: orpc.guestWifi.get.queryKey({
-						input: { workspaceId: workspace?.id || "" },
-					}),
-				});
-			},
-		}),
-	);
-
-	const buildConfigFromState = () => ({
-		authentication: {
-			guestRegistrationEnabled,
-			registrationMode,
-			showLoginOption,
-			appleIdEnabled,
-			accessCodesEnabled,
-			enterpriseIdpEnabled,
-			selectedIdps,
-			sponsorshipEnabled,
-			phoneValidationEnabled,
-			registrationFields,
-			terms,
-		},
-		journey: {
-			easyWifiEnabled,
-			successRedirectMode: successRedirectMode as "external" | "text",
-			autoConnectReturning: true,
-			allowBypassWithCode: true,
-			allowExtensionRequest: true,
-		},
-		style: {
-			fontFamily,
-			baseFontSize,
-			baseColor,
-			primaryColor,
-			spacing,
-			backgroundType: backgroundType as "image" | "color" | "gradient",
-			backgroundColor,
-			gradientColor1,
-			gradientColor2,
-		},
-		content,
-		assets: {
-			logoUrl: logo || undefined,
-			logoSize,
-			backgroundImageUrl: backgroundImage || undefined,
-		},
-		languages: selectedLanguages,
-		defaultLanguage: activeLanguage,
-	});
-
-	// Check for unsaved changes
-	const hasUnsavedChanges = useMemo(() => {
-		if (!initialConfig) return false;
-
-		const currentConfig = buildConfigFromState();
-
-		// Use fast-deep-equal for comparison
-		return !equal(currentConfig, initialConfig);
-	}, [
-		initialConfig,
+function WizardContent({ onClose }: { onClose: () => void }) {
+	const {
+		currentStep,
+		isLoadingConfig,
+		// State for StepJourney and StepContent (passed as props for now)
+		easyWifiEnabled,
+		setEasyWifiEnabled,
+		successRedirectMode,
+		setSuccessRedirectMode,
+		registrationFields,
+		sponsorshipEnabled,
+		phoneValidationEnabled,
 		guestRegistrationEnabled,
 		registrationMode,
 		showLoginOption,
+		fontFamily,
+		setFontFamily,
+		baseFontSize,
+		setBaseFontSize,
+		baseColor,
+		setBaseColor,
+		primaryColor,
+		setPrimaryColor,
+		spacing,
+		setSpacing,
+		logo,
+		setLogo,
+		logoSize,
+		setLogoSize,
+		backgroundType,
+		setBackgroundType,
+		backgroundImage,
+		setBackgroundImage,
+		backgroundColor,
+		setBackgroundColor,
+		gradientColor1,
+		setGradientColor1,
+		gradientColor2,
+		setGradientColor2,
+		content,
+		setContent,
+		selectedLanguages,
+		setSelectedLanguages,
+		activeLanguage,
+		setActiveLanguage,
+		previewPage,
+		setPreviewPage,
+		// State for Preview
+		getContentForLanguage,
 		appleIdEnabled,
 		accessCodesEnabled,
 		enterpriseIdpEnabled,
 		selectedIdps,
-		sponsorshipEnabled,
-		phoneValidationEnabled,
-		registrationFields,
 		terms,
-		easyWifiEnabled,
-		successRedirectMode,
-		fontFamily,
-		baseFontSize,
-		baseColor,
-		primaryColor,
-		spacing,
-		backgroundType,
-		backgroundColor,
-		gradientColor1,
-		gradientColor2,
-		content,
-		logo,
-		logoSize,
-		backgroundImage,
-		selectedLanguages,
-		activeLanguage,
-		savedConfig,
-	]);
+		availableTerms,
+	} = useWizard();
 
-	const [showUnsavedChangesDialog, setShowUnsavedChangesDialog] =
-		useState(false);
-
-	const handleClose = () => {
-		if (hasUnsavedChanges) {
-			setShowUnsavedChangesDialog(true);
-		} else {
-			onClose();
-		}
-	};
-
-	if (!open) return null;
-
-	const handleSaveAndContinue = () => {
-		// Save current state
-		if (workspace?.id) {
-			saveMutation.mutate({
-				workspaceId: workspace.id,
-				name: "Default",
-				config: buildConfigFromState(),
-			});
-		}
-
-		if (currentStep < STEPS.length) {
-			setCurrentStep(currentStep + 1);
-		} else {
-			// Final save and close
-			onClose();
-		}
-	};
-
-	// Show loading while fetching config
 	if (isLoadingConfig) {
 		return (
 			<div
@@ -484,107 +93,13 @@ export function OnboardingJourneyWizard({
 		>
 			<div className="h-full w-full p-5">
 				<div className="h-full flex flex-col">
-					{/* Header */}
-					<div className="rounded-t-2xl border bg-card text-card-foreground shadow-sm">
-						<div className="flex items-center justify-between px-6 py-4">
-							{/* Breadcrumb Navigation */}
-							<div className="flex items-center gap-2">
-								{STEPS.map((step, index) => (
-									<div
-										key={step.id}
-										className="flex items-center gap-2"
-									>
-										<button
-											type="button"
-											onClick={() =>
-												setCurrentStep(step.id)
-											}
-											className={`flex items-center gap-2 text-sm transition-colors ${
-												currentStep === step.id
-													? "text-primary font-semibold"
-													: "text-muted-foreground font-medium hover:text-foreground"
-											}`}
-										>
-											<step.icon className="h-4 w-4" />
-											{step.name}
-										</button>
-										{index < STEPS.length - 1 && (
-											<span className="text-muted-foreground">
-												›
-											</span>
-										)}
-									</div>
-								))}
-							</div>
-
-							{/* Actions */}
-							<div className="flex items-center gap-2">
-								<Button variant="ghost" onClick={handleClose}>
-									Exit
-								</Button>
-								<Button
-									onClick={handleSaveAndContinue}
-									className="gap-2"
-									disabled={saveMutation.isPending}
-								>
-									{saveMutation.isPending && (
-										<Loader2 className="h-4 w-4 animate-spin" />
-									)}
-									{currentStep === STEPS.length
-										? "Publish"
-										: "Save & Continue"}
-									<ArrowRight className="h-4 w-4" />
-								</Button>
-							</div>
-						</div>
-					</div>
+					<WizardHeader onClose={onClose} />
 
 					{/* Content Area - Split View */}
 					<div className="flex-1 flex overflow-hidden rounded-b-2xl border border-t-0 bg-card text-card-foreground shadow-sm">
 						{/* Left Panel - Configuration */}
 						<div className="w-1/2 overflow-y-auto border-r">
-							{currentStep === 1 && (
-								<StepAuthentication
-									registrationFields={registrationFields}
-									setRegistrationFields={
-										setRegistrationFields
-									}
-									sponsorshipEnabled={sponsorshipEnabled}
-									setSponsorshipEnabled={
-										setSponsorshipEnabled
-									}
-									phoneValidationEnabled={
-										phoneValidationEnabled
-									}
-									setPhoneValidationEnabled={
-										setPhoneValidationEnabled
-									}
-									showLoginOption={showLoginOption}
-									setShowLoginOption={setShowLoginOption}
-									appleIdEnabled={appleIdEnabled}
-									setAppleIdEnabled={setAppleIdEnabled}
-									accessCodesEnabled={accessCodesEnabled}
-									setAccessCodesEnabled={
-										setAccessCodesEnabled
-									}
-									enterpriseIdpEnabled={enterpriseIdpEnabled}
-									setEnterpriseIdpEnabled={
-										setEnterpriseIdpEnabled
-									}
-									selectedIdps={selectedIdps}
-									setSelectedIdps={setSelectedIdps}
-									terms={terms}
-									setTerms={setTerms}
-									guestRegistrationEnabled={
-										guestRegistrationEnabled
-									}
-									setGuestRegistrationEnabled={
-										setGuestRegistrationEnabled
-									}
-									registrationMode={registrationMode}
-									setRegistrationMode={setRegistrationMode}
-								/>
-							)}
+							{currentStep === 1 && <StepAuthentication />}
 							{currentStep === 2 && (
 								<StepJourney
 									easyWifiEnabled={easyWifiEnabled}
@@ -734,27 +249,19 @@ export function OnboardingJourneyWizard({
 					</div>
 				</div>
 			</div>
-
-			<AlertDialog
-				open={showUnsavedChangesDialog}
-				onOpenChange={setShowUnsavedChangesDialog}
-			>
-				<AlertDialogContent>
-					<AlertDialogHeader>
-						<AlertDialogTitle>Unsaved Changes</AlertDialogTitle>
-						<AlertDialogDescription>
-							You have unsaved changes. Are you sure you want to
-							leave? Your changes will be lost.
-						</AlertDialogDescription>
-					</AlertDialogHeader>
-					<AlertDialogFooter>
-						<AlertDialogCancel>Cancel</AlertDialogCancel>
-						<AlertDialogAction onClick={onClose}>
-							Leave without saving
-						</AlertDialogAction>
-					</AlertDialogFooter>
-				</AlertDialogContent>
-			</AlertDialog>
 		</div>
+	);
+}
+
+export function OnboardingJourneyWizard({
+	open,
+	onClose,
+}: OnboardingJourneyWizardProps) {
+	if (!open) return null;
+
+	return (
+		<WizardProvider open={open} onClose={onClose}>
+			<WizardContent onClose={onClose} />
+		</WizardProvider>
 	);
 }
