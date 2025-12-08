@@ -86,7 +86,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 			],
 		},
 		{
-			title: "Employees",
+			title: "BYOD",
 			url: `${basePath}/employees`,
 			icon: ShieldCheckIcon,
 			isActive: currentPath.startsWith(`${basePath}/employees`),
@@ -185,19 +185,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 	];
 
 	const navSecondary = [
-		{
-			title: "Documentation",
-			url: "https://supastarter.dev/docs/nextjs",
-			icon: BookOpenIcon,
-			isActive: false,
-			external: true,
-		},
-		{
-			title: "Notifications",
-			url: "#",
-			icon: BellIcon,
-			isActive: false,
-		},
 		{
 			title: "Upgrade to Pro",
 			url: "#",
