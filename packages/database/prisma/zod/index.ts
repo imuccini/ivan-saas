@@ -172,6 +172,18 @@ export const TermScalarFieldEnumSchema = z.enum(['id', 'workspaceId', 'name', 'v
 
 export type TermScalarFieldEnum = z.infer<typeof TermScalarFieldEnumSchema>;
 
+// File: IntegrationScalarFieldEnum.schema.ts
+
+export const IntegrationScalarFieldEnumSchema = z.enum(['id', 'workspaceId', 'provider', 'name', 'credentials', 'createdAt', 'updatedAt'])
+
+export type IntegrationScalarFieldEnum = z.infer<typeof IntegrationScalarFieldEnumSchema>;
+
+// File: NetworkScalarFieldEnum.schema.ts
+
+export const NetworkScalarFieldEnumSchema = z.enum(['id', 'workspaceId', 'integrationId', 'externalId', 'name', 'config', 'tags', 'provisioningStatus', 'createdAt', 'updatedAt'])
+
+export type NetworkScalarFieldEnum = z.infer<typeof NetworkScalarFieldEnumSchema>;
+
 // File: SortOrder.schema.ts
 
 export const SortOrderSchema = z.enum(['asc', 'desc'])
@@ -647,4 +659,37 @@ export const TermSchema = z.object({
 });
 
 export type TermType = z.infer<typeof TermSchema>;
+
+
+// File: Integration.schema.ts
+
+export const IntegrationSchema = z.object({
+  id: z.string(),
+  workspaceId: z.string(),
+  provider: z.string(),
+  name: z.string(),
+  credentials: z.unknown().refine((val) => { const getDepth = (obj: unknown, depth: number = 0): number => { if (depth > 10) return depth; if (obj === null || typeof obj !== 'object') return depth; const values = Object.values(obj as Record<string, unknown>); if (values.length === 0) return depth; return Math.max(...values.map(v => getDepth(v, depth + 1))); }; return getDepth(val) <= 10; }, "JSON nesting depth exceeds maximum of 10"),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
+export type IntegrationType = z.infer<typeof IntegrationSchema>;
+
+
+// File: Network.schema.ts
+
+export const NetworkSchema = z.object({
+  id: z.string(),
+  workspaceId: z.string(),
+  integrationId: z.string(),
+  externalId: z.string(),
+  name: z.string(),
+  config: z.unknown().refine((val) => { const getDepth = (obj: unknown, depth: number = 0): number => { if (depth > 10) return depth; if (obj === null || typeof obj !== 'object') return depth; const values = Object.values(obj as Record<string, unknown>); if (values.length === 0) return depth; return Math.max(...values.map(v => getDepth(v, depth + 1))); }; return getDepth(val) <= 10; }, "JSON nesting depth exceeds maximum of 10"),
+  tags: z.array(z.string()),
+  provisioningStatus: z.string().default("pending"),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
+export type NetworkType = z.infer<typeof NetworkSchema>;
 

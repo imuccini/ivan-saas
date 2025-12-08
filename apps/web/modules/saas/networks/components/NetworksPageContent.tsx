@@ -1,95 +1,58 @@
 "use client";
 
+import { useActiveWorkspace } from "@saas/workspaces/hooks/use-active-workspace";
+import { orpc } from "@shared/lib/orpc-query-utils";
+import { useQuery } from "@tanstack/react-query";
 import { Badge } from "@ui/components/badge";
 import { Button } from "@ui/components/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@ui/components/card";
 import {
-	BotIcon,
 	CheckCircle2Icon,
-	CircleIcon,
+	Loader2,
 	PlusIcon,
 	RadioTowerIcon,
-	ShieldCheckIcon,
-	WifiIcon,
 	XCircleIcon,
 } from "lucide-react";
-
-// Mock data for networks
-const MOCK_NETWORKS = [
-	{
-		id: "1",
-		name: "HQ Campus Network",
-		vendor: "Cisco Meraki",
-		status: "connected",
-		accessPoints: 24,
-		ssids: {
-			guestWifi: true,
-			iot: true,
-			employees: true,
-		},
-	},
-	{
-		id: "2",
-		name: "Branch Office - NYC",
-		vendor: "Ubiquiti UniFi",
-		status: "connected",
-		accessPoints: 8,
-		ssids: {
-			guestWifi: true,
-			iot: false,
-			employees: true,
-		},
-	},
-	{
-		id: "3",
-		name: "Warehouse Network",
-		vendor: "Aruba Instant",
-		status: "disconnected",
-		accessPoints: 6,
-		ssids: {
-			guestWifi: false,
-			iot: true,
-			employees: false,
-		},
-	},
-	{
-		id: "4",
-		name: "Retail Store - SF",
-		vendor: "Cisco Meraki",
-		status: "connected",
-		accessPoints: 12,
-		ssids: {
-			guestWifi: true,
-			iot: true,
-			employees: true,
-		},
-	},
-	{
-		id: "5",
-		name: "Remote Office - LA",
-		vendor: "Ubiquiti UniFi",
-		status: "connected",
-		accessPoints: 4,
-		ssids: {
-			guestWifi: true,
-			iot: false,
-			employees: true,
-		},
-	},
-];
+import { useState } from "react";
+import { AddNetworkWizard } from "./add-network-wizard";
 
 const VENDOR_ICONS: Record<string, string> = {
-	"Cisco Meraki": "🔷",
-	"Ubiquiti UniFi": "⚡",
-	"Aruba Instant": "🟠",
+	meraki: "🔷",
+	cisco: "🔷",
+	aruba: "🟠",
+	ubiquiti: "⚡",
+	fortigate: "🔴",
+	fortiedge: "🔴",
+	omada: "🟢",
+	ruckus: "🟡",
+	mist: "🔵",
 };
 
 interface NetworkCardProps {
-	network: (typeof MOCK_NETWORKS)[0];
+	network: {
+		id: string;
+		name: string;
+		provisioningStatus: string;
+		integration: {
+			provider: string;
+			name: string;
+		};
+		// biome-ignore lint/suspicious/noExplicitAny: Config structure varies
+		config: any;
+	};
 }
 
 function NetworkCard({ network }: NetworkCardProps) {
-	const isConnected = network.status === "connected";
+	const isActive = network.provisioningStatus === "active";
+	const isPending =
+		network.provisioningStatus === "pending" ||
+		network.provisioningStatus === "provisioning";
+	const isFailed = network.provisioningStatus === "failed";
+
+	// Extract network info from config
+	const networkConfig = network.config || {};
+	const productTypes = networkConfig.productTypes || [];
+	const hasWireless = productTypes.includes("wireless");
 
 	return (
 		<Card className="flex flex-col">
@@ -97,19 +60,31 @@ function NetworkCard({ network }: NetworkCardProps) {
 				<div className="flex items-start justify-between">
 					<CardTitle className="text-lg">{network.name}</CardTitle>
 					<Badge
-						variant={isConnected ? "default" : "secondary"}
+						variant={isActive ? "default" : "secondary"}
 						className={
-							isConnected
+							isActive
 								? "bg-green-500/10 text-green-600 hover:bg-green-500/20 dark:text-green-400"
-								: "bg-muted text-muted-foreground"
+								: isPending
+									? "bg-yellow-500/10 text-yellow-600 hover:bg-yellow-500/20 dark:text-yellow-400"
+									: isFailed
+										? "bg-red-500/10 text-red-600 hover:bg-red-500/20 dark:text-red-400"
+										: "bg-muted text-muted-foreground"
 						}
 					>
-						{isConnected ? (
+						{isPending ? (
+							<Loader2 className="mr-1 size-3 animate-spin" />
+						) : isActive ? (
 							<CheckCircle2Icon className="mr-1 size-3" />
 						) : (
 							<XCircleIcon className="mr-1 size-3" />
 						)}
-						{isConnected ? "Connected" : "Disconnected"}
+						{isPending
+							? "Provisioning"
+							: isActive
+								? "Active"
+								: isFailed
+									? "Failed"
+									: "Disconnected"}
 					</Badge>
 				</div>
 			</CardHeader>
@@ -117,75 +92,41 @@ function NetworkCard({ network }: NetworkCardProps) {
 				{/* Vendor */}
 				<div className="flex items-center gap-2 text-sm text-muted-foreground">
 					<span className="text-lg">
-						{VENDOR_ICONS[network.vendor] || "📡"}
+						{VENDOR_ICONS[network.integration.provider] || "📡"}
 					</span>
-					<span>{network.vendor}</span>
+					<span>{network.integration.name}</span>
 				</div>
 
-				{/* Access Points */}
-				<div className="flex items-center gap-2 text-sm">
-					<RadioTowerIcon className="size-4 text-muted-foreground" />
-					<span className="font-medium">
-						{network.accessPoints} APs
-					</span>
-				</div>
-
-				{/* SSIDs */}
-				<div className="space-y-2">
-					<p className="text-xs font-medium text-muted-foreground">
-						Deployed SSIDs
-					</p>
-					<div className="flex flex-wrap gap-2">
-						<Badge
-							variant="outline"
-							className={
-								network.ssids.guestWifi
-									? "border-blue-500/50 bg-blue-500/10 text-blue-600 dark:text-blue-400"
-									: "opacity-50"
-							}
-						>
-							<WifiIcon className="mr-1 size-3" />
-							Guest WiFi
-							{network.ssids.guestWifi ? (
-								<CheckCircle2Icon className="ml-1 size-3" />
-							) : (
-								<CircleIcon className="ml-1 size-3" />
-							)}
-						</Badge>
-						<Badge
-							variant="outline"
-							className={
-								network.ssids.iot
-									? "border-purple-500/50 bg-purple-500/10 text-purple-600 dark:text-purple-400"
-									: "opacity-50"
-							}
-						>
-							<BotIcon className="mr-1 size-3" />
-							IoT
-							{network.ssids.iot ? (
-								<CheckCircle2Icon className="ml-1 size-3" />
-							) : (
-								<CircleIcon className="ml-1 size-3" />
-							)}
-						</Badge>
-						<Badge
-							variant="outline"
-							className={
-								network.ssids.employees
-									? "border-green-500/50 bg-green-500/10 text-green-600 dark:text-green-400"
-									: "opacity-50"
-							}
-						>
-							<ShieldCheckIcon className="mr-1 size-3" />
-							Employees
-							{network.ssids.employees ? (
-								<CheckCircle2Icon className="ml-1 size-3" />
-							) : (
-								<CircleIcon className="ml-1 size-3" />
-							)}
-						</Badge>
+				{/* Network Info */}
+				{hasWireless && (
+					<div className="flex items-center gap-2 text-sm">
+						<RadioTowerIcon className="size-4 text-muted-foreground" />
+						<span className="font-medium">
+							{(network as any).accessPointCount || 0} Access
+							Points
+						</span>
 					</div>
-				</div>
+				)}
+
+				{/* Tags */}
+				{network.config?.tags && network.config.tags.length > 0 && (
+					<div className="space-y-2">
+						<p className="text-xs font-medium text-muted-foreground">
+							Device Tags
+						</p>
+						<div className="flex flex-wrap gap-2">
+							{network.config.tags.map((tag: string) => (
+								<Badge
+									key={tag}
+									variant="outline"
+									className="text-xs"
+								>
+									{tag}
+								</Badge>
+							))}
+						</div>
+					</div>
+				)}
 
 				{/* Edit Button */}
 				<Button variant="outline" className="mt-auto w-full">
@@ -197,6 +138,19 @@ function NetworkCard({ network }: NetworkCardProps) {
 }
 
 export function NetworksPageContent() {
+	const [isWizardOpen, setIsWizardOpen] = useState(false);
+	const { activeWorkspace } = useActiveWorkspace();
+
+	// Fetch networks from database
+	const { data: networks, isLoading } = useQuery({
+		...orpc.networks.list.queryOptions({
+			input: {
+				workspaceId: activeWorkspace?.id || "",
+			},
+		}),
+		enabled: !!activeWorkspace?.id,
+	});
+
 	return (
 		<div className="space-y-6">
 			{/* Header */}
@@ -207,18 +161,54 @@ export function NetworksPageContent() {
 						Manage your network infrastructure and deployments
 					</p>
 				</div>
-				<Button>
+				<Button onClick={() => setIsWizardOpen(true)}>
 					<PlusIcon className="mr-2 size-4" />
 					Add Network
 				</Button>
 			</div>
 
+			{/* Loading State */}
+			{isLoading && (
+				<div className="flex items-center justify-center py-12">
+					<Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+				</div>
+			)}
+
+			{/* Empty State */}
+			{!isLoading && (!networks || networks.length === 0) && (
+				<Card className="p-12">
+					<div className="flex flex-col items-center justify-center text-center">
+						<RadioTowerIcon className="h-12 w-12 text-muted-foreground mb-4" />
+						<h3 className="text-lg font-semibold mb-2">
+							No networks yet
+						</h3>
+						<p className="text-muted-foreground mb-6 max-w-sm">
+							Connect your network infrastructure to start
+							managing Guest WiFi, IoT, and Employee access.
+						</p>
+						<Button onClick={() => setIsWizardOpen(true)}>
+							<PlusIcon className="mr-2 size-4" />
+							Add Your First Network
+						</Button>
+					</div>
+				</Card>
+			)}
+
 			{/* Networks Grid */}
-			<div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-				{MOCK_NETWORKS.map((network) => (
-					<NetworkCard key={network.id} network={network} />
-				))}
-			</div>
+			{!isLoading && networks && networks.length > 0 && (
+				<div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+					{networks.map((network) => (
+						<NetworkCard key={network.id} network={network} />
+					))}
+				</div>
+			)}
+
+			{/* Add Network Wizard */}
+			{isWizardOpen && (
+				<div className="fixed inset-0 z-50 bg-background overflow-y-auto">
+					<AddNetworkWizard onClose={() => setIsWizardOpen(false)} />
+				</div>
+			)}
 		</div>
 	);
 }

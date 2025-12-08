@@ -170,6 +170,8 @@ model Workspace {
   guestWifiConfigs       GuestWifiConfig[]
   sponsors               Sponsor[]
   accessCodeGroups       AccessCodeGroup[]
+  integrations           Integration[]
+  networks               Network[]
 
   @@unique([organizationId, slug])
   @@map("workspace")
@@ -479,4 +481,47 @@ model Term {
   @@index([workspaceId])
   @@index([workspaceId, status])
   @@map("term")
+}
+
+// Network Management Models
+
+model Integration {
+  id          String    @id @default(cuid())
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  provider    String   // 'meraki', 'aruba', 'fortigate', etc.
+  name        String   // User-friendly name
+  credentials Json     // Encrypted { apiKey: '...' }
+
+  networks    Network[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([workspaceId, provider])
+  @@map("integration")
+}
+
+model Network {
+  id            String      @id @default(cuid())
+  workspaceId   String
+  workspace     Workspace   @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  integrationId String
+  integration   Integration @relation(fields: [integrationId], references: [id], onDelete: Cascade)
+
+  externalId    String      // Vendor's network ID (e.g., 'N_12345')
+  name          String
+  config        Json        // Network-specific config
+  tags          String[]    // Selected device tags
+
+  provisioningStatus String @default("pending") // pending, provisioning, active, failed
+
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@unique([integrationId, externalId])
+  @@index([workspaceId])
+  @@map("network")
 }
