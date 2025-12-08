@@ -22,7 +22,12 @@ import {
 } from "@ui/components/select";
 import { Switch } from "@ui/components/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@ui/components/tabs";
-import { ChevronDown, FileText, LayoutTemplate, MousePointerClick } from "lucide-react";
+import {
+	ChevronDown,
+	FileText,
+	LayoutTemplate,
+	MousePointerClick,
+} from "lucide-react";
 import { useState } from "react";
 import { ConfigureSignupFormDialog } from "../configure-signup-form-dialog";
 import { ConfigureTermsDialog } from "../configure-terms-dialog";
@@ -134,9 +139,12 @@ export function StepAuthentication({
 					<div className="rounded-lg border bg-card p-4 space-y-4">
 						<div className="flex items-center justify-between">
 							<div className="space-y-1">
-								<div className="font-semibold">Guest Accounts</div>
+								<div className="font-semibold">
+									Guest Accounts
+								</div>
 								<p className="text-sm text-muted-foreground">
-									Define how guests register or log in using built-in credentials.
+									Define how guests register or log in using
+									built-in credentials.
 								</p>
 							</div>
 						</div>
@@ -148,20 +156,29 @@ export function StepAuthentication({
 								</Label>
 								<Switch
 									checked={guestRegistrationEnabled}
-									onCheckedChange={setGuestRegistrationEnabled}
+									onCheckedChange={
+										setGuestRegistrationEnabled
+									}
 								/>
 							</div>
 
 							{guestRegistrationEnabled && (
-								<div className="space-y-4 pl-4 border-l-2 border-muted ml-2">
+								<div className="space-y-4">
 									<div className="space-y-3">
-										<Label className="text-sm font-medium">Display</Label>
+										<Label className="text-sm font-medium">
+											Display
+										</Label>
 										<div className="flex bg-muted p-1 rounded-lg">
 											<button
 												type="button"
-												onClick={() => setRegistrationMode("button")}
+												onClick={() =>
+													setRegistrationMode(
+														"button",
+													)
+												}
 												className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 text-sm font-medium rounded-md transition-all ${
-													registrationMode === "button"
+													registrationMode ===
+													"button"
 														? "bg-background text-foreground shadow-sm"
 														: "text-muted-foreground hover:bg-background/50"
 												}`}
@@ -171,7 +188,9 @@ export function StepAuthentication({
 											</button>
 											<button
 												type="button"
-												onClick={() => setRegistrationMode("form")}
+												onClick={() =>
+													setRegistrationMode("form")
+												}
 												className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 text-sm font-medium rounded-md transition-all ${
 													registrationMode === "form"
 														? "bg-background text-foreground shadow-sm"
@@ -184,7 +203,10 @@ export function StepAuthentication({
 										</div>
 										{registrationMode === "button" && (
 											<p className="text-xs text-muted-foreground">
-												Home page will show only a registration button. A separate registration page will be added to the journey.
+												Home page will show only a
+												registration button. A separate
+												registration page will be added
+												to the journey.
 											</p>
 										)}
 									</div>
@@ -195,14 +217,17 @@ export function StepAuthentication({
 												id="apple-id"
 												checked={appleIdEnabled}
 												onCheckedChange={(checked) =>
-													setAppleIdEnabled(checked === true)
+													setAppleIdEnabled(
+														checked === true,
+													)
 												}
 											/>
 											<Label
 												htmlFor="apple-id"
 												className="font-normal"
 											>
-												Enable Apple ID for quick sign-up (Apple devices only)
+												Enable Apple ID for quick
+												sign-up (Apple devices only)
 											</Label>
 										</div>
 									</div>
@@ -211,7 +236,9 @@ export function StepAuthentication({
 										variant="outline"
 										size="sm"
 										className="gap-2 w-full"
-										onClick={() => setSignupFormDialogOpen(true)}
+										onClick={() =>
+											setSignupFormDialogOpen(true)
+										}
 										type="button"
 									>
 										Configure Registration Form fields
@@ -229,7 +256,8 @@ export function StepAuthentication({
 							<div className="flex items-center justify-between pt-4 border-t">
 								<div className="space-y-0.5">
 									<Label className="text-base">
-										Allows users with existing credentials to sign in.
+										Allows users with existing credentials
+										to sign in.
 									</Label>
 								</div>
 								<Switch
@@ -248,7 +276,8 @@ export function StepAuthentication({
 									Third-Party Authentication
 								</div>
 								<p className="text-sm text-muted-foreground">
-									Allow users to authenticate via external systems
+									Allow users to authenticate via external
+									systems
 								</p>
 							</div>
 							<Switch
@@ -289,7 +318,8 @@ export function StepAuthentication({
 													})
 												) : (
 													<span className="text-muted-foreground font-normal">
-														Select Identity Sources...
+														Select Identity
+														Sources...
 													</span>
 												)}
 											</div>
@@ -302,14 +332,20 @@ export function StepAuthentication({
 										</DropdownMenuLabel>
 										<DropdownMenuSeparator />
 										{idpOptions
-											.filter((option) => option.category === "enterprise")
+											.filter(
+												(option) =>
+													option.category ===
+													"enterprise",
+											)
 											.map((option) => (
 												<DropdownMenuCheckboxItem
 													key={option.id}
 													checked={selectedIdps.includes(
 														option.id,
 													)}
-													onCheckedChange={(checked) => {
+													onCheckedChange={(
+														checked,
+													) => {
 														if (checked) {
 															setSelectedIdps([
 																...selectedIdps,
@@ -334,14 +370,19 @@ export function StepAuthentication({
 										</DropdownMenuLabel>
 										<DropdownMenuSeparator />
 										{idpOptions
-											.filter((option) => option.category === "pms")
+											.filter(
+												(option) =>
+													option.category === "pms",
+											)
 											.map((option) => (
 												<DropdownMenuCheckboxItem
 													key={option.id}
 													checked={selectedIdps.includes(
 														option.id,
 													)}
-													onCheckedChange={(checked) => {
+													onCheckedChange={(
+														checked,
+													) => {
 														if (checked) {
 															setSelectedIdps([
 																...selectedIdps,
@@ -375,7 +416,9 @@ export function StepAuthentication({
 									Terms and agreements
 								</div>
 								<p className="text-sm text-muted-foreground">
-									Define terms and consents to collect from users joining the service, for all registration and identification methods.
+									Define terms and consents to collect from
+									users joining the service, for all
+									registration and identification methods.
 								</p>
 							</div>
 							<Button
