@@ -3,16 +3,6 @@
 import { useActiveWorkspace } from "@saas/workspaces/hooks/use-active-workspace";
 import { orpc } from "@shared/lib/orpc-query-utils";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Button } from "@ui/components/button";
-import {
-	ArrowRight,
-	Fingerprint,
-	Loader2,
-	Palette,
-	Workflow,
-} from "lucide-react";
-import equal from "fast-deep-equal";
-import { useEffect, useState, useMemo } from "react";
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -23,6 +13,16 @@ import {
 	AlertDialogHeader,
 	AlertDialogTitle,
 } from "@ui/components/alert-dialog";
+import { Button } from "@ui/components/button";
+import equal from "fast-deep-equal";
+import {
+	ArrowRight,
+	Fingerprint,
+	Loader2,
+	Palette,
+	Workflow,
+} from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 import { StepAuthentication } from "./steps/step-1-authentication";
 import { StepContent } from "./steps/step-2-content";
 import { StepJourney } from "./steps/step-3-journey";
@@ -47,6 +47,15 @@ interface SelectedTerm {
 	id: string;
 	termDefinitionId: string;
 	required: boolean;
+}
+
+interface TermTranslations {
+	[languageCode: string]: {
+		label: string;
+		linkText: string;
+		documentTitle: string;
+		documentContent: string;
+	};
 }
 
 const STEPS = [
@@ -87,11 +96,14 @@ export function OnboardingJourneyWizard({
 		}),
 	);
 
-	const availableTerms = termsData.map((term) => ({
-		id: term.id,
-		title: term.name,
-		label: term.translations?.en?.label || term.name,
-	}));
+	const availableTerms = termsData.map((term) => {
+		const translations = term.translations as TermTranslations;
+		return {
+			id: term.id,
+			title: term.name,
+			label: translations?.en?.label || term.name,
+		};
+	});
 
 	// Shared state across steps - initialized from saved config
 	const [easyWifiEnabled, setEasyWifiEnabled] = useState(false);
@@ -167,8 +179,11 @@ export function OnboardingJourneyWizard({
 	};
 
 	// Authentication State
-	const [guestRegistrationEnabled, setGuestRegistrationEnabled] = useState(true);
-	const [registrationMode, setRegistrationMode] = useState<"form" | "button">("form");
+	const [guestRegistrationEnabled, setGuestRegistrationEnabled] =
+		useState(true);
+	const [registrationMode, setRegistrationMode] = useState<"form" | "button">(
+		"form",
+	);
 	const [showLoginOption, setShowLoginOption] = useState(true);
 	const [appleIdEnabled, setAppleIdEnabled] = useState(false);
 	const [accessCodesEnabled, setAccessCodesEnabled] = useState(false);
@@ -203,10 +218,14 @@ export function OnboardingJourneyWizard({
 
 			// Authentication
 			if (config.authentication.guestRegistrationEnabled !== undefined) {
-				setGuestRegistrationEnabled(config.authentication.guestRegistrationEnabled);
+				setGuestRegistrationEnabled(
+					config.authentication.guestRegistrationEnabled,
+				);
 			}
 			if (config.authentication.registrationMode) {
-				setRegistrationMode(config.authentication.registrationMode as "form" | "button");
+				setRegistrationMode(
+					config.authentication.registrationMode as "form" | "button",
+				);
 			}
 			setShowLoginOption(config.authentication.showLoginOption);
 			setAppleIdEnabled(config.authentication.appleIdEnabled);
@@ -258,23 +277,29 @@ export function OnboardingJourneyWizard({
 
 			// Content - load all languages
 			if (config.content) {
-
 				setContent(config.content);
 			}
 
 			// Set initial config for dirty checking
 			setInitialConfig({
 				authentication: {
-					guestRegistrationEnabled: config.authentication.guestRegistrationEnabled ?? true,
-					registrationMode: config.authentication.registrationMode || "form",
+					guestRegistrationEnabled:
+						config.authentication.guestRegistrationEnabled ?? true,
+					registrationMode:
+						config.authentication.registrationMode || "form",
 					showLoginOption: config.authentication.showLoginOption,
 					appleIdEnabled: config.authentication.appleIdEnabled,
-					accessCodesEnabled: config.authentication.accessCodesEnabled,
-					enterpriseIdpEnabled: config.authentication.enterpriseIdpEnabled,
+					accessCodesEnabled:
+						config.authentication.accessCodesEnabled,
+					enterpriseIdpEnabled:
+						config.authentication.enterpriseIdpEnabled,
 					selectedIdps: config.authentication.selectedIdps,
-					sponsorshipEnabled: config.authentication.sponsorshipEnabled,
-					phoneValidationEnabled: config.authentication.phoneValidationEnabled,
-					registrationFields: config.authentication.registrationFields,
+					sponsorshipEnabled:
+						config.authentication.sponsorshipEnabled,
+					phoneValidationEnabled:
+						config.authentication.phoneValidationEnabled,
+					registrationFields:
+						config.authentication.registrationFields,
 					terms: config.authentication.terms,
 				},
 				journey: {
@@ -299,7 +324,8 @@ export function OnboardingJourneyWizard({
 				assets: {
 					logoUrl: config.assets.logoUrl || undefined,
 					logoSize: config.assets.logoSize,
-					backgroundImageUrl: config.assets.backgroundImageUrl || undefined,
+					backgroundImageUrl:
+						config.assets.backgroundImageUrl || undefined,
 				},
 				languages: config.languages || ["en"],
 				defaultLanguage: config.defaultLanguage || "en",
@@ -362,12 +388,10 @@ export function OnboardingJourneyWizard({
 		defaultLanguage: activeLanguage,
 	});
 
-
-
 	// Check for unsaved changes
 	const hasUnsavedChanges = useMemo(() => {
 		if (!initialConfig) return false;
-		
+
 		const currentConfig = buildConfigFromState();
 
 		// Use fast-deep-equal for comparison
@@ -402,10 +426,11 @@ export function OnboardingJourneyWizard({
 		backgroundImage,
 		selectedLanguages,
 		activeLanguage,
-		savedConfig
+		savedConfig,
 	]);
 
-	const [showUnsavedChangesDialog, setShowUnsavedChangesDialog] = useState(false);
+	const [showUnsavedChangesDialog, setShowUnsavedChangesDialog] =
+		useState(false);
 
 	const handleClose = () => {
 		if (hasUnsavedChanges) {
@@ -550,8 +575,12 @@ export function OnboardingJourneyWizard({
 									setSelectedIdps={setSelectedIdps}
 									terms={terms}
 									setTerms={setTerms}
-									guestRegistrationEnabled={guestRegistrationEnabled}
-									setGuestRegistrationEnabled={setGuestRegistrationEnabled}
+									guestRegistrationEnabled={
+										guestRegistrationEnabled
+									}
+									setGuestRegistrationEnabled={
+										setGuestRegistrationEnabled
+									}
 									registrationMode={registrationMode}
 									setRegistrationMode={setRegistrationMode}
 								/>
@@ -575,7 +604,9 @@ export function OnboardingJourneyWizard({
 										phoneValidationEnabled
 									}
 									successRedirectMode={successRedirectMode}
-									guestRegistrationEnabled={guestRegistrationEnabled}
+									guestRegistrationEnabled={
+										guestRegistrationEnabled
+									}
 									registrationMode={registrationMode}
 									showLoginOption={showLoginOption}
 									fontFamily={fontFamily}
@@ -647,7 +678,9 @@ export function OnboardingJourneyWizard({
 									getContentForLanguage(activeLanguage)
 										.registrationSubmitButtonText
 								}
-								guestRegistrationEnabled={guestRegistrationEnabled}
+								guestRegistrationEnabled={
+									guestRegistrationEnabled
+								}
 								registrationMode={registrationMode}
 								showLoginOption={showLoginOption}
 								appleIdEnabled={appleIdEnabled}
@@ -702,18 +735,23 @@ export function OnboardingJourneyWizard({
 				</div>
 			</div>
 
-
-			<AlertDialog open={showUnsavedChangesDialog} onOpenChange={setShowUnsavedChangesDialog}>
+			<AlertDialog
+				open={showUnsavedChangesDialog}
+				onOpenChange={setShowUnsavedChangesDialog}
+			>
 				<AlertDialogContent>
 					<AlertDialogHeader>
 						<AlertDialogTitle>Unsaved Changes</AlertDialogTitle>
 						<AlertDialogDescription>
-							You have unsaved changes. Are you sure you want to leave? Your changes will be lost.
+							You have unsaved changes. Are you sure you want to
+							leave? Your changes will be lost.
 						</AlertDialogDescription>
 					</AlertDialogHeader>
 					<AlertDialogFooter>
 						<AlertDialogCancel>Cancel</AlertDialogCancel>
-						<AlertDialogAction onClick={onClose}>Leave without saving</AlertDialogAction>
+						<AlertDialogAction onClick={onClose}>
+							Leave without saving
+						</AlertDialogAction>
 					</AlertDialogFooter>
 				</AlertDialogContent>
 			</AlertDialog>

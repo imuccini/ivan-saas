@@ -25,7 +25,9 @@ export const contentPerLanguageSchema = z.object({
 	signupButtonText: z.string(),
 	loginButtonText: z.string(),
 	registrationTitle: z.string().default("Register for WiFi"),
-	registrationDescription: z.string().default("Please fill in your details to get online"),
+	registrationDescription: z
+		.string()
+		.default("Please fill in your details to get online"),
 	registrationSubmitButtonText: z.string().default("Register"),
 	sponsorMessage: z.string(),
 	phoneValidationMessage: z.string(),
@@ -147,6 +149,10 @@ export const defaultGuestWifiConfig: GuestWifiConfigData = {
 			description: "How do you want to connect?",
 			signupButtonText: "Register",
 			loginButtonText: "Login with your account",
+			registrationTitle: "Register for WiFi",
+			registrationDescription:
+				"Please fill in your details to get online",
+			registrationSubmitButtonText: "Register",
 			sponsorMessage:
 				"You need to wait that your host approves your access",
 			phoneValidationMessage: "You need to validate your phone number",
