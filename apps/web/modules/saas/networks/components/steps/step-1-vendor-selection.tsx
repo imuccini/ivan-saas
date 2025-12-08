@@ -1,22 +1,9 @@
 "use client";
 
+import { getAllVendors } from "@saas/networks/lib/vendors";
 import { cn } from "@ui/lib";
 
-const VENDORS = [
-	{
-		id: "meraki",
-		name: "Cisco Meraki",
-		logo: "/images/vendors/meraki.svg",
-		available: true,
-	},
-	{ id: "cisco", name: "Cisco Catalyst", available: false },
-	{ id: "aruba", name: "Aruba Central", available: false },
-	{ id: "fortigate", name: "Fortigate", available: false },
-	{ id: "fortiedge", name: "FortiEdge Cloud", available: false },
-	{ id: "omada", name: "TP-Link Omada", available: false },
-	{ id: "ruckus", name: "Ruckus One", available: false },
-	{ id: "mist", name: "Mist", available: false },
-];
+const VENDORS = getAllVendors();
 
 interface Step1Props {
 	onSelect: (vendor: string) => void;
@@ -37,25 +24,32 @@ export function Step1VendorSelection({ onSelect }: Step1Props) {
 					<button
 						key={vendor.id}
 						type="button"
-						onClick={() => vendor.available && onSelect(vendor.id)}
-						disabled={!vendor.available}
+						onClick={() => !vendor.comingSoon && onSelect(vendor.id)}
+						disabled={vendor.comingSoon}
 						className={cn(
 							"flex flex-col items-center justify-center p-6 border rounded-lg transition-all",
-							vendor.available
+							!vendor.comingSoon
 								? "hover:border-primary hover:bg-accent cursor-pointer"
 								: "opacity-50 cursor-not-allowed bg-muted",
 						)}
 					>
-						<div className="h-12 w-12 bg-muted rounded-full mb-3 flex items-center justify-center">
-							{/* Placeholder for logo */}
-							<span className="text-xs font-bold">
-								{vendor.name[0]}
-							</span>
+						<div className="h-16 w-16 bg-muted rounded-full mb-3 flex items-center justify-center overflow-hidden">
+							{vendor.logo ? (
+								<img
+									src={vendor.logo}
+									alt={vendor.name}
+									className="h-full w-full object-contain p-2"
+								/>
+							) : (
+								<span className="text-xl font-bold">
+									{vendor.name[0]}
+								</span>
+							)}
 						</div>
 						<span className="font-medium text-center text-sm">
 							{vendor.name}
 						</span>
-						{!vendor.available && (
+						{vendor.comingSoon && (
 							<span className="text-[10px] bg-muted-foreground/20 px-2 py-0.5 rounded-full mt-2">
 								Coming Soon
 							</span>
