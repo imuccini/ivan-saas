@@ -889,256 +889,225 @@ export function StepContent({
 				</TabsContent>
 
 				{/* Style Tab */}
-				<TabsContent value="style" className="space-y-4 mt-6">
+				<TabsContent value="style" className="space-y-6 mt-6">
 					{/* Logo Settings */}
-					<Collapsible
-						defaultOpen
-						className="rounded-lg border bg-card"
-					>
-						<CollapsibleTrigger className="flex w-full items-center justify-between p-4 hover:bg-accent/50 rounded-lg">
-							<span className="font-semibold">Logo</span>
-							<ChevronDown className="h-4 w-4" />
-						</CollapsibleTrigger>
-						<CollapsibleContent className="border-t p-4 space-y-4">
-							<div className="space-y-3">
-								<Label>Logo Upload</Label>
-								<p className="text-xs text-muted-foreground">
-									JPG/PNG/SVG, 150px by 30px, 5MB
-								</p>
-								<div className="flex items-center gap-3">
-									<div className="h-16 w-16 rounded-full bg-muted flex items-center justify-center overflow-hidden">
-										{logo ? (
-											<img
-												src={logo}
-												alt="Logo"
-												className="w-full h-full object-contain"
-											/>
-										) : (
-											<span className="text-xs">
-												Logo
-											</span>
-										)}
-									</div>
-									<input
-										ref={logoInputRef}
-										type="file"
-										accept="image/*"
-										onChange={handleLogoUpload}
-										className="hidden"
-									/>
-									<Button
-										variant="outline"
-										size="sm"
-										onClick={() =>
-											logoInputRef.current?.click()
-										}
-										type="button"
-									>
-										{logo ? "Change" : "Upload"}
-									</Button>
-									{logo && (
-										<Button
-											variant="ghost"
-											size="sm"
-											onClick={() => setLogo(null)}
-											type="button"
-										>
-											Remove
-										</Button>
+					<div className="space-y-4">
+						<h3 className="text-lg font-semibold">Logo</h3>
+						<div className="space-y-3">
+							<Label>Logo Upload</Label>
+							<p className="text-xs text-muted-foreground">
+								JPG/PNG/SVG, 150px by 30px, 5MB
+							</p>
+							<div className="flex items-center gap-3">
+								<div className="h-16 w-16 rounded-full bg-muted flex items-center justify-center overflow-hidden">
+									{logo ? (
+										<img
+											src={logo}
+											alt="Logo"
+											className="w-full h-full object-contain"
+										/>
+									) : (
+										<span className="text-xs">Logo</span>
 									)}
 								</div>
-							</div>
-							<div className="space-y-3">
-								<Label>Logo size: {logoSize}px</Label>
-								<Slider
-									value={[logoSize]}
-									onValueChange={(value) =>
-										setLogoSize(value[0])
-									}
-									max={150}
-									step={1}
+								<input
+									ref={logoInputRef}
+									type="file"
+									accept="image/*"
+									onChange={handleLogoUpload}
+									className="hidden"
 								/>
+								<Button
+									variant="outline"
+									size="sm"
+									onClick={() =>
+										logoInputRef.current?.click()
+									}
+									type="button"
+								>
+									{logo ? "Change" : "Upload"}
+								</Button>
+								{logo && (
+									<Button
+										variant="ghost"
+										size="sm"
+										onClick={() => setLogo(null)}
+										type="button"
+									>
+										Remove
+									</Button>
+								)}
 							</div>
-						</CollapsibleContent>
-					</Collapsible>
+						</div>
+						<div className="space-y-3">
+							<Label>Logo size: {logoSize}px</Label>
+							<Slider
+								value={[logoSize]}
+								onValueChange={(value) => setLogoSize(value[0])}
+								max={150}
+								step={1}
+							/>
+						</div>
+					</div>
+
+					<div className="border-t" />
 
 					{/* Global Font Settings */}
-					<Collapsible className="rounded-lg border bg-card">
-						<CollapsibleTrigger className="flex w-full items-center justify-between p-4 hover:bg-accent/50 rounded-lg">
-							<span className="font-semibold">
-								Global Font Settings
-							</span>
-							<ChevronDown className="h-4 w-4" />
-						</CollapsibleTrigger>
-						<CollapsibleContent className="border-t p-4 space-y-4">
-							<div className="grid grid-cols-2 gap-4">
-								<div className="space-y-2">
-									<Label>Font Family</Label>
-									<Select
-										value={fontFamily}
-										onValueChange={setFontFamily}
-									>
-										<SelectTrigger>
-											<SelectValue />
-										</SelectTrigger>
-										<SelectContent>
-											<SelectItem value="Inter">
-												Inter
-											</SelectItem>
-											<SelectItem value="Roboto">
-												Roboto
-											</SelectItem>
-											<SelectItem value="Open Sans">
-												Open Sans
-											</SelectItem>
-											<SelectItem value="Lato">
-												Lato
-											</SelectItem>
-										</SelectContent>
-									</Select>
-								</div>
-								<div className="space-y-2">
-									<Label>Font Size</Label>
-									<Select
-										value={baseFontSize}
-										onValueChange={setBaseFontSize}
-									>
-										<SelectTrigger>
-											<SelectValue />
-										</SelectTrigger>
-										<SelectContent>
-											<SelectItem value="14">
-												14px
-											</SelectItem>
-											<SelectItem value="16">
-												16px
-											</SelectItem>
-											<SelectItem value="18">
-												18px
-											</SelectItem>
-										</SelectContent>
-									</Select>
-								</div>
+					<div className="space-y-4">
+						<h3 className="text-lg font-semibold">
+							Global Font Settings
+						</h3>
+						<div className="grid grid-cols-2 gap-4">
+							<div className="space-y-2">
+								<Label>Font Family</Label>
+								<Select
+									value={fontFamily}
+									onValueChange={setFontFamily}
+								>
+									<SelectTrigger>
+										<SelectValue />
+									</SelectTrigger>
+									<SelectContent>
+										<SelectItem value="Inter">
+											Inter
+										</SelectItem>
+										<SelectItem value="Roboto">
+											Roboto
+										</SelectItem>
+										<SelectItem value="Open Sans">
+											Open Sans
+										</SelectItem>
+										<SelectItem value="Lato">
+											Lato
+										</SelectItem>
+									</SelectContent>
+								</Select>
 							</div>
 							<div className="space-y-2">
-								<Label>Base Color</Label>
-								<div className="flex items-center gap-2">
-									<div
-										className="h-10 w-10 rounded border"
-										style={{
-											backgroundColor: baseColor,
-										}}
-									/>
-									<Input
-										value={baseColor}
-										onChange={(e) =>
-											setBaseColor(e.target.value)
-										}
-										className="font-mono"
-									/>
-									<Input
-										type="color"
-										value={baseColor}
-										onChange={(e) =>
-											setBaseColor(e.target.value)
-										}
-										className="w-12 p-1 h-10"
-									/>
-								</div>
+								<Label>Font Size</Label>
+								<Select
+									value={baseFontSize}
+									onValueChange={setBaseFontSize}
+								>
+									<SelectTrigger>
+										<SelectValue />
+									</SelectTrigger>
+									<SelectContent>
+										<SelectItem value="14">14px</SelectItem>
+										<SelectItem value="16">16px</SelectItem>
+										<SelectItem value="18">18px</SelectItem>
+									</SelectContent>
+								</Select>
 							</div>
-						</CollapsibleContent>
-					</Collapsible>
+						</div>
+						<div className="space-y-2">
+							<Label>Base Color</Label>
+							<div className="flex items-center gap-2">
+								<div
+									className="h-10 w-10 rounded border"
+									style={{
+										backgroundColor: baseColor,
+									}}
+								/>
+								<Input
+									value={baseColor}
+									onChange={(e) =>
+										setBaseColor(e.target.value)
+									}
+									className="font-mono"
+								/>
+								<Input
+									type="color"
+									value={baseColor}
+									onChange={(e) =>
+										setBaseColor(e.target.value)
+									}
+									className="w-12 p-1 h-10"
+								/>
+							</div>
+						</div>
+					</div>
+
+					<div className="border-t" />
 
 					{/* Primary Accent Color */}
-					<Collapsible
-						defaultOpen
-						className="rounded-lg border bg-card"
-					>
-						<CollapsibleTrigger className="flex w-full items-center justify-between p-4 hover:bg-accent/50 rounded-lg">
-							<span className="font-semibold">
-								Primary Accent Color
-							</span>
-							<ChevronDown className="h-4 w-4" />
-						</CollapsibleTrigger>
-						<CollapsibleContent className="border-t p-4 space-y-4">
-							<div className="space-y-2">
-								<Label>Button Color</Label>
-								<div className="flex items-center gap-2">
-									<div
-										className="h-10 w-10 rounded border"
-										style={{
-											backgroundColor: primaryColor,
-										}}
-									/>
-									<Input
-										value={primaryColor}
-										onChange={(e) =>
-											setPrimaryColor(e.target.value)
-										}
-										className="font-mono"
-									/>
-									<Input
-										type="color"
-										value={primaryColor}
-										onChange={(e) =>
-											setPrimaryColor(e.target.value)
-										}
-										className="w-12 p-1 h-10"
-									/>
-								</div>
+					<div className="space-y-4">
+						<h3 className="text-lg font-semibold">
+							Primary Accent Color
+						</h3>
+						<div className="space-y-2">
+							<Label>Button Color</Label>
+							<div className="flex items-center gap-2">
+								<div
+									className="h-10 w-10 rounded border"
+									style={{
+										backgroundColor: primaryColor,
+									}}
+								/>
+								<Input
+									value={primaryColor}
+									onChange={(e) =>
+										setPrimaryColor(e.target.value)
+									}
+									className="font-mono"
+								/>
+								<Input
+									type="color"
+									value={primaryColor}
+									onChange={(e) =>
+										setPrimaryColor(e.target.value)
+									}
+									className="w-12 p-1 h-10"
+								/>
 							</div>
-						</CollapsibleContent>
-					</Collapsible>
+						</div>
+					</div>
+
+					<div className="border-t" />
 
 					{/* Overall Spacing & Padding */}
-					<Collapsible
-						defaultOpen
-						className="rounded-lg border bg-card"
-					>
-						<CollapsibleTrigger className="flex w-full items-center justify-between p-4 hover:bg-accent/50 rounded-lg">
-							<span className="font-semibold">
-								Overall Spacing & Padding
-							</span>
-							<ChevronDown className="h-4 w-4" />
-						</CollapsibleTrigger>
-						<CollapsibleContent className="border-t p-4 space-y-4">
-							<div className="flex rounded-lg border p-1 bg-muted/20">
-								<button
-									type="button"
-									onClick={() => setSpacing("compact")}
-									className={`flex-1 rounded-md py-2 text-sm font-medium transition-all ${
-										spacing === "compact"
-											? "bg-background shadow-sm text-foreground"
-											: "text-muted-foreground hover:bg-background/50"
-									}`}
-								>
-									Compact
-								</button>
-								<button
-									type="button"
-									onClick={() => setSpacing("balanced")}
-									className={`flex-1 rounded-md py-2 text-sm font-medium transition-all ${
-										spacing === "balanced"
-											? "bg-background shadow-sm text-foreground"
-											: "text-muted-foreground hover:bg-background/50"
-									}`}
-								>
-									Balanced
-								</button>
-								<button
-									type="button"
-									onClick={() => setSpacing("spacious")}
-									className={`flex-1 rounded-md py-2 text-sm font-medium transition-all ${
-										spacing === "spacious"
-											? "bg-background shadow-sm text-foreground"
-											: "text-muted-foreground hover:bg-background/50"
-									}`}
-								>
-									Spacious
-								</button>
-							</div>
-						</CollapsibleContent>
-					</Collapsible>
+					<div className="space-y-4">
+						<h3 className="text-lg font-semibold">
+							Overall Spacing & Padding
+						</h3>
+						<div className="flex rounded-lg border p-1 bg-muted/20">
+							<button
+								type="button"
+								onClick={() => setSpacing("compact")}
+								className={`flex-1 rounded-md py-2 text-sm font-medium transition-all ${
+									spacing === "compact"
+										? "bg-background shadow-sm text-foreground"
+										: "text-muted-foreground hover:bg-background/50"
+								}`}
+							>
+								Compact
+							</button>
+							<button
+								type="button"
+								onClick={() => setSpacing("balanced")}
+								className={`flex-1 rounded-md py-2 text-sm font-medium transition-all ${
+									spacing === "balanced"
+										? "bg-background shadow-sm text-foreground"
+										: "text-muted-foreground hover:bg-background/50"
+								}`}
+							>
+								Balanced
+							</button>
+							<button
+								type="button"
+								onClick={() => setSpacing("spacious")}
+								className={`flex-1 rounded-md py-2 text-sm font-medium transition-all ${
+									spacing === "spacious"
+										? "bg-background shadow-sm text-foreground"
+										: "text-muted-foreground hover:bg-background/50"
+								}`}
+							>
+								Spacious
+							</button>
+						</div>
+					</div>
+
+					<div className="border-t" />
 
 					{/* Advanced Customization */}
 					<Collapsible className="rounded-lg border bg-card">

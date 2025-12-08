@@ -132,7 +132,7 @@ export function GuestRegistrationSection() {
 				<div className="flex items-center justify-between pt-4 border-t">
 					<div className="space-y-0.5">
 						<Label className="text-base">
-							Allows users with existing credentials to sign in.
+							Allow Existing User Login
 						</Label>
 					</div>
 					<Switch
