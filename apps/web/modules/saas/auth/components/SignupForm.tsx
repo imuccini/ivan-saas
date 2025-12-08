@@ -84,7 +84,6 @@ export function SignupForm({ prefillEmail }: { prefillEmail?: string }) {
 	const searchParams = useSearchParams();
 
 	const [currentStep, setCurrentStep] = useState(1);
-	const [emailExists, setEmailExists] = useState(false);
 	const [otp, setOtp] = useState("");
 	const [otpError, setOtpError] = useState<string | null>(null);
 	const [isVerifying, setIsVerifying] = useState(false);
@@ -112,7 +111,7 @@ export function SignupForm({ prefillEmail }: { prefillEmail?: string }) {
 	// Check if email exists when user types
 	const checkEmailExists = async (email: string) => {
 		if (!email || !email.includes("@")) {
-			return;
+			return false;
 		}
 
 		try {
@@ -120,10 +119,10 @@ export function SignupForm({ prefillEmail }: { prefillEmail?: string }) {
 				`/api/auth/check-email?email=${encodeURIComponent(email)}`,
 			);
 			const data = await response.json();
-			setEmailExists(data.exists || false);
+			return data.exists || false;
 		} catch (error) {
 			console.error("Error checking email:", error);
-			setEmailExists(false);
+			return false;
 		}
 	};
 
@@ -131,6 +130,7 @@ export function SignupForm({ prefillEmail }: { prefillEmail?: string }) {
 	const onStep1Submit = step1Form.handleSubmit(async (data) => {
 		try {
 			// Check if email already exists
+			const emailExists = await checkEmailExists(data.email);
 			if (emailExists) {
 				step1Form.setError("email", {
 					message: "This email is already registered.",
@@ -285,31 +285,8 @@ export function SignupForm({ prefillEmail }: { prefillEmail?: string }) {
 												type="email"
 												autoComplete="email"
 												readOnly={!!prefillEmail}
-												onBlur={(e) => {
-													field.onBlur();
-													checkEmailExists(
-														e.target.value,
-													);
-												}}
 											/>
 										</FormControl>
-										{emailExists && (
-											<Alert
-												variant="destructive"
-												className="mt-2"
-											>
-												<AlertDescription>
-													This email is already
-													registered.{" "}
-													<Link
-														href="/auth/login"
-														className="font-medium underline"
-													>
-														Log in instead
-													</Link>
-												</AlertDescription>
-											</Alert>
-										)}
 										<FormMessage />
 									</FormItem>
 								)}
