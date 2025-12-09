@@ -31,6 +31,70 @@ importers:
         specifier: 5.9.2
         version: 5.9.2
 
+  apps/portal:
+    dependencies:
+      '@repo/config':
+        specifier: workspace:*
+        version: link:../../config
+      '@repo/database':
+        specifier: workspace:*
+        version: link:../../packages/database
+      '@repo/portal-shared':
+        specifier: workspace:*
+        version: link:../../packages/portal-shared
+      '@repo/utils':
+        specifier: workspace:*
+        version: link:../../packages/utils
+      class-variance-authority:
+        specifier: ^0.7.1
+        version: 0.7.1
+      clsx:
+        specifier: ^2.1.1
+        version: 2.1.1
+      next:
+        specifier: 15.5.7
+        version: 15.5.7(@opentelemetry/api@1.9.0)(@playwright/test@1.55.0)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
+      react:
+        specifier: 19.1.1
+        version: 19.1.1
+      react-dom:
+        specifier: 19.1.1
+        version: 19.1.1(react@19.1.1)
+      tailwind-merge:
+        specifier: ^3.3.0
+        version: 3.3.1
+      zod:
+        specifier: ^4.1.5
+        version: 4.1.5
+    devDependencies:
+      '@repo/tailwind-config':
+        specifier: workspace:*
+        version: link:../../tooling/tailwind
+      '@repo/tsconfig':
+        specifier: workspace:*
+        version: link:../../tooling/typescript
+      '@tailwindcss/postcss':
+        specifier: ^4.1.12
+        version: 4.1.12
+      '@types/node':
+        specifier: 24.3.1
+        version: 24.3.1
+      '@types/react':
+        specifier: 19.0.0
+        version: 19.0.0
+      '@types/react-dom':
+        specifier: 19.0.0
+        version: 19.0.0
+      postcss:
+        specifier: 8.5.6
+        version: 8.5.6
+      tailwindcss:
+        specifier: 4.1.12
+        version: 4.1.12
+      typescript:
+        specifier: ^5.8.4
+        version: 5.9.2
+
   apps/web:
     dependencies:
       '@ai-sdk/react':
@@ -705,6 +769,19 @@ importers:
       tsx:
         specifier: ^4.20.5
         version: 4.20.5
+
+  packages/portal-shared:
+    dependencies:
+      zod:
+        specifier: ^4.1.5
+        version: 4.1.5
+    devDependencies:
+      '@repo/tsconfig':
+        specifier: workspace:*
+        version: link:../../tooling/typescript
+      typescript:
+        specifier: ^5.8.4
+        version: 5.9.2
 
   packages/storage:
     dependencies:
