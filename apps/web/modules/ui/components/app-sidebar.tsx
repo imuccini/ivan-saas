@@ -4,6 +4,7 @@ import { useSession } from "@saas/auth/hooks/use-session";
 
 import { useActiveOrganization } from "@saas/organizations/hooks/use-active-organization";
 import { UnifiedWorkspaceSwitcher } from "@saas/shared/components/UnifiedWorkspaceSwitcher";
+import { useWorkspaceServices } from "@saas/workspaces/components/WorkspaceServicesProvider";
 import { useActiveWorkspace } from "@saas/workspaces/hooks/use-active-workspace";
 import { NavMain } from "@ui/components/nav-main";
 import { NavSecondary } from "@ui/components/nav-secondary";
@@ -51,6 +52,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 	// Prevent navigation if workspace is still loading or slug is empty
 	const isNavigationDisabled = isWorkspaceLoading || !workspaceSlug;
 
+	// Get enabled services
+	const { services } = useWorkspaceServices();
+
 	const navLaunchpad = [
 		{
 			title: "Launchpad",
@@ -61,7 +65,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 	];
 
 	const navMain = [
-		{
+		services.guestWifi && {
 			title: "Guest WiFi",
 			url: `${basePath}/guest-wifi`,
 			icon: WifiIcon,
@@ -87,7 +91,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 				},
 			],
 		},
-		{
+		services.byod && {
 			title: "BYOD",
 			url: `${basePath}/employees`,
 			icon: ShieldCheckIcon,
@@ -118,13 +122,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 				},
 			],
 		},
-		{
+		services.iot && {
 			title: "IoT",
 			url: `${basePath}/iot`,
 			icon: CpuIcon,
 			isActive: currentPath.startsWith(`${basePath}/iot`),
 		},
-	];
+	].filter((item): item is Exclude<typeof item, false> => Boolean(item));
 
 	const navOperations = [
 		{
@@ -181,6 +185,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 					url: `${basePath}/manage/communications`,
 					isActive:
 						currentPath === `${basePath}/manage/communications`,
+				},
+				{
+					title: "Workspace Settings",
+					url: `${basePath}/workspace-settings`,
+					isActive: currentPath === `${basePath}/workspace-settings`,
 				},
 			],
 		},

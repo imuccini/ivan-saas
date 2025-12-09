@@ -2,6 +2,7 @@
 
 import { config } from "@repo/config";
 import { NavBar } from "@saas/shared/components/NavBar";
+import { WorkspaceServicesProvider } from "@saas/workspaces/components/WorkspaceServicesProvider";
 import { useActiveWorkspace } from "@saas/workspaces/hooks/use-active-workspace";
 import { AppSidebar } from "@ui/components/app-sidebar";
 import { MobileBottomNav } from "@ui/components/mobile-bottom-nav";
@@ -192,14 +193,16 @@ export function AppWrapper({ children }: PropsWithChildren) {
 	if (config.ui.saas.useSidebarLayout) {
 		return (
 			<SidebarProvider storageKey="left_sidebar">
-				{isSettingsRoute ? (
-					<SettingsSidebar />
-				) : isSuperAdminRoute ? (
-					<SuperAdminSidebar />
-				) : (
-					<AppSidebar />
-				)}
-				<AppLayout>{children}</AppLayout>
+				<WorkspaceServicesProvider>
+					{isSettingsRoute ? (
+						<SettingsSidebar />
+					) : isSuperAdminRoute ? (
+						<SuperAdminSidebar />
+					) : (
+						<AppSidebar />
+					)}
+					<AppLayout>{children}</AppLayout>
+				</WorkspaceServicesProvider>
 			</SidebarProvider>
 		);
 	}
