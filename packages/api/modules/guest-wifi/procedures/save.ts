@@ -4,6 +4,47 @@ import { protectedProcedure } from "../../../orpc/procedures";
 import { guestWifiConfigDataSchema } from "../types";
 
 /**
+ * Invalidate portal cache after config update
+ */
+async function invalidatePortalCache(
+	workspaceSlug: string,
+	instanceName: string,
+) {
+	const portalUrl = process.env.PORTAL_URL;
+	const revalidateToken = process.env.REVALIDATE_TOKEN;
+
+	if (!portalUrl || !revalidateToken) {
+		console.warn(
+			"Portal cache invalidation skipped: PORTAL_URL or REVALIDATE_TOKEN not configured",
+		);
+		return;
+	}
+
+	try {
+		const response = await fetch(`${portalUrl}/api/revalidate`, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+				"x-revalidate-token": revalidateToken,
+			},
+			body: JSON.stringify({
+				workspace: workspaceSlug,
+				instance: instanceName,
+			}),
+		});
+
+		if (!response.ok) {
+			console.error(
+				"Portal cache invalidation failed:",
+				await response.text(),
+			);
+		}
+	} catch (error) {
+		console.error("Portal cache invalidation error:", error);
+	}
+}
+
+/**
  * Save (create or update) guest WiFi config for a workspace
  */
 export const save = protectedProcedure
@@ -33,6 +74,19 @@ export const save = protectedProcedure
 				config: input.config,
 				updatedAt: new Date(),
 			},
+			include: {
+				workspace: {
+					select: { slug: true },
+				},
+			},
+		});
+
+		// Invalidate portal cache (fire-and-forget, don't block response)
+		invalidatePortalCache(
+			savedConfig.workspace.slug,
+			savedConfig.name,
+		).catch(() => {
+			// Silently ignore - cache will expire naturally
 		});
 
 		return {
