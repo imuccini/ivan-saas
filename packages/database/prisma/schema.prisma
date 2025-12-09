@@ -42,6 +42,7 @@ model User {
   aiChats            AiChat[]
   workspaceMembers   WorkspaceMember[]
   roleAssignments    RoleAssignment[]
+  sponsorshipRequests SponsorshipRequest[]
 
   displayUsername String?
 
@@ -172,6 +173,7 @@ model Workspace {
   accessCodeGroups       AccessCodeGroup[]
   integrations           Integration[]
   networks               Network[]
+  guestUsers             GuestUser[]
 
   @@unique([organizationId, slug])
   @@map("workspace")
@@ -235,6 +237,44 @@ model GuestWifiConfig {
   @@unique([workspaceId, name])
   @@map("guest_wifi_config")
 }
+
+model GuestUser {
+  id          String    @id @default(cuid())
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  email       String
+  fullName    String?
+  phone       String?
+  customData  Json?    // Custom field values
+
+  accessCode  String?  // If using access codes
+
+  termsAccepted Json   // Which terms were accepted
+
+  createdAt   DateTime @default(now())
+  expiresAt   DateTime // Based on data retention
+
+  sponsorshipRequests SponsorshipRequest[]
+
+  @@map("guest_user")
+}
+
+model SponsorshipRequest {
+  id          String    @id @default(cuid())
+  guestUserId String
+  guestUser   GuestUser @relation(fields: [guestUserId], references: [id], onDelete: Cascade)
+  sponsorId   String
+  sponsor     User      @relation(fields: [sponsorId], references: [id], onDelete: Cascade)
+
+  status      String    // PENDING, APPROVED, DENIED
+
+  createdAt   DateTime  @default(now())
+  respondedAt DateTime?
+
+  @@map("sponsorship_request")
+}
+
 
 model CustomField {
   id             String    @id @default(cuid())

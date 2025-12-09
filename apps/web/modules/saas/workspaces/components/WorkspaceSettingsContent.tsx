@@ -1,7 +1,10 @@
 "use client";
 
+import { useActiveOrganization } from "@saas/organizations/hooks/use-active-organization";
 import { useWorkspaceServices } from "@saas/workspaces/components/WorkspaceServicesProvider";
 import { useActiveWorkspace } from "@saas/workspaces/hooks/use-active-workspace";
+import { orpc } from "@shared/lib/orpc-query-utils";
+import { useQuery } from "@tanstack/react-query";
 import { Badge } from "@ui/components/badge";
 import { Button } from "@ui/components/button";
 import {
@@ -22,11 +25,21 @@ import {
 } from "@ui/components/select";
 import { Switch } from "@ui/components/switch";
 import { BotIcon, Check, Copy, ShieldCheckIcon, WifiIcon } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 export function WorkspaceSettingsContent() {
 	const { activeWorkspace } = useActiveWorkspace();
+	const { activeOrganization } = useActiveOrganization();
 	const { services, toggleService } = useWorkspaceServices();
+
+	// Fetch the GuestWifiConfig to get its ID
+	const { data: guestWifiConfig } = useQuery(
+		orpc.guestWifi.get.queryOptions({
+			input: {
+				workspaceId: activeWorkspace?.id ?? "",
+			},
+		}),
+	);
 
 	// Data Retention
 	const [dataRetentionDays, setDataRetentionDays] = useState("90");
@@ -47,13 +60,45 @@ export function WorkspaceSettingsContent() {
 
 	// Portal URLs
 	const [multipleExperiences, setMultipleExperiences] = useState(false);
+
+	// Generate proper captive portal URL
+	const captivePortalUrl = useMemo(() => {
+		if (!activeOrganization?.id || !activeWorkspace?.id) {
+			return "";
+		}
+		// Portal app runs on a separate domain/port
+		// Format: {portal-url}/{org-id}/{workspace-id}/{instance-id}
+		// Using IDs ensures URLs remain stable even if names/slugs change
+		const portalBaseUrl =
+			process.env.NEXT_PUBLIC_PORTAL_URL || "http://localhost:3001";
+
+		// Use the actual GuestWifiConfig ID if available
+		const instanceId = guestWifiConfig?.id || "[instance-id]";
+
+		return `${portalBaseUrl}/${activeOrganization.id}/${activeWorkspace.id}/${instanceId}`;
+	}, [activeOrganization?.id, activeWorkspace?.id, guestWifiConfig?.id]);
+
 	const [portalUrls, setPortalUrls] = useState([
 		{
 			id: "1",
 			name: "Default Experience",
-			url: "https://portal.example.com/guest",
+			url: captivePortalUrl,
 		},
 	]);
+
+	// Update portal URL when it changes
+	useMemo(() => {
+		if (
+			captivePortalUrl &&
+			portalUrls.length > 0 &&
+			portalUrls[0].url !== captivePortalUrl
+		) {
+			setPortalUrls([
+				{ ...portalUrls[0], url: captivePortalUrl },
+				...portalUrls.slice(1),
+			]);
+		}
+	}, [captivePortalUrl, portalUrls]);
 
 	const [copiedField, setCopiedField] = useState<string | null>(null);
 

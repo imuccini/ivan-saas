@@ -7,6 +7,7 @@ import { guestWifiConfigDataSchema } from "../types";
  * Invalidate portal cache after config update
  */
 async function invalidatePortalCache(
+	organizationSlug: string,
 	workspaceSlug: string,
 	instanceName: string,
 ) {
@@ -28,6 +29,7 @@ async function invalidatePortalCache(
 				"x-revalidate-token": revalidateToken,
 			},
 			body: JSON.stringify({
+				organization: organizationSlug,
 				workspace: workspaceSlug,
 				instance: instanceName,
 			}),
@@ -76,18 +78,27 @@ export const save = protectedProcedure
 			},
 			include: {
 				workspace: {
-					select: { slug: true },
+					select: {
+						slug: true,
+						organization: {
+							select: { slug: true },
+						},
+					},
 				},
 			},
 		});
 
 		// Invalidate portal cache (fire-and-forget, don't block response)
-		invalidatePortalCache(
-			savedConfig.workspace.slug,
-			savedConfig.name,
-		).catch(() => {
-			// Silently ignore - cache will expire naturally
-		});
+		// Only invalidate if organization has a slug
+		if (savedConfig.workspace.organization.slug) {
+			invalidatePortalCache(
+				savedConfig.workspace.organization.slug,
+				savedConfig.workspace.slug,
+				savedConfig.name,
+			).catch(() => {
+				// Silently ignore - cache will expire naturally
+			});
+		}
 
 		return {
 			id: savedConfig.id,

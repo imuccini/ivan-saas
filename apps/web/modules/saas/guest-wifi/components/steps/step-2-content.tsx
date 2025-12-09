@@ -444,202 +444,6 @@ export function StepContent({
 											</p>
 										</div>
 									)}
-
-									{/* Background type */}
-									<div className="space-y-2">
-										<Label>Background type</Label>
-										<Select
-											value={backgroundType}
-											onValueChange={setBackgroundType}
-										>
-											<SelectTrigger>
-												<SelectValue />
-											</SelectTrigger>
-											<SelectContent>
-												<SelectItem value="image">
-													Image
-												</SelectItem>
-												<SelectItem value="color">
-													Color
-												</SelectItem>
-												<SelectItem value="gradient">
-													Gradient
-												</SelectItem>
-											</SelectContent>
-										</Select>
-									</div>
-
-									{/* Background Image - Only show when type is image */}
-									{backgroundType === "image" && (
-										<div className="space-y-3">
-											<Label>Background image</Label>
-											<p className="text-xs text-muted-foreground">
-												JPG/PNG/SVG, 150px, 5MB
-											</p>
-											<div className="flex items-center gap-3">
-												<div className="h-16 w-16 rounded bg-muted flex items-center justify-center overflow-hidden">
-													{backgroundImage ? (
-														<img
-															src={
-																backgroundImage
-															}
-															alt="Background"
-															className="w-full h-full object-cover"
-														/>
-													) : (
-														<span className="text-xs">
-															BG
-														</span>
-													)}
-												</div>
-												<input
-													ref={bgInputRef}
-													type="file"
-													accept="image/*"
-													onChange={
-														handleBackgroundUpload
-													}
-													className="hidden"
-												/>
-												<Button
-													variant="outline"
-													size="sm"
-													onClick={() =>
-														bgInputRef.current?.click()
-													}
-													type="button"
-												>
-													{backgroundImage
-														? "Change"
-														: "Upload"}
-												</Button>
-												{backgroundImage && (
-													<Button
-														variant="ghost"
-														size="sm"
-														onClick={() =>
-															setBackgroundImage(
-																null,
-															)
-														}
-														type="button"
-													>
-														Remove
-													</Button>
-												)}
-											</div>
-										</div>
-									)}
-
-									{/* Background Color - Only show when type is color */}
-									{backgroundType === "color" && (
-										<div className="space-y-3">
-											<Label>Background color</Label>
-											<div className="flex items-center gap-3">
-												<div
-													className="h-10 w-10 rounded border"
-													style={{
-														backgroundColor:
-															backgroundColor,
-													}}
-												/>
-												<Input
-													type="color"
-													value={backgroundColor}
-													onChange={(e) =>
-														setBackgroundColor(
-															e.target.value,
-														)
-													}
-													className="w-20 h-10"
-												/>
-												<Input
-													type="text"
-													value={backgroundColor}
-													onChange={(e) =>
-														setBackgroundColor(
-															e.target.value,
-														)
-													}
-													className="flex-1"
-													placeholder="#6366f1"
-												/>
-											</div>
-										</div>
-									)}
-
-									{/* Gradient Colors - Only show when type is gradient */}
-									{backgroundType === "gradient" && (
-										<div className="space-y-4">
-											<div className="space-y-3">
-												<Label>Gradient color 1</Label>
-												<div className="flex items-center gap-3">
-													<div
-														className="h-10 w-10 rounded border"
-														style={{
-															backgroundColor:
-																gradientColor1,
-														}}
-													/>
-													<Input
-														type="color"
-														value={gradientColor1}
-														onChange={(e) =>
-															setGradientColor1(
-																e.target.value,
-															)
-														}
-														className="w-20 h-10"
-													/>
-													<Input
-														type="text"
-														value={gradientColor1}
-														onChange={(e) =>
-															setGradientColor1(
-																e.target.value,
-															)
-														}
-														className="flex-1"
-														placeholder="#6366f1"
-													/>
-												</div>
-											</div>
-
-											<div className="space-y-3">
-												<Label>Gradient color 2</Label>
-												<div className="flex items-center gap-3">
-													<div
-														className="h-10 w-10 rounded border"
-														style={{
-															backgroundColor:
-																gradientColor2,
-														}}
-													/>
-													<Input
-														type="color"
-														value={gradientColor2}
-														onChange={(e) =>
-															setGradientColor2(
-																e.target.value,
-															)
-														}
-														className="w-20 h-10"
-													/>
-													<Input
-														type="text"
-														value={gradientColor2}
-														onChange={(e) =>
-															setGradientColor2(
-																e.target.value,
-															)
-														}
-														className="flex-1"
-														placeholder="#ec4899"
-													/>
-												</div>
-											</div>
-										</div>
-									)}
 								</div>
 							)}
 
@@ -948,6 +752,186 @@ export function StepContent({
 								step={1}
 							/>
 						</div>
+					</div>
+
+					<div className="border-t" />
+
+					{/* Background Settings */}
+					<div className="space-y-4">
+						<h3 className="text-lg font-semibold">Background</h3>
+						<div className="space-y-2">
+							<Label>Background type</Label>
+							<Select
+								value={backgroundType}
+								onValueChange={setBackgroundType}
+							>
+								<SelectTrigger>
+									<SelectValue />
+								</SelectTrigger>
+								<SelectContent>
+									<SelectItem value="image">Image</SelectItem>
+									<SelectItem value="color">Color</SelectItem>
+									<SelectItem value="gradient">
+										Gradient
+									</SelectItem>
+								</SelectContent>
+							</Select>
+						</div>
+
+						{/* Background Image - Only show when type is image */}
+						{backgroundType === "image" && (
+							<div className="space-y-3">
+								<Label>Background image</Label>
+								<p className="text-xs text-muted-foreground">
+									JPG/PNG/SVG, 150px, 5MB
+								</p>
+								<div className="flex items-center gap-3">
+									<div className="h-16 w-16 rounded bg-muted flex items-center justify-center overflow-hidden">
+										{backgroundImage ? (
+											<img
+												src={backgroundImage}
+												alt="Background"
+												className="w-full h-full object-cover"
+											/>
+										) : (
+											<span className="text-xs">BG</span>
+										)}
+									</div>
+									<input
+										ref={bgInputRef}
+										type="file"
+										accept="image/*"
+										onChange={handleBackgroundUpload}
+										className="hidden"
+									/>
+									<Button
+										variant="outline"
+										size="sm"
+										onClick={() =>
+											bgInputRef.current?.click()
+										}
+										type="button"
+									>
+										{backgroundImage ? "Change" : "Upload"}
+									</Button>
+									{backgroundImage && (
+										<Button
+											variant="ghost"
+											size="sm"
+											onClick={() =>
+												setBackgroundImage(null)
+											}
+											type="button"
+										>
+											Remove
+										</Button>
+									)}
+								</div>
+							</div>
+						)}
+
+						{/* Background Color - Only show when type is color */}
+						{backgroundType === "color" && (
+							<div className="space-y-3">
+								<Label>Background color</Label>
+								<div className="flex items-center gap-3">
+									<div
+										className="h-10 w-10 rounded border"
+										style={{
+											backgroundColor: backgroundColor,
+										}}
+									/>
+									<Input
+										type="color"
+										value={backgroundColor}
+										onChange={(e) =>
+											setBackgroundColor(e.target.value)
+										}
+										className="w-20 h-10"
+									/>
+									<Input
+										type="text"
+										value={backgroundColor}
+										onChange={(e) =>
+											setBackgroundColor(e.target.value)
+										}
+										className="flex-1"
+										placeholder="#6366f1"
+									/>
+								</div>
+							</div>
+						)}
+
+						{/* Gradient Colors - Only show when type is gradient */}
+						{backgroundType === "gradient" && (
+							<div className="space-y-4">
+								<div className="space-y-3">
+									<Label>Gradient color 1</Label>
+									<div className="flex items-center gap-3">
+										<div
+											className="h-10 w-10 rounded border"
+											style={{
+												backgroundColor: gradientColor1,
+											}}
+										/>
+										<Input
+											type="color"
+											value={gradientColor1}
+											onChange={(e) =>
+												setGradientColor1(
+													e.target.value,
+												)
+											}
+											className="w-20 h-10"
+										/>
+										<Input
+											type="text"
+											value={gradientColor1}
+											onChange={(e) =>
+												setGradientColor1(
+													e.target.value,
+												)
+											}
+											className="flex-1"
+											placeholder="#6366f1"
+										/>
+									</div>
+								</div>
+
+								<div className="space-y-3">
+									<Label>Gradient color 2</Label>
+									<div className="flex items-center gap-3">
+										<div
+											className="h-10 w-10 rounded border"
+											style={{
+												backgroundColor: gradientColor2,
+											}}
+										/>
+										<Input
+											type="color"
+											value={gradientColor2}
+											onChange={(e) =>
+												setGradientColor2(
+													e.target.value,
+												)
+											}
+											className="w-20 h-10"
+										/>
+										<Input
+											type="text"
+											value={gradientColor2}
+											onChange={(e) =>
+												setGradientColor2(
+													e.target.value,
+												)
+											}
+											className="flex-1"
+											placeholder="#ec4899"
+										/>
+									</div>
+								</div>
+							</div>
+						)}
 					</div>
 
 					<div className="border-t" />

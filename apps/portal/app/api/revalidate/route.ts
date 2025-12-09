@@ -13,28 +13,29 @@ export async function POST(request: NextRequest) {
 
 	try {
 		const body = await request.json();
-		const { workspace, instance } = body as {
+		const { organization, workspace, instance } = body as {
+			organization: string;
 			workspace: string;
 			instance: string;
 		};
 
-		if (!workspace || !instance) {
+		if (!organization || !workspace || !instance) {
 			return NextResponse.json(
-				{ error: "Missing workspace or instance" },
+				{ error: "Missing organization, workspace, or instance" },
 				{ status: 400 },
 			);
 		}
 
 		// Revalidate the specific portal path
-		revalidatePath(`/${workspace}/${instance}`);
+		revalidatePath(`/${organization}/${workspace}/${instance}`);
 
 		// Also invalidate the in-memory cache if using one
 		// In production, this would be Redis
-		// invalidatePortalCache(workspace, instance);
+		// invalidatePortalCache(organization, workspace, instance);
 
 		return NextResponse.json({
 			revalidated: true,
-			path: `/${workspace}/${instance}`,
+			path: `/${organization}/${workspace}/${instance}`,
 			timestamp: new Date().toISOString(),
 		});
 	} catch (error) {

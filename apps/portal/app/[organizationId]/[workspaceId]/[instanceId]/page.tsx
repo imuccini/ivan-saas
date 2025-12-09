@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { PortalShell } from "@/components/portal-shell";
-import { getPortalConfig } from "@/lib/config-loader";
+import { getPortalConfigById } from "@/lib/config-loader";
 
 interface PortalPageProps {
 	params: Promise<{
-		workspace: string;
-		instance: string;
+		organizationId: string;
+		workspaceId: string;
+		instanceId: string;
 	}>;
 }
 
@@ -16,8 +17,12 @@ export const revalidate = 60;
 export async function generateMetadata({
 	params,
 }: PortalPageProps): Promise<Metadata> {
-	const { workspace, instance } = await params;
-	const config = await getPortalConfig(workspace, instance);
+	const { organizationId, workspaceId, instanceId } = await params;
+	const config = await getPortalConfigById(
+		organizationId,
+		workspaceId,
+		instanceId,
+	);
 
 	if (!config) {
 		return { title: "Portal Not Found" };
@@ -39,8 +44,12 @@ export async function generateMetadata({
 }
 
 export default async function PortalPage({ params }: PortalPageProps) {
-	const { workspace, instance } = await params;
-	const config = await getPortalConfig(workspace, instance);
+	const { organizationId, workspaceId, instanceId } = await params;
+	const config = await getPortalConfigById(
+		organizationId,
+		workspaceId,
+		instanceId,
+	);
 
 	if (!config) {
 		notFound();

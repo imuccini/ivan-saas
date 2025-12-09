@@ -48,6 +48,15 @@ const nextConfig: NextConfig = {
 	},
 
 	webpack: (config, { webpack, isServer }) => {
+		// Add path aliases for UI components
+		config.resolve.alias = {
+			...config.resolve.alias,
+			"@ui": require("path").resolve(
+				__dirname,
+				"./components/ui-components",
+			),
+		};
+
 		config.plugins.push(
 			new webpack.IgnorePlugin({
 				resourceRegExp: /^pg-native$|^cloudflare:sockets$/,
