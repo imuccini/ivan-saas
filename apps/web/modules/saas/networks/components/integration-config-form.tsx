@@ -1,7 +1,10 @@
 "use client";
 
-import { ARUBA_REGIONS, getArubaRegion } from "@saas/networks/lib/aruba-regions";
-import { type VendorId, getVendor } from "@saas/networks/lib/vendors";
+import {
+	ARUBA_REGIONS,
+	getArubaRegion,
+} from "@saas/networks/lib/aruba-regions";
+import { getVendor, type VendorId } from "@saas/networks/lib/vendors";
 import { useActiveWorkspace } from "@saas/workspaces/hooks/use-active-workspace";
 import { orpc } from "@shared/lib/orpc-query-utils";
 import { useMutation } from "@tanstack/react-query";
@@ -139,7 +142,9 @@ export function IntegrationConfigForm({
 			},
 			onError: (error) => {
 				toast.error("Failed to create integration");
-				setValidationError(error.message || "An unexpected error occurred");
+				setValidationError(
+					error.message || "An unexpected error occurred",
+				);
 			},
 		}),
 	);
@@ -165,12 +170,16 @@ export function IntegrationConfigForm({
 			// Validate credentials first
 			const validationResult = await validateMutation.mutateAsync(
 				vendor === "aruba"
-					? { clientId, clientSecret, regionUrl: getArubaRegion(regionId)?.baseUrl }
+					? {
+							clientId,
+							clientSecret,
+							regionUrl: getArubaRegion(regionId)?.baseUrl,
+						}
 					: { apiKey },
 			);
 
 			// Build credentials object based on vendor
-			const credentials =
+			const credentials: any =
 				vendor === "aruba"
 					? {
 							clientId,
@@ -253,14 +262,18 @@ export function IntegrationConfigForm({
 							</SelectTrigger>
 							<SelectContent>
 								{ARUBA_REGIONS.map((region) => (
-									<SelectItem key={region.id} value={region.id}>
+									<SelectItem
+										key={region.id}
+										value={region.id}
+									>
 										{region.name}
 									</SelectItem>
 								))}
 							</SelectContent>
 						</Select>
 						<p className="text-xs text-muted-foreground">
-							Select the region where your Aruba Central account is hosted
+							Select the region where your Aruba Central account
+							is hosted
 						</p>
 					</div>
 
@@ -333,7 +346,9 @@ export function IntegrationConfigForm({
 
 			<div className="flex justify-end">
 				<Button type="submit" disabled={isLoading}>
-					{isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+					{isLoading && (
+						<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+					)}
 					{validateMutation.isPending
 						? "Validating..."
 						: createMutation.isPending
