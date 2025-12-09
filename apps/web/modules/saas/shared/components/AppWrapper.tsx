@@ -2,6 +2,7 @@
 
 import { config } from "@repo/config";
 import { NavBar } from "@saas/shared/components/NavBar";
+import { useActiveWorkspace } from "@saas/workspaces/hooks/use-active-workspace";
 import { AppSidebar } from "@ui/components/app-sidebar";
 import { MobileBottomNav } from "@ui/components/mobile-bottom-nav";
 import { MobileChatDrawer } from "@ui/components/mobile-chat-drawer";
@@ -20,11 +21,22 @@ import { type PropsWithChildren, useEffect, useState } from "react";
 
 function AppLayout({ children }: PropsWithChildren) {
 	const { setOpen, open, isMobile } = useSidebar();
+	const { activeWorkspace, isLoading: isWorkspaceLoading } =
+		useActiveWorkspace();
 	const [isChatOpen, setIsChatOpen] = useState(false);
 	const [initialMessage, setInitialMessage] = useState("");
 	const insetRef = React.useRef<HTMLElement>(null);
+	const pathname = usePathname();
 
 	const openRef = React.useRef(open);
+
+	// Determine if we should show loading overlay
+	// Show loader by default until workspace is confirmed (not just while loading)
+	// Don't show on superadmin routes
+	const isSuperAdminRoute =
+		pathname === "/app" || pathname.startsWith("/app/admin");
+	const shouldShowLoadingOverlay =
+		!isSuperAdminRoute && (isWorkspaceLoading || !activeWorkspace);
 
 	// Handler to open AI chat from mobile bottom nav
 	const handleOpenChat = React.useCallback(() => {
@@ -108,10 +120,22 @@ function AppLayout({ children }: PropsWithChildren) {
 
 	return (
 		<>
-			<SidebarInset ref={insetRef}>
+			<SidebarInset ref={insetRef} className="relative">
 				<main className="flex-1 overflow-auto p-4 md:p-6 pb-20 md:pb-6">
 					{children}
 				</main>
+
+				{/* Loading overlay - blocks all interactions while workspace is loading */}
+				{shouldShowLoadingOverlay && (
+					<div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center">
+						<div className="flex flex-col items-center gap-3">
+							<div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+							<p className="text-sm text-muted-foreground">
+								Loading workspace...
+							</p>
+						</div>
+					</div>
+				)}
 			</SidebarInset>
 			{/* Desktop: Right side panel for AI chat */}
 			{!isMobile && (

@@ -7,6 +7,7 @@ import { Badge } from "@ui/components/badge";
 import { Button } from "@ui/components/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@ui/components/card";
 import { Label } from "@ui/components/label";
+import { RadioGroup, RadioGroupItem } from "@ui/components/radio-group";
 import {
 	Select,
 	SelectContent,
@@ -32,9 +33,9 @@ interface Step4Props {
 }
 
 export interface SSIDMapping {
-	guestWifi?: { ssidNumber: number; ssidName: string };
-	iot?: { ssidNumber: number; ssidName: string };
-	employees?: { ssidNumber: number; ssidName: string };
+	guestWifi?: { ssidNumber: number; ssidName: string } | "auto" | "skip";
+	iot?: { ssidNumber: number; ssidName: string } | "auto" | "skip";
+	employees?: { ssidNumber: number; ssidName: string } | "auto" | "skip";
 }
 
 const USE_CASES = [
@@ -68,9 +69,17 @@ export function Step4SsidMapping({
 	onSkip,
 }: Step4Props) {
 	const { activeWorkspace } = useActiveWorkspace();
+	const isSingleNetwork = selectedNetworks.length === 1;
+
+	// For single network: specific SSID selection
 	const [guestWifiSsid, setGuestWifiSsid] = useState<string>("");
 	const [iotSsid, setIotSsid] = useState<string>("");
 	const [employeesSsid, setEmployeesSsid] = useState<string>("");
+
+	// For multiple networks: auto/skip options
+	const [guestWifiMode, setGuestWifiMode] = useState<"auto" | "skip">("skip");
+	const [iotMode, setIotMode] = useState<"auto" | "skip">("skip");
+	const [employeesMode, setEmployeesMode] = useState<"auto" | "skip">("skip");
 
 	// For simplicity, fetch SSIDs from the first selected network
 	const firstNetwork = selectedNetworks[0];
@@ -88,47 +97,64 @@ export function Step4SsidMapping({
 				{ number: 4, name: "Unconfigured SSID 4", enabled: false },
 			];
 		},
-		enabled: !!firstNetwork && !!integrationId && !!activeWorkspace?.id,
+		enabled:
+			!!firstNetwork &&
+			!!integrationId &&
+			!!activeWorkspace?.id &&
+			isSingleNetwork,
 	});
 
 	const handleContinue = () => {
 		const mapping: SSIDMapping = {};
 
-		if (guestWifiSsid) {
-			const ssid = ssids?.find(
-				(s) => s.number.toString() === guestWifiSsid,
-			);
-			if (ssid) {
-				mapping.guestWifi = {
-					ssidNumber: ssid.number,
-					ssidName: ssid.name,
-				};
+		if (isSingleNetwork) {
+			// Single network: use specific SSID selections
+			if (guestWifiSsid && guestWifiSsid !== "none") {
+				const ssid = ssids?.find(
+					(s) => s.number.toString() === guestWifiSsid,
+				);
+				if (ssid) {
+					mapping.guestWifi = {
+						ssidNumber: ssid.number,
+						ssidName: ssid.name,
+					};
+				}
 			}
-		}
 
-		if (iotSsid) {
-			const ssid = ssids?.find((s) => s.number.toString() === iotSsid);
-			if (ssid) {
-				mapping.iot = { ssidNumber: ssid.number, ssidName: ssid.name };
+			if (iotSsid && iotSsid !== "none") {
+				const ssid = ssids?.find(
+					(s) => s.number.toString() === iotSsid,
+				);
+				if (ssid) {
+					mapping.iot = {
+						ssidNumber: ssid.number,
+						ssidName: ssid.name,
+					};
+				}
 			}
-		}
 
-		if (employeesSsid) {
-			const ssid = ssids?.find(
-				(s) => s.number.toString() === employeesSsid,
-			);
-			if (ssid) {
-				mapping.employees = {
-					ssidNumber: ssid.number,
-					ssidName: ssid.name,
-				};
+			if (employeesSsid && employeesSsid !== "none") {
+				const ssid = ssids?.find(
+					(s) => s.number.toString() === employeesSsid,
+				);
+				if (ssid) {
+					mapping.employees = {
+						ssidNumber: ssid.number,
+						ssidName: ssid.name,
+					};
+				}
 			}
+		} else {
+			// Multiple networks: use auto/skip modes
+			mapping.guestWifi = guestWifiMode;
+			mapping.iot = iotMode;
+			mapping.employees = employeesMode;
 		}
 
 		onComplete(mapping);
 	};
 
-	if (isLoading) {
+	if (isLoading && isSingleNetwork) {
 		return (
 			<div className="flex items-center justify-center py-12">
 				<Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -143,8 +169,9 @@ export function Step4SsidMapping({
 					SSID Mapping (Optional)
 				</h2>
 				<p className="text-muted-foreground">
-					Map SSIDs to use cases for your networks. You can skip this
-					and configure later when deploying services.
+					{isSingleNetwork
+						? "Map SSIDs to use cases for your network. You can skip this and configure later when deploying services."
+						: `Map SSIDs to use cases for your ${selectedNetworks.length} networks. You can automatically setup the first unused SSID or skip for each use case.`}
 				</p>
 			</div>
 
@@ -160,18 +187,110 @@ export function Step4SsidMapping({
 			<div className="space-y-4">
 				{USE_CASES.map((useCase) => {
 					const Icon = useCase.icon;
-					const value =
+
+					if (isSingleNetwork) {
+						// Single network: show dropdown selector
+						const value =
+							useCase.id === "guestWifi"
+								? guestWifiSsid
+								: useCase.id === "iot"
+									? iotSsid
+									: employeesSsid;
+						const setValue =
+							useCase.id === "guestWifi"
+								? setGuestWifiSsid
+								: useCase.id === "iot"
+									? setIotSsid
+									: setEmployeesSsid;
+
+						return (
+							<Card key={useCase.id}>
+								<CardHeader>
+									<div className="flex items-center gap-3">
+										<div
+											className={`h-10 w-10 rounded-lg bg-${useCase.color}-100 dark:bg-${useCase.color}-900/20 flex items-center justify-center`}
+										>
+											<Icon
+												className={`h-5 w-5 text-${useCase.color}-600 dark:text-${useCase.color}-400`}
+											/>
+										</div>
+										<div>
+											<CardTitle className="text-base">
+												{useCase.name}
+											</CardTitle>
+											<p className="text-sm text-muted-foreground">
+												{useCase.description}
+											</p>
+										</div>
+									</div>
+								</CardHeader>
+								<CardContent>
+									<div className="space-y-2">
+										<Label htmlFor={`ssid-${useCase.id}`}>
+											Select SSID
+										</Label>
+										<Select
+											value={value}
+											onValueChange={setValue}
+										>
+											<SelectTrigger
+												id={`ssid-${useCase.id}`}
+											>
+												<SelectValue placeholder="Choose an SSID or skip" />
+											</SelectTrigger>
+											<SelectContent>
+												<SelectItem value="none">
+													<span className="text-muted-foreground">
+														Skip for now
+													</span>
+												</SelectItem>
+												{ssids?.map((ssid) => (
+													<SelectItem
+														key={ssid.number}
+														value={ssid.number.toString()}
+													>
+														<div className="flex items-center justify-between w-full gap-2">
+															<span>
+																SSID{" "}
+																{ssid.number}:{" "}
+																{ssid.name}
+															</span>
+															<Badge
+																variant={
+																	ssid.enabled
+																		? "default"
+																		: "secondary"
+																}
+																className="ml-2"
+															>
+																{ssid.enabled
+																	? "Active"
+																	: "Inactive"}
+															</Badge>
+														</div>
+													</SelectItem>
+												))}
+											</SelectContent>
+										</Select>
+									</div>
+								</CardContent>
+							</Card>
+						);
+					}
+
+					// Multiple networks: show auto/skip radio options
+					const mode =
 						useCase.id === "guestWifi"
-							? guestWifiSsid
+							? guestWifiMode
 							: useCase.id === "iot"
-								? iotSsid
-								: employeesSsid;
-					const setValue =
+								? iotMode
+								: employeesMode;
+					const setMode =
 						useCase.id === "guestWifi"
-							? setGuestWifiSsid
+							? setGuestWifiMode
 							: useCase.id === "iot"
-								? setIotSsid
-								: setEmployeesSsid;
+								? setIotMode
+								: setEmployeesMode;
 
 					return (
 						<Card key={useCase.id}>
@@ -195,53 +314,38 @@ export function Step4SsidMapping({
 								</div>
 							</CardHeader>
 							<CardContent>
-								<div className="space-y-2">
-									<Label htmlFor={`ssid-${useCase.id}`}>
-										Select SSID
-									</Label>
-									<Select
-										value={value}
-										onValueChange={setValue}
-									>
-										<SelectTrigger
-											id={`ssid-${useCase.id}`}
+								<RadioGroup
+									value={mode}
+									onValueChange={(value) =>
+										setMode(value as "auto" | "skip")
+									}
+								>
+									<div className="flex items-center space-x-2">
+										<RadioGroupItem
+											value="auto"
+											id={`${useCase.id}-auto`}
+										/>
+										<Label
+											htmlFor={`${useCase.id}-auto`}
+											className="font-normal cursor-pointer"
 										>
-											<SelectValue placeholder="Choose an SSID or skip" />
-										</SelectTrigger>
-										<SelectContent>
-											<SelectItem value="none">
-												<span className="text-muted-foreground">
-													Skip for now
-												</span>
-											</SelectItem>
-											{ssids?.map((ssid) => (
-												<SelectItem
-													key={ssid.number}
-													value={ssid.number.toString()}
-												>
-													<div className="flex items-center justify-between w-full gap-2">
-														<span>
-															SSID {ssid.number}:{" "}
-															{ssid.name}
-														</span>
-														<Badge
-															variant={
-																ssid.enabled
-																	? "default"
-																	: "secondary"
-															}
-															className="ml-2"
-														>
-															{ssid.enabled
-																? "Active"
-																: "Inactive"}
-														</Badge>
-													</div>
-												</SelectItem>
-											))}
-										</SelectContent>
-									</Select>
-								</div>
+											Automatically setup first unused
+											SSID
+										</Label>
+									</div>
+									<div className="flex items-center space-x-2">
+										<RadioGroupItem
+											value="skip"
+											id={`${useCase.id}-skip`}
+										/>
+										<Label
+											htmlFor={`${useCase.id}-skip`}
+											className="font-normal cursor-pointer"
+										>
+											Skip - Configure later
+										</Label>
+									</div>
+								</RadioGroup>
 							</CardContent>
 						</Card>
 					);
