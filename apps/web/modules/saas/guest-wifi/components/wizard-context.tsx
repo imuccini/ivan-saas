@@ -66,6 +66,8 @@ export interface WizardState {
 	setRegistrationFields: (fields: FormField[]) => void;
 	sponsorshipEnabled: boolean;
 	setSponsorshipEnabled: (enabled: boolean) => void;
+	sponsorSelectionMode: "dropdown" | "type";
+	setSponsorSelectionMode: (mode: "dropdown" | "type") => void;
 	phoneValidationEnabled: boolean;
 	setPhoneValidationEnabled: (enabled: boolean) => void;
 
@@ -190,6 +192,9 @@ export function WizardProvider({
 	// Shared state across steps - initialized from saved config
 	const [easyWifiEnabled, setEasyWifiEnabled] = useState(false);
 	const [sponsorshipEnabled, setSponsorshipEnabled] = useState(false);
+	const [sponsorSelectionMode, setSponsorSelectionMode] = useState<
+		"dropdown" | "type"
+	>("dropdown");
 	const [phoneValidationEnabled, setPhoneValidationEnabled] = useState(false);
 	const [successRedirectMode, setSuccessRedirectMode] = useState("text");
 
@@ -558,6 +563,8 @@ export function WizardProvider({
 		setRegistrationFields,
 		sponsorshipEnabled,
 		setSponsorshipEnabled,
+		sponsorSelectionMode,
+		setSponsorSelectionMode,
 		phoneValidationEnabled,
 		setPhoneValidationEnabled,
 		easyWifiEnabled,

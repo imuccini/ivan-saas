@@ -2,6 +2,14 @@
 
 import { Button } from "@ui/components/button";
 import { Input } from "@ui/components/input";
+import { Label } from "@ui/components/label";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@ui/components/select";
 import { useState } from "react";
 
 interface FormField {
@@ -27,6 +35,7 @@ interface WizardPreviewProps {
 	registrationFields: FormField[];
 	easyWifiEnabled: boolean;
 	sponsorshipEnabled: boolean;
+	sponsorSelectionMode: "dropdown" | "type";
 	phoneValidationEnabled: boolean;
 	successRedirectMode: string;
 	// Style props
@@ -74,6 +83,7 @@ export function WizardPreview({
 	registrationFields,
 	easyWifiEnabled,
 	sponsorshipEnabled,
+	sponsorSelectionMode,
 	phoneValidationEnabled,
 	successRedirectMode,
 	fontFamily,
@@ -786,7 +796,7 @@ export function WizardPreview({
 							{previewPage === "sponsor" &&
 								sponsorshipEnabled && (
 									<div
-										className={`text-center ${
+										className={`${
 											spacing === "compact"
 												? "space-y-2"
 												: spacing === "spacious"
@@ -794,30 +804,124 @@ export function WizardPreview({
 													: "space-y-4"
 										}`}
 									>
-										<h2
-											className="font-bold"
+										<div className="text-center">
+											<h2
+												className="font-bold"
+												style={{
+													fontSize: `${Number.parseInt(baseFontSize) * 1.25}px`,
+												}}
+											>
+												Sponsor Approval Required
+											</h2>
+											<p
+												className="text-muted-foreground mt-2"
+												style={{
+													fontSize: `${baseFontSize}px`,
+												}}
+											>
+												{sponsorMessage}
+											</p>
+										</div>
+
+										{/* Sponsor Selection UI */}
+										<div className="space-y-3">
+											{sponsorSelectionMode ===
+											"dropdown" ? (
+												<>
+													<Label
+														style={{
+															fontSize: `${baseFontSize}px`,
+														}}
+													>
+														Select your sponsor
+													</Label>
+													<Select>
+														<SelectTrigger
+															style={{
+																fontSize: `${baseFontSize}px`,
+															}}
+														>
+															<SelectValue placeholder="Choose a sponsor..." />
+														</SelectTrigger>
+														<SelectContent>
+															{/* Search input for filtering */}
+															<div className="px-2 pb-2">
+																<Input
+																	placeholder="Search..."
+																	className="h-8"
+																	style={{
+																		fontSize: `${Number.parseInt(baseFontSize) * 0.875}px`,
+																	}}
+																/>
+															</div>
+															<SelectItem value="john">
+																<div>
+																	<div className="font-medium">
+																		John Doe
+																	</div>
+																	<div className="text-xs text-muted-foreground">
+																		john.doe@company.com
+																	</div>
+																</div>
+															</SelectItem>
+															<SelectItem value="jane">
+																<div>
+																	<div className="font-medium">
+																		Jane
+																		Smith
+																	</div>
+																	<div className="text-xs text-muted-foreground">
+																		jane.smith@company.com
+																	</div>
+																</div>
+															</SelectItem>
+															<SelectItem value="bob">
+																<div>
+																	<div className="font-medium">
+																		Bob
+																		Johnson
+																	</div>
+																	<div className="text-xs text-muted-foreground">
+																		bob.johnson@company.com
+																	</div>
+																</div>
+															</SelectItem>
+														</SelectContent>
+													</Select>
+												</>
+											) : (
+												<>
+													<Label
+														style={{
+															fontSize: `${baseFontSize}px`,
+														}}
+													>
+														Search your sponsor by
+														email or name
+													</Label>
+													<Input
+														placeholder="Type at least 3 characters..."
+														style={{
+															fontSize: `${baseFontSize}px`,
+														}}
+													/>
+													<p className="text-xs text-muted-foreground">
+														Start typing to see
+														suggestions
+													</p>
+												</>
+											)}
+										</div>
+
+										<Button
+											className="w-full"
 											style={{
-												fontSize: `${Number.parseInt(baseFontSize) * 1.25}px`,
-											}}
-										>
-											Sponsor Approval Required
-										</h2>
-										<p
-											className="text-muted-foreground"
-											style={{
+												backgroundColor: primaryColor,
 												fontSize: `${baseFontSize}px`,
 											}}
 										>
-											{sponsorMessage}
-										</p>
-										<div className="flex items-center justify-center py-8">
-											<div
-												className="animate-spin rounded-full h-12 w-12 border-b-2"
-												style={{
-													borderColor: primaryColor,
-												}}
-											/>
-										</div>
+											Request Approval
+										</Button>
 									</div>
 								)}
 

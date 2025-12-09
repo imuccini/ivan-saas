@@ -19,6 +19,8 @@ export function AccessControlSection() {
 	const {
 		sponsorshipEnabled,
 		setSponsorshipEnabled,
+		sponsorSelectionMode,
+		setSponsorSelectionMode,
 		registrationFields,
 		phoneValidationEnabled,
 		setPhoneValidationEnabled,
@@ -114,13 +116,18 @@ export function AccessControlSection() {
 										type="radio"
 										id="email-dropdown"
 										name="sponsor-selection"
-										defaultChecked
+										checked={
+											sponsorSelectionMode === "dropdown"
+										}
+										onChange={() =>
+											setSponsorSelectionMode("dropdown")
+										}
 									/>
 									<Label
 										htmlFor="email-dropdown"
 										className="font-normal"
 									>
-										Select email form dropdown
+										Select from dropdown
 									</Label>
 								</div>
 								<div className="flex items-center gap-2">
@@ -128,12 +135,18 @@ export function AccessControlSection() {
 										type="radio"
 										id="type-email"
 										name="sponsor-selection"
+										checked={
+											sponsorSelectionMode === "type"
+										}
+										onChange={() =>
+											setSponsorSelectionMode("type")
+										}
 									/>
 									<Label
 										htmlFor="type-email"
 										className="font-normal"
 									>
-										Type email
+										Type email or name
 									</Label>
 								</div>
 							</div>

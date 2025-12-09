@@ -18,8 +18,6 @@ import {
 } from "@ui/components/sidebar";
 import {
 	ActivityIcon,
-	BellIcon,
-	BookOpenIcon,
 	ClockIcon,
 	CpuIcon,
 	RocketIcon,
@@ -34,7 +32,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 	const pathname = usePathname();
 	const { user } = useSession();
 	const { activeOrganization } = useActiveOrganization();
-	const { activeWorkspace } = useActiveWorkspace();
+	const { activeWorkspace, isLoading: isWorkspaceLoading } =
+		useActiveWorkspace();
 	const [pendingPath, setPendingPath] = React.useState<string | null>(null);
 
 	// Reset pending path when pathname changes (navigation complete)
@@ -48,6 +47,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 	const basePath = activeOrganization
 		? `/app/${activeOrganization.slug}/${workspaceSlug}`
 		: "/app";
+
+	// Prevent navigation if workspace is still loading or slug is empty
+	const isNavigationDisabled = isWorkspaceLoading || !workspaceSlug;
 
 	const navLaunchpad = [
 		{
@@ -202,18 +204,28 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 					</SidebarMenuItem>
 				</SidebarMenu>
 			</SidebarHeader>
-			<SidebarContent>
+			<SidebarContent
+				className={
+					isNavigationDisabled ? "pointer-events-none opacity-50" : ""
+				}
+			>
 				<NavMain
 					items={navLaunchpad}
-					onNavigate={(url) => setPendingPath(url)}
+					onNavigate={(url) =>
+						!isNavigationDisabled && setPendingPath(url)
+					}
 				/>
 				<NavMain
 					items={navMain}
-					onNavigate={(url) => setPendingPath(url)}
+					onNavigate={(url) =>
+						!isNavigationDisabled && setPendingPath(url)
+					}
 				/>
 				<NavMain
 					items={navOperations}
-					onNavigate={(url) => setPendingPath(url)}
+					onNavigate={(url) =>
+						!isNavigationDisabled && setPendingPath(url)
+					}
 				/>
 				<NavSecondary items={navSecondary} className="mt-auto" />
 			</SidebarContent>

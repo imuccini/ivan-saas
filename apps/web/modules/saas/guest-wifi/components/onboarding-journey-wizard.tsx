@@ -24,6 +24,7 @@ function WizardContent({ onClose }: { onClose: () => void }) {
 		setSuccessRedirectMode,
 		registrationFields,
 		sponsorshipEnabled,
+		sponsorSelectionMode,
 		phoneValidationEnabled,
 		guestRegistrationEnabled,
 		registrationMode,
@@ -215,6 +216,7 @@ function WizardContent({ onClose }: { onClose: () => void }) {
 								backgroundImage={backgroundImage}
 								easyWifiEnabled={easyWifiEnabled}
 								sponsorshipEnabled={sponsorshipEnabled}
+								sponsorSelectionMode={sponsorSelectionMode}
 								phoneValidationEnabled={phoneValidationEnabled}
 								successRedirectMode={successRedirectMode}
 								sponsorMessage={
