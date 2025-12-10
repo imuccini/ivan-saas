@@ -56,17 +56,17 @@ export function Step5Provisioning({
 	};
 
 	const handleFinish = () => {
-		const orgSlug = params.organizationSlug as string;
-		const workspaceSlug = params.workspaceSlug as string;
+		const orgSlug =
+			(params.organizationSlug as string) ||
+			activeWorkspace?.organization?.slug;
+		const workspaceSlug =
+			(params.workspaceSlug as string) || activeWorkspace?.slug;
 
 		if (orgSlug && workspaceSlug) {
 			router.push(`/app/${orgSlug}/${workspaceSlug}/manage/networks`);
 		} else {
-			// Fallback: just reload the current page which should show the networks
-			window.location.href = window.location.pathname.replace(
-				/\/[^/]*$/,
-				"/networks",
-			);
+			// Fallback: reload to networks page
+			window.location.href = window.location.pathname.split("/manage")[0] + "/manage/networks";
 		}
 	};
 
