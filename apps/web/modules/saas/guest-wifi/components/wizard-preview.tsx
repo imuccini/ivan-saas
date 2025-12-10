@@ -292,14 +292,14 @@ export function WizardPreview({
 			</div>
 
 			{/* Preview Frame */}
-			<div className="flex items-center justify-center flex-1 p-8 overflow-y-auto">
+			<div className="flex flex-1 p-8 overflow-y-auto">
 				{/* Force light mode for the preview */}
-				<div className="light">
+				<div className="light m-auto">
 					<div
 						className={cn(
-							"relative flex flex-col items-center overflow-hidden transition-all bg-background rounded-lg border shadow-lg",
+							"relative flex flex-col items-center transition-all bg-background rounded-lg border shadow-lg overflow-y-auto scrollbar-hide",
 							previewMode === "mobile"
-								? "w-[393px] h-[852px]"
+								? "w-[393px] h-[852px] pt-24"
 								: previewMode === "tablet"
 									? "w-[768px] min-h-[1024px]"
 									: "w-full max-w-4xl min-h-[600px]",
@@ -325,7 +325,7 @@ export function WizardPreview({
 							className={cn(
 								"relative flex w-full flex-col bg-white p-6 shadow-none transition-all",
 								previewMode === "mobile"
-									? "mt-24 min-h-[calc(100%-6rem)] rounded-t-[2.5rem]"
+									? "mt-auto min-h-[66%] rounded-t-[2.5rem]"
 									: "m-auto w-full max-w-[440px] rounded-2xl shadow-2xl p-10",
 							)}
 						>
