@@ -325,7 +325,7 @@ export function WizardPreview({
 							className={cn(
 								"relative flex w-full flex-col bg-white p-6 shadow-none transition-all",
 								previewMode === "mobile"
-									? "mt-auto min-h-[66%] rounded-t-[2.5rem]"
+									? "mt-auto min-h-[85%] rounded-t-[2.5rem]"
 									: "m-auto w-full max-w-[440px] rounded-2xl shadow-2xl p-10",
 							)}
 						>
