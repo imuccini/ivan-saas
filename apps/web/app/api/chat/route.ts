@@ -15,6 +15,11 @@ function setupGoogleCredentials() {
 		process.env.GOOGLE_VERTEX_LOCATION = "us-central1";
 	}
 
+	// Ensure GOOGLE_CLOUD_PROJECT is set (Vertex SDK often looks for this)
+	if (!process.env.GOOGLE_CLOUD_PROJECT && process.env.GOOGLE_VERTEX_PROJECT) {
+		process.env.GOOGLE_CLOUD_PROJECT = process.env.GOOGLE_VERTEX_PROJECT;
+	}
+
 	// 1. Check for local google-credentials.json (priority)
 	const localCredsPath = path.join(process.cwd(), "google-credentials.json");
 	if (fs.existsSync(localCredsPath)) {
