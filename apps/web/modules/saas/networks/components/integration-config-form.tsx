@@ -60,71 +60,26 @@ export function IntegrationConfigForm({
 			apiKey?: string;
 			clientId?: string;
 			clientSecret?: string;
-			regionUrl?: string;
+			regionUrl?: string; // regionUrl is not needed for the action, but kept for type compatibility if needed, though regionId is what matters
+			regionId?: string;
 		}) => {
-			if (vendor === "aruba") {
-				// Aruba OAuth2 validation
-				const region = getArubaRegion(regionId);
-				if (!region) {
-					throw new Error("Please select a region");
-				}
+			// Import dynamically to avoid top-level server action import issues in some setups, strictly typing
+			const { validateIntegrationCredentials } = await import(
+				"../actions"
+			);
 
-				const response = await fetch(`${region.baseUrl}/oauth2/token`, {
-					method: "POST",
-					headers: { "Content-Type": "application/json" },
-					body: JSON.stringify({
-						grant_type: "client_credentials",
-						client_id: credentials.clientId,
-						client_secret: credentials.clientSecret,
-					}),
-				});
+			const result = await validateIntegrationCredentials(vendor, {
+				apiKey: credentials.apiKey,
+				clientId: credentials.clientId,
+				clientSecret: credentials.clientSecret,
+				regionId: regionId, // Use state regionId
+			});
 
-				if (!response.ok) {
-					const errorText = await response.text();
-					throw new Error(
-						response.status === 401 || response.status === 400
-							? "Invalid Client ID or Secret"
-							: `OAuth2 validation failed: ${errorText}`,
-					);
-				}
-
-				const data = await response.json();
-				return {
-					accessToken: data.access_token,
-					refreshToken: data.refresh_token,
-					expiresIn: data.expires_in,
-					expiresAt: new Date(
-						Date.now() + data.expires_in * 1000,
-					).toISOString(),
-				};
+			if (!result.success) {
+				throw new Error(result.error);
 			}
 
-			// Meraki API key validation
-			if (vendor === "meraki") {
-				const response = await fetch(
-					"https://api.meraki.com/api/v1/organizations",
-					{
-						headers: {
-							"X-Cisco-Meraki-API-Key": credentials.apiKey || "",
-							"Content-Type": "application/json",
-						},
-					},
-				);
-
-				if (!response.ok) {
-					const errorText = await response.text();
-					throw new Error(
-						response.status === 401
-							? "Invalid API key"
-							: `API validation failed: ${errorText}`,
-					);
-				}
-
-				return response.json();
-			}
-
-			// For other vendors, skip validation for now
-			return true;
+			return result.data;
 		},
 	});
 
