@@ -1,5 +1,6 @@
 ---
-trigger: always_on
+trigger: model_decision
+description: Performance optimization guidelines for Next.js App Router development
 ---
 
 ---

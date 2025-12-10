@@ -2,8 +2,8 @@ import { ORPCError, streamToEventIterator } from "@orpc/client";
 import { type } from "@orpc/server";
 import {
 	convertToModelMessages,
+	getTextModel,
 	streamText,
-	textModel,
 	type UIMessage,
 } from "@repo/ai";
 import { getAiChatById, updateAiChat } from "@repo/database";
@@ -44,7 +44,7 @@ export const addMessageToChat = protectedProcedure
 		}
 
 		const response = streamText({
-			model: textModel,
+			model: getTextModel(),
 			messages: convertToModelMessages(messages),
 			async onFinish({ text }) {
 				await updateAiChat({

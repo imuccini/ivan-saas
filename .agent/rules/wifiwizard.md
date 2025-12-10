@@ -1,5 +1,5 @@
 ---
-trigger: manual
+trigger: model_decision
 ---
 
 The Guest WiFi Wizard is a multi-step configuration interface that allows administrators to set up and customize a guest WiFi onboarding experience. The wizard uses a context-based architecture with a split-view layout showing configuration options on the left and a live preview on the right.
