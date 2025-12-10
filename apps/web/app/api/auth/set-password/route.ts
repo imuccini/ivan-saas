@@ -1,17 +1,7 @@
 import { auth } from "@repo/auth";
 import { db } from "@repo/database";
-import { randomBytes, scrypt } from "crypto";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
-import { promisify } from "util";
-
-const scryptAsync = promisify(scrypt);
-
-async function hashPassword(password: string): Promise<string> {
-	const salt = randomBytes(16).toString("hex");
-	const derivedKey = (await scryptAsync(password, salt, 64)) as Buffer;
-	return `${salt}:${derivedKey.toString("hex")}`;
-}
 
 export async function POST(request: Request) {
 	try {
@@ -59,48 +49,16 @@ export async function POST(request: Request) {
 			);
 		}
 
-		// Parallelize independent operations for performance
-		const [user, hashedPassword, existingAccount] = await Promise.all([
-			db.user.findUnique({
-				where: { id: session.user.id },
-			}),
-			hashPassword(password),
-			db.account.findFirst({
-				where: {
-					userId: session.user.id,
-					providerId: "credential",
-				},
-			}),
-		]);
-		
-		if (!user || !user.email) {
-			return NextResponse.json(
-				{ error: "User email not found" },
-				{ status: 400 },
-			);
-		}
+	
+		// Set the password using better-auth's API to ensure correct hashing
+		await auth.api.setPassword({
+			headers: await headers(),
+			body: {
+				newPassword: password,
+			},
+		});
 
-		if (existingAccount) {
-			// Update existing account
-			await db.account.update({
-				where: { id: existingAccount.id },
-				data: { password: hashedPassword },
-			});
-		} else {
-			// Create new credential account
-			await db.account.create({
-				data: {
-					userId: session.user.id,
-					accountId: user.email, // Use email as accountId for credential provider
-					providerId: "credential",
-					password: hashedPassword,
-					createdAt: new Date(),
-					updatedAt: new Date(),
-				},
-			});
-		}
-
-		// Mark email as verified
+		// Explicitly mark email as verified since the user successfully set a password (proving ownership/access via OTP flow)
 		await db.user.update({
 			where: { id: session.user.id },
 			data: { emailVerified: true },
