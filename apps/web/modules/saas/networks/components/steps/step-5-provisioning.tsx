@@ -1,6 +1,7 @@
 "use client";
 
 import { useActiveWorkspace } from "@saas/workspaces/hooks/use-active-workspace";
+import { useActiveOrganization } from "@saas/organizations/hooks/use-active-organization";
 import { orpc } from "@shared/lib/orpc-query-utils";
 import { useMutation } from "@tanstack/react-query";
 import { Button } from "@ui/components/button";
@@ -29,6 +30,7 @@ export function Step5Provisioning({
 	const params = useParams();
 	const { activeWorkspace } = useActiveWorkspace();
 
+	const { activeOrganization } = useActiveOrganization();
 	const provisionMutation = useMutation(
 		orpc.networks.provision.mutationOptions({
 			onSuccess: () => {
@@ -58,7 +60,7 @@ export function Step5Provisioning({
 	const handleFinish = () => {
 		const orgSlug =
 			(params.organizationSlug as string) ||
-			activeWorkspace?.organization?.slug;
+			activeOrganization?.slug;
 		const workspaceSlug =
 			(params.workspaceSlug as string) || activeWorkspace?.slug;
 
