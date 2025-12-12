@@ -27,6 +27,7 @@ import { useState } from "react";
 
 interface Step4Props {
 	integrationId: string;
+	vendor: string;
 	// biome-ignore lint/suspicious/noExplicitAny: Network object structure varies
 	selectedNetworks: any[];
 	onComplete: (ssidMapping: SSIDMapping) => void;
@@ -75,6 +76,7 @@ const USE_CASES = [
 export function Step4SsidMapping({
 	integrationId,
 	selectedNetworks,
+	vendor,
 	onComplete,
 	onSkip,
 }: Step4Props) {
@@ -94,7 +96,10 @@ export function Step4SsidMapping({
 	// For simplicity, fetch SSIDs from the first selected network
 	const firstNetwork = selectedNetworks[0];
 
-	const { data: ssids, isLoading } = useQuery({
+	const isMeraki = vendor === "meraki";
+	const isUbiquiti = vendor === "ubiquiti";
+
+	const { data: merakiSsids, isLoading: isLoadingMeraki } = useQuery({
 		...orpc.meraki.getNetworkSSIDs.queryOptions({
 			input: {
 				integrationId,
@@ -106,8 +111,28 @@ export function Step4SsidMapping({
 			!!firstNetwork &&
 			!!integrationId &&
 			!!activeWorkspace?.id &&
-			isSingleNetwork,
+			isSingleNetwork &&
+			isMeraki,
 	});
+
+	const { data: ubiquitiWlans, isLoading: isLoadingUbiquiti } = useQuery({
+		...orpc.ubiquiti.getWLANs.queryOptions({
+			input: {
+				integrationId,
+				siteName: firstNetwork?.id || "", // id maps to name/code
+				workspaceId: activeWorkspace?.id || "",
+			},
+		}),
+		enabled:
+			!!firstNetwork &&
+			!!integrationId &&
+			!!activeWorkspace?.id &&
+			isSingleNetwork &&
+			isUbiquiti,
+	});
+
+	const ssids = isUbiquiti ? ubiquitiWlans : merakiSsids;
+	const isLoading = isUbiquiti ? isLoadingUbiquiti : isLoadingMeraki;
 
 	const handleContinue = () => {
 		const mapping: SSIDMapping = {};

@@ -20,6 +20,7 @@ import type { SSIDMapping } from "./steps/step-4-ssid-mapping";
 
 interface SsidMappingEditorProps {
 	integrationId: string;
+	vendor: string;
 	networkId: string;
 	initialMapping?: SSIDMapping;
 	onSave: (mapping: SSIDMapping) => void;
@@ -53,6 +54,7 @@ const USE_CASES = [
 
 export function SsidMappingEditor({
 	integrationId,
+	vendor,
 	networkId,
 	initialMapping,
 	onSave,
@@ -90,7 +92,10 @@ export function SsidMappingEditor({
 		}
 	}, [initialMapping]);
 
-	const { data: ssids, isLoading } = useQuery({
+	const isMeraki = vendor === "meraki";
+	const isUbiquiti = vendor === "ubiquiti";
+
+	const { data: merakiSsids, isLoading: isLoadingMeraki } = useQuery({
 		...orpc.meraki.getNetworkSSIDs.queryOptions({
 			input: {
 				integrationId,
@@ -98,8 +103,22 @@ export function SsidMappingEditor({
 				workspaceId: activeWorkspace?.id || "",
 			},
 		}),
-		enabled: !!networkId && !!integrationId && !!activeWorkspace?.id,
+		enabled: !!networkId && !!integrationId && !!activeWorkspace?.id && isMeraki,
 	});
+
+	const { data: ubiquitiWlans, isLoading: isLoadingUbiquiti } = useQuery({
+		...orpc.ubiquiti.getWLANs.queryOptions({
+			input: {
+				integrationId,
+				siteName: networkId, // networkId maps to site name/code in Ubiquiti context
+				workspaceId: activeWorkspace?.id || "",
+			},
+		}),
+		enabled: !!networkId && !!integrationId && !!activeWorkspace?.id && isUbiquiti,
+	});
+
+	const ssids = isUbiquiti ? ubiquitiWlans : merakiSsids;
+	const isLoading = isUbiquiti ? isLoadingUbiquiti : isLoadingMeraki;
 
 	const handleSave = () => {
 		const mapping: SSIDMapping = {};

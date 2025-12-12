@@ -8,7 +8,7 @@ import { Button } from "@ui/components/button";
 import { CheckCircle2Icon, PlusIcon, WifiIcon } from "lucide-react";
 
 interface Step0Props {
-	onSelectExisting: (integrationId: string) => void;
+	onSelectExisting: (integrationId: string, provider: string) => void;
 	onCreateNew: () => void;
 }
 
@@ -55,7 +55,7 @@ export function Step0IntegrationSelect({
 								<button
 									key={integration.id}
 									type="button"
-									onClick={() => onSelectExisting(integration.id)}
+									onClick={() => onSelectExisting(integration.id, integration.provider)}
 									className="group relative rounded-lg border bg-card p-6 text-left transition-all hover:border-primary hover:shadow-md"
 								>
 									<div className="flex items-start gap-4">

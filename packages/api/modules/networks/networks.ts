@@ -4,6 +4,7 @@ import { z } from "zod";
 import { decrypt } from "../../lib/encryption";
 import { protectedProcedure } from "../../orpc/procedures";
 import { MerakiAdapter } from "./adapters/meraki-adapter";
+import { UbiquitiAdapter } from "./adapters/ubiquiti-adapter";
 
 const list = protectedProcedure
 	.route({
@@ -237,19 +238,45 @@ export const networksRouter = {
 				});
 			}
 
-			// Initialize adapter
-			const merakiAdapter = new MerakiAdapter();
-			// biome-ignore lint/suspicious/noExplicitAny: JSON type
-			const credentials = network.integration.credentials as any;
-			const apiKey = decrypt(credentials.apiKey);
-			// biome-ignore lint/suspicious/noExplicitAny: JSON type
-			const networkId = (network.config as any)?.id || network.externalId;
-
 			// Fetch fresh data
-			const [ssids, deviceCount] = await Promise.all([
-				merakiAdapter.getNetworkSSIDs(apiKey, networkId),
-				merakiAdapter.getDeviceCount(apiKey, networkId),
-			]);
+			let ssids: { number: number; name: string; enabled: boolean }[] = [];
+			let deviceCount = 0;
+
+			if (network.integration.provider === "meraki") {
+				const merakiAdapter = new MerakiAdapter();
+				// biome-ignore lint/suspicious/noExplicitAny: JSON type
+				const credentials = network.integration.credentials as any;
+				const apiKey = decrypt(credentials.apiKey);
+				// biome-ignore lint/suspicious/noExplicitAny: JSON type
+				const networkId = (network.config as any)?.id || network.externalId;
+
+				const [merakiSsids, count] = await Promise.all([
+					merakiAdapter.getNetworkSSIDs(apiKey, networkId),
+					merakiAdapter.getDeviceCount(apiKey, networkId),
+				]);
+				ssids = merakiSsids;
+				deviceCount = count;
+			} else if (network.integration.provider === "ubiquiti") {
+				const ubiquitiAdapter = new UbiquitiAdapter();
+				// biome-ignore lint/suspicious/noExplicitAny: JSON type
+				const credentials = network.integration.credentials as any;
+				const password = credentials.password ? decrypt(credentials.password) : "";
+
+				const siteName = network.externalId;
+
+				const wlans = await ubiquitiAdapter.getWLANs({
+					controllerUrl: credentials.controllerUrl,
+					username: credentials.username,
+					password: password,
+					allowSelfSigned: credentials.allowSelfSigned,
+				}, siteName);
+
+				ssids = wlans.map((w, i) => ({
+					number: i,
+					name: w.name,
+					enabled: w.enabled,
+				}));
+			}
 
 			// Update config
 			// biome-ignore lint/suspicious/noExplicitAny: JSON type
@@ -265,6 +292,9 @@ export const networksRouter = {
 					typeof mapping === "object" &&
 					"ssidNumber" in mapping
 				) {
+					// Logic to find fresh SSID.
+					// For Ubiquiti using index (number) is fragile if order changes.
+					// But for now it consistent with proxy.
 					const freshSsid = ssids.find(
 						(s) => s.number === mapping.ssidNumber,
 					);

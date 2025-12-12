@@ -127,7 +127,18 @@ const createIntegration = protectedProcedure
 			provider: z.string(),
 			name: z.string(),
 			credentials: z.object({
-				apiKey: z.string(),
+				apiKey: z.string().optional(),
+				clientId: z.string().optional(),
+				clientSecret: z.string().optional(),
+				username: z.string().optional(),
+				password: z.string().optional(),
+				controllerUrl: z.string().optional(),
+				allowSelfSigned: z.boolean().optional(),
+				regionId: z.string().optional(),
+				regionUrl: z.string().optional(),
+				accessToken: z.string().optional(),
+				refreshToken: z.string().optional(),
+				expiresAt: z.string().optional(),
 			}),
 		}),
 	)
@@ -161,16 +172,31 @@ const createIntegration = protectedProcedure
 			});
 		}
 
-		const encryptedApiKey = encrypt(input.credentials.apiKey);
+		// Encrypt sensitive fields
+		const encryptedCredentials: any = { ...input.credentials };
+		
+		if (input.credentials.apiKey) {
+			encryptedCredentials.apiKey = encrypt(input.credentials.apiKey);
+		}
+		if (input.credentials.clientSecret) {
+			encryptedCredentials.clientSecret = encrypt(input.credentials.clientSecret);
+		}
+		if (input.credentials.password) {
+			encryptedCredentials.password = encrypt(input.credentials.password);
+		}
+		if (input.credentials.accessToken) {
+			encryptedCredentials.accessToken = encrypt(input.credentials.accessToken);
+		}
+		if (input.credentials.refreshToken) {
+			encryptedCredentials.refreshToken = encrypt(input.credentials.refreshToken);
+		}
 
 		const integration = await db.integration.create({
 			data: {
 				workspaceId: input.workspaceId,
 				provider: input.provider,
 				name: input.name,
-				credentials: {
-					apiKey: encryptedApiKey,
-				},
+				credentials: encryptedCredentials,
 			},
 		});
 

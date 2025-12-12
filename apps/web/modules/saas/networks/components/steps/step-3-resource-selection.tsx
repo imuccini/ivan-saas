@@ -24,6 +24,7 @@ import { useEffect, useMemo, useState } from "react";
 
 interface Step3Props {
 	integrationId: string;
+	vendor: string;
 	// biome-ignore lint/suspicious/noExplicitAny: Network object structure varies
 	onComplete: (orgId: string, networks: any[], tags: string[]) => void;
 }
@@ -32,6 +33,7 @@ type SelectionMode = "tag-sync" | "manual-select";
 
 export function Step3ResourceSelection({
 	integrationId,
+	vendor,
 	onComplete,
 }: Step3Props) {
 	const { activeWorkspace } = useActiveWorkspace();
@@ -43,19 +45,22 @@ export function Step3ResourceSelection({
 	const [networkSearchQuery, setNetworkSearchQuery] = useState("");
 	const [tagSearchQuery, setTagSearchQuery] = useState("");
 
-	// Fetch Organizations
-	const { data: organizations, isLoading: isLoadingOrgs } = useQuery(
+	const isMeraki = vendor === "meraki";
+	const isUbiquiti = vendor === "ubiquiti";
+
+	// Fetch Organizations (Meraki)
+	const { data: merakiOrgs, isLoading: isLoadingMerakiOrgs } = useQuery(
 		orpc.meraki.getOrganizations.queryOptions({
 			input: {
 				integrationId,
 				workspaceId: activeWorkspace?.id || "",
 			},
-			enabled: !!activeWorkspace?.id,
+			enabled: !!activeWorkspace?.id && isMeraki,
 		}),
 	);
 
-	// Fetch Networks (when org selected)
-	const { data: networks, isLoading: isLoadingNetworks } = useQuery({
+	// Fetch Networks (Meraki)
+	const { data: merakiNetworks, isLoading: isLoadingMerakiNetworks } = useQuery({
 		...orpc.meraki.getNetworks.queryOptions({
 			input: {
 				integrationId,
@@ -63,8 +68,38 @@ export function Step3ResourceSelection({
 				workspaceId: activeWorkspace?.id || "",
 			},
 		}),
-		enabled: !!selectedOrg && !!activeWorkspace?.id,
+		enabled: !!selectedOrg && !!activeWorkspace?.id && isMeraki,
 	});
+
+	// Fetch Sites (Ubiquiti) - mapped to networks
+	const { data: titleSites, isLoading: isLoadingUbiquitiSites } = useQuery({
+		...orpc.ubiquiti.getSites.queryOptions({
+			input: {
+				integrationId,
+				workspaceId: activeWorkspace?.id || "",
+			},
+		}),
+		enabled: !!activeWorkspace?.id && isUbiquiti,
+	});
+
+	// Normalize data
+	const organizations = isUbiquiti
+		? [{ id: "default", name: "UniFi Controller" }]
+		: merakiOrgs;
+	
+	const networks = isUbiquiti
+		? titleSites
+		: merakiNetworks;
+
+	const isLoadingOrgs = isUbiquiti ? false : isLoadingMerakiOrgs;
+	const isLoadingNetworks = isUbiquiti ? isLoadingUbiquitiSites : isLoadingMerakiNetworks;
+
+	// Auto-select "default" org for Ubiquiti
+	useEffect(() => {
+		if (isUbiquiti && !selectedOrg) {
+			setSelectedOrg("default");
+		}
+	}, [isUbiquiti, selectedOrg]);
 
 	// Extract network tags from fetched networks
 	const networkTags = useMemo(() => {

@@ -8,6 +8,7 @@ import { customFieldsRouter } from "../modules/custom-fields/router";
 import { guestWifiRouter } from "../modules/guest-wifi/router";
 import { integrationsRouter } from "../modules/networks/integrations";
 import { merakiProxyRouter } from "../modules/networks/meraki-proxy";
+import { ubiquitiProxyRouter } from "../modules/networks/ubiquiti-proxy";
 import { networkProvisioningRouter } from "../modules/networks/network-provisioning";
 import { networksRouter } from "../modules/networks/networks";
 import { newsletterRouter } from "../modules/newsletter/router";
@@ -40,6 +41,7 @@ export const router = publicProcedure
 		accessCodes: accessCodesRouter,
 		integrations: integrationsRouter,
 		meraki: merakiProxyRouter,
+		ubiquiti: ubiquitiProxyRouter,
 		onboarding: onboardingRouter,
 		networks: {
 			...networksRouter,

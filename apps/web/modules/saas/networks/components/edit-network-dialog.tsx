@@ -89,6 +89,7 @@ export function EditNetworkDialog({
 
 				<SsidMappingEditor
 					integrationId={network.integration.id}
+					vendor={network.integration.provider}
 					networkId={network.externalId || network.config?.id}
 					initialMapping={network.config?.ssidMapping}
 					onSave={handleSave}

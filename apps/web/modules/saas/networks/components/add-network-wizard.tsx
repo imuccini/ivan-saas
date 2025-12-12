@@ -38,8 +38,9 @@ export function AddNetworkWizard({ onClose }: AddNetworkWizardProps) {
 		undefined,
 	);
 
-	const handleSelectExistingIntegration = (id: string) => {
+	const handleSelectExistingIntegration = (id: string, vendor: string) => {
 		setIntegrationId(id);
+		setSelectedVendor(vendor);
 		setStep("resources");
 	};
 
@@ -85,11 +86,17 @@ export function AddNetworkWizard({ onClose }: AddNetworkWizardProps) {
 		if (step === "resources") {
 			// If we came from integration-select (existing integration), go back there
 			// If we came from auth (new integration), go back to auth
-			if (selectedVendor) {
-				setStep("auth");
-			} else {
-				setStep("integration-select");
-			}
+			// Wait, if existing, we skip auth. 
+			// If we selected existing integration, selectedVendor is set.
+			// If we created new, selectedVendor is set too.
+			// We can differentiate based on previous step logic, but here simple back is fine?
+			// If we were in auth, we go to vendor.
+			// If we were in resources, we want to go back to selection or auth.
+			// But we don't track history.
+			// Simple logic: if integration was created now, go to auth? No, auth is done.
+			// Let's go to integration-select always for now or improve later.
+			// Actually, let's just go back to integration-select.
+			setStep("integration-select");
 		}
 		if (step === "ssid") setStep("resources");
 		if (step === "provisioning") setStep("ssid");
@@ -134,6 +141,7 @@ export function AddNetworkWizard({ onClose }: AddNetworkWizardProps) {
 				{step === "resources" && integrationId && (
 					<Step3ResourceSelection
 						integrationId={integrationId}
+						vendor={selectedVendor || "meraki"} // Default to meraki for safety
 						onComplete={handleResourcesComplete}
 					/>
 				)}
@@ -143,6 +151,7 @@ export function AddNetworkWizard({ onClose }: AddNetworkWizardProps) {
 						<Step4SsidMapping
 							integrationId={integrationId}
 							selectedNetworks={selectedNetworks}
+							vendor={selectedVendor || "meraki"}
 							onComplete={handleSsidMappingComplete}
 							onSkip={handleSsidMappingSkip}
 						/>
