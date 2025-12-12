@@ -1,5 +1,10 @@
 "use client";
 
+import { useOnboardingStatus } from "@saas/onboarding/hooks/use-onboarding-status";
+import { useActiveOrganization } from "@saas/organizations/hooks/use-active-organization";
+import { useActiveWorkspace } from "@saas/workspaces/hooks/use-active-workspace";
+import { orpc } from "@shared/lib/orpc-query-utils";
+import { useQuery } from "@tanstack/react-query";
 import { Alert, AlertDescription } from "@ui/components/alert";
 import { Badge } from "@ui/components/badge";
 import { Button } from "@ui/components/button";
@@ -30,7 +35,6 @@ import {
 	Wifi,
 	Zap,
 } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { OnboardingJourneyWizard } from "./onboarding-journey-wizard";
@@ -43,6 +47,26 @@ export function GuestWifiPageContent() {
 	const [ssidName, setSsidName] = useState("Guest_WiFi_Network");
 	const networksConnected: number = 4;
 	const legacyNetworks: number = 2;
+
+	const { activeOrganization } = useActiveOrganization();
+	const { activeWorkspace } = useActiveWorkspace();
+	const { data: onboarding } = useOnboardingStatus(activeWorkspace?.id);
+
+	const basePath =
+		activeOrganization && activeWorkspace
+			? `/app/${activeOrganization.slug}/${activeWorkspace.slug}`
+			: "/app";
+
+	// Fetch GuestWifiConfig to get the ID for portal preview
+	const { data: guestWifiConfig } = useQuery({
+		...orpc.guestWifi.get.queryOptions({
+			input: {
+				workspaceId: activeWorkspace?.id || "",
+				name: "Default",
+			},
+		}),
+		enabled: !!activeWorkspace?.id,
+	});
 
 	return (
 		<div className="space-y-6">
@@ -83,17 +107,76 @@ export function GuestWifiPageContent() {
 
 						{/* Alerts */}
 						<div className="flex-1 space-y-3">
-							{/* No Issues Alert */}
-							<Alert className="bg-background border">
-								<ThumbsUp className="h-4 w-4 text-green-500" />
-								<AlertDescription>
-									<span>
-										You have{" "}
-										<span className="font-bold">no</span>{" "}
-										blocking issues
-									</span>
-								</AlertDescription>
-							</Alert>
+							{/* Onboarding Alerts */}
+							{onboarding && !onboarding.networkSetup && (
+								<Alert className="border-orange-500/20 bg-orange-500/10 text-orange-600 dark:text-orange-400">
+									<AlertTriangle className="h-4 w-4" />
+									<AlertDescription className="flex items-center justify-between">
+										<span>
+											Onboarding checklist to be
+											completed:{" "}
+											<span className="font-bold">
+												Create your first network
+											</span>
+										</span>
+										<Button
+											size="sm"
+											variant="outline"
+											asChild
+											className="ml-2"
+										>
+											<Link
+												href={`${basePath}/manage/networks?add=true`}
+											>
+												Setup Network
+											</Link>
+										</Button>
+									</AlertDescription>
+								</Alert>
+							)}
+
+							{onboarding &&
+								onboarding.networkSetup &&
+								!onboarding.wifiPersonalized && (
+									<Alert className="border-blue-500/20 bg-blue-500/10 text-blue-600 dark:text-blue-400">
+										<InfoIcon className="h-4 w-4" />
+										<AlertDescription className="flex items-center justify-between">
+											<span>
+												Complete setup by{" "}
+												<span className="font-bold">
+													personalizing your Guest
+													WiFi onboarding
+												</span>
+											</span>
+											<Button
+												size="sm"
+												variant="outline"
+												onClick={() =>
+													setWizardOpen(true)
+												}
+												className="ml-2"
+											>
+												Personalize Now
+											</Button>
+										</AlertDescription>
+									</Alert>
+								)}
+
+							{/* No Issues Alert - only show if onboarding complete */}
+							{(!onboarding || onboarding.isComplete) && (
+								<Alert className="bg-background border">
+									<ThumbsUp className="h-4 w-4 text-green-500" />
+									<AlertDescription>
+										<span>
+											You have{" "}
+											<span className="font-bold">
+												no
+											</span>{" "}
+											blocking issues
+										</span>
+									</AlertDescription>
+								</Alert>
+							)}
 
 							{/* Warning Alert */}
 							<Link href="#" className="block">
@@ -204,12 +287,32 @@ export function GuestWifiPageContent() {
 
 					{/* Portal Preview */}
 					<div className="relative h-[300px] rounded-lg border bg-muted/30 overflow-hidden">
-						<Image
-							src="/images/guest-wifi-onboarding.png"
-							alt="Onboarding Preview"
-							fill
-							className="object-cover"
-						/>
+						{activeOrganization?.id &&
+						activeWorkspace?.id &&
+						guestWifiConfig?.id ? (
+							<>
+								<div className="absolute inset-0 flex items-center justify-center">
+									<iframe
+										src={`${process.env.NEXT_PUBLIC_PORTAL_URL || "http://localhost:3001"}/${activeOrganization.id}/${activeWorkspace.id}/${guestWifiConfig.id}`}
+										className="absolute inset-0 w-full h-full origin-top-left pointer-events-none"
+										style={{
+											transform: "scale(0.335)",
+											width: "300%",
+											height: "300%",
+										}}
+										title="Portal Preview"
+									/>
+								</div>
+								<div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent pointer-events-none" />
+							</>
+						) : (
+							<div className="absolute inset-0 flex items-center justify-center text-muted-foreground">
+								<p className="text-sm">
+									Configure your onboarding journey to see
+									preview
+								</p>
+							</div>
+						)}
 					</div>
 				</div>
 			</div>

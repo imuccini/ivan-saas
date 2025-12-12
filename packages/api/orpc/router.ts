@@ -11,6 +11,7 @@ import { merakiProxyRouter } from "../modules/networks/meraki-proxy";
 import { networkProvisioningRouter } from "../modules/networks/network-provisioning";
 import { networksRouter } from "../modules/networks/networks";
 import { newsletterRouter } from "../modules/newsletter/router";
+import { onboardingRouter } from "../modules/onboarding/router";
 import { organizationsRouter } from "../modules/organizations/router";
 import { paymentsRouter } from "../modules/payments/router";
 import { sponsorsRouter } from "../modules/sponsors/router";
@@ -39,6 +40,7 @@ export const router = publicProcedure
 		accessCodes: accessCodesRouter,
 		integrations: integrationsRouter,
 		meraki: merakiProxyRouter,
+		onboarding: onboardingRouter,
 		networks: {
 			...networksRouter,
 			provision: networkProvisioningRouter.provision,

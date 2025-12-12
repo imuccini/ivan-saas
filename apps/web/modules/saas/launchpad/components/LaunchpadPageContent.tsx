@@ -1,5 +1,7 @@
 "use client";
 
+import { OnboardingChecklist } from "@saas/onboarding/components/OnboardingChecklist";
+import { useOnboardingStatus } from "@saas/onboarding/hooks/use-onboarding-status";
 import { useActiveOrganization } from "@saas/organizations/hooks/use-active-organization";
 import { useActiveWorkspace } from "@saas/workspaces/hooks/use-active-workspace";
 import {
@@ -89,6 +91,8 @@ export function LaunchpadPageContent() {
 	const [aiInput, setAiInput] = useState("");
 	const { activeOrganization } = useActiveOrganization();
 	const { activeWorkspace } = useActiveWorkspace();
+	const { data: onboarding, isLoading: isLoadingOnboarding } =
+		useOnboardingStatus(activeWorkspace?.id);
 
 	const basePath =
 		activeOrganization && activeWorkspace
@@ -122,6 +126,10 @@ export function LaunchpadPageContent() {
 		}
 		setAiInput("");
 	};
+
+	// Show checklist if onboarding is not complete
+	const showChecklist =
+		onboarding && !onboarding.isComplete && !isLoadingOnboarding;
 
 	return (
 		<div className="mx-auto max-w-5xl space-y-8 py-8">
@@ -157,6 +165,11 @@ export function LaunchpadPageContent() {
 				</div>
 			</form>
 
+			{/* Onboarding Checklist */}
+			{showChecklist && (
+				<OnboardingChecklist status={onboarding} basePath={basePath} />
+			)}
+
 			{/* Quick Actions */}
 			<div className="grid gap-6 md:grid-cols-3">
 				{QUICK_ACTIONS.map((action) => (
@@ -183,37 +196,39 @@ export function LaunchpadPageContent() {
 			</div>
 
 			{/* Insights Section */}
-			<div className="grid gap-6 md:grid-cols-3">
-				{INSIGHTS.map((insight) => (
-					<Card key={insight.id} className="flex flex-col">
-						<CardHeader>
-							<div className="flex items-center gap-2">
-								<div
-									className={`flex size-8 items-center justify-center rounded-lg ${insight.iconBg}`}
-								>
-									<insight.icon
-										className={`size-4 ${insight.iconColor}`}
-									/>
+			{(!onboarding || onboarding.isComplete) && (
+				<div className="grid gap-6 md:grid-cols-3">
+					{INSIGHTS.map((insight) => (
+						<Card key={insight.id} className="flex flex-col">
+							<CardHeader>
+								<div className="flex items-center gap-2">
+									<div
+										className={`flex size-8 items-center justify-center rounded-lg ${insight.iconBg}`}
+									>
+										<insight.icon
+											className={`size-4 ${insight.iconColor}`}
+										/>
+									</div>
+									<CardTitle className="text-base">
+										{insight.type}
+									</CardTitle>
 								</div>
-								<CardTitle className="text-base">
-									{insight.type}
-								</CardTitle>
-							</div>
-						</CardHeader>
-						<CardContent className="flex flex-1 flex-col">
-							<p className="flex-1 text-sm text-muted-foreground">
-								{insight.description}
-							</p>
-							<Link
-								href={insight.actionHref}
-								className="mt-4 text-sm font-medium text-primary hover:underline"
-							>
-								{insight.action} →
-							</Link>
-						</CardContent>
-					</Card>
-				))}
-			</div>
+							</CardHeader>
+							<CardContent className="flex flex-1 flex-col">
+								<p className="flex-1 text-sm text-muted-foreground">
+									{insight.description}
+								</p>
+								<Link
+									href={insight.actionHref}
+									className="mt-4 text-sm font-medium text-primary hover:underline"
+								>
+									{insight.action} →
+								</Link>
+							</CardContent>
+						</Card>
+					))}
+				</div>
+			)}
 		</div>
 	);
 }

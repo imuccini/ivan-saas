@@ -13,7 +13,8 @@ import {
 	RadioTowerIcon,
 	XCircleIcon,
 } from "lucide-react";
-import { useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 import { AddNetworkWizard } from "./add-network-wizard";
 
 const VENDOR_ICONS: Record<string, string> = {
@@ -78,53 +79,48 @@ function NetworkCard({ network }: NetworkCardProps) {
 						) : (
 							<XCircleIcon className="mr-1 size-3" />
 						)}
-						{isPending
-							? "Provisioning"
-							: isActive
-								? "Active"
-								: isFailed
-									? "Failed"
-									: "Disconnected"}
+						{network.provisioningStatus}
 					</Badge>
 				</div>
 			</CardHeader>
 			<CardContent className="flex flex-1 flex-col gap-4">
-				{/* Vendor */}
-				<div className="flex items-center gap-2 text-sm text-muted-foreground">
-					<span className="text-lg">
-						{VENDOR_ICONS[network.integration.provider] || "📡"}
+				{/* Integration Info */}
+				<div className="flex items-center gap-2">
+					<span className="text-2xl">
+						{VENDOR_ICONS[
+							network.integration.provider.toLowerCase()
+						] || "🔷"}
 					</span>
-					<span>{network.integration.name}</span>
+					<div>
+						<p className="text-sm font-medium">
+							{network.integration.name}
+						</p>
+						<p className="text-xs text-muted-foreground capitalize">
+							{network.integration.provider}
+						</p>
+					</div>
 				</div>
 
-				{/* Network Info */}
+				{/* Network Type */}
 				{hasWireless && (
-					<div className="flex items-center gap-2 text-sm">
-						<RadioTowerIcon className="size-4 text-muted-foreground" />
-						<span className="font-medium">
-							{(network as any).accessPointCount || 0} Access
-							Points
-						</span>
+					<div className="flex items-center gap-2 text-sm text-muted-foreground">
+						<RadioTowerIcon className="size-4" />
+						<span>Wireless Network</span>
 					</div>
 				)}
 
-				{/* Tags */}
-				{network.config?.tags && network.config.tags.length > 0 && (
-					<div className="space-y-2">
-						<p className="text-xs font-medium text-muted-foreground">
-							Device Tags
-						</p>
-						<div className="flex flex-wrap gap-2">
-							{network.config.tags.map((tag: string) => (
-								<Badge
-									key={tag}
-									variant="outline"
-									className="text-xs"
-								>
-									{tag}
-								</Badge>
-							))}
-						</div>
+				{/* Device Tags */}
+				{networkConfig.tags && networkConfig.tags.length > 0 && (
+					<div className="flex flex-wrap gap-2">
+						{networkConfig.tags.map((tag: string) => (
+							<Badge
+								key={tag}
+								variant="outline"
+								className="text-xs"
+							>
+								{tag}
+							</Badge>
+						))}
 					</div>
 				)}
 
@@ -140,6 +136,14 @@ function NetworkCard({ network }: NetworkCardProps) {
 export function NetworksPageContent() {
 	const [isWizardOpen, setIsWizardOpen] = useState(false);
 	const { activeWorkspace } = useActiveWorkspace();
+	const searchParams = useSearchParams();
+
+	// Auto-open wizard if 'add=true' parameter is present
+	useEffect(() => {
+		if (searchParams.get("add") === "true") {
+			setIsWizardOpen(true);
+		}
+	}, [searchParams]);
 
 	// Fetch networks from database
 	const { data: networks, isLoading } = useQuery({
