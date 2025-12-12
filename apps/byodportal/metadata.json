@@ -1,0 +1,5 @@
+{
+  "name": "BYOD Secure Portal",
+  "description": "A secure Bring Your Own Device (BYOD) onboarding portal allowing employees to provision devices, view network credentials, and manage connected devices.",
+  "requestFramePermissions": []
+}
