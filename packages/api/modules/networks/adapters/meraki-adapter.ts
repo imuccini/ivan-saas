@@ -172,4 +172,56 @@ export class MerakiAdapter {
 
 		return Array.from(tags).sort();
 	}
+
+	async getDeviceCount(apiKey: string, networkId: string): Promise<number> {
+		const response = await fetch(
+			`${this.baseUrl}/networks/${networkId}/devices`,
+			{
+				headers: {
+					"X-Cisco-Meraki-API-Key": apiKey,
+					"Content-Type": "application/json",
+					Accept: "application/json",
+				},
+			},
+		);
+
+		if (!response.ok) {
+			throw new Error(`Failed to fetch devices: ${response.statusText}`);
+		}
+
+		const devices = await response.json();
+		// Filter for wireless access points
+		const aps = devices.filter(
+			// biome-ignore lint/suspicious/noExplicitAny: Meraki device object is complex
+			(device: any) =>
+				device.model && device.model.toLowerCase().includes("mr"),
+		);
+		return aps.length;
+	}
+
+	async updateNetworkSSID(
+		apiKey: string,
+		networkId: string,
+		ssidNumber: number,
+		config: Partial<MerakiSSID>,
+	): Promise<MerakiSSID> {
+		const response = await fetch(
+			`${this.baseUrl}/networks/${networkId}/wireless/ssids/${ssidNumber}`,
+			{
+				method: "PUT",
+				headers: {
+					"X-Cisco-Meraki-API-Key": apiKey,
+					"Content-Type": "application/json",
+					Accept: "application/json",
+				},
+				body: JSON.stringify(config),
+			},
+		);
+
+		if (!response.ok) {
+			throw new Error(`Failed to update SSID: ${response.statusText}`);
+		}
+
+		return response.json();
+	}
 }

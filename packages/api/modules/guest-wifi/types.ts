@@ -90,6 +90,9 @@ export const guestWifiConfigDataSchema = z.object({
 	// Languages
 	languages: z.array(z.string()),
 	defaultLanguage: z.string(),
+
+	// SSID Name
+	ssidName: z.string().optional(),
 });
 
 // TypeScript types
@@ -100,6 +103,7 @@ export type GuestWifiConfigData = z.infer<typeof guestWifiConfigDataSchema>;
 
 // Default config
 export const defaultGuestWifiConfig: GuestWifiConfigData = {
+	ssidName: "Guest WiFi",
 	authentication: {
 		guestRegistrationEnabled: true,
 		registrationMode: "form" as const,

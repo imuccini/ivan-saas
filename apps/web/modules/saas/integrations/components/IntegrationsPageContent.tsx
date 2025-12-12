@@ -43,9 +43,8 @@ const MOCK_IDENTITY_PROVIDERS = [
 ];
 
 const CATEGORIES = [
-	{ id: "all", label: "All", icon: ZapIcon },
+	{ id: "networks", label: "Network Integrations", icon: WifiIcon },
 	{ id: "identity-providers", label: "Identity Providers", icon: ShieldIcon },
-	{ id: "networks", label: "Networks", icon: WifiIcon },
 	{ id: "marketing", label: "Marketing", icon: ZapIcon },
 ];
 
@@ -279,7 +278,7 @@ function IntegrationCard({
 
 export function IntegrationsPageContent() {
 	const [searchQuery, setSearchQuery] = useState("");
-	const [activeCategory, setActiveCategory] = useState("identity-providers");
+	const [activeCategory, setActiveCategory] = useState("networks");
 	const [isDialogOpen, setIsDialogOpen] = useState(false);
 	const [editingIntegration, setEditingIntegration] = useState<{
 		id: string;
@@ -336,8 +335,7 @@ export function IntegrationsPageContent() {
 		const matchesSearch = integration.name
 			.toLowerCase()
 			.includes(searchQuery.toLowerCase());
-		const matchesCategory =
-			activeCategory === "all" || integration.category === activeCategory;
+		const matchesCategory = integration.category === activeCategory;
 		return matchesSearch && matchesCategory;
 	});
 

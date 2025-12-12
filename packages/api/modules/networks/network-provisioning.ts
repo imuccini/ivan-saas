@@ -24,6 +24,40 @@ const provision = protectedProcedure
 				}),
 			),
 			tags: z.array(z.string()),
+			ssidMapping: z
+				.object({
+					guestWifi: z
+						.union([
+							z.object({
+								ssidNumber: z.number(),
+								ssidName: z.string(),
+							}),
+							z.literal("auto"),
+							z.literal("skip"),
+						])
+						.optional(),
+					iot: z
+						.union([
+							z.object({
+								ssidNumber: z.number(),
+								ssidName: z.string(),
+							}),
+							z.literal("auto"),
+							z.literal("skip"),
+						])
+						.optional(),
+					employees: z
+						.union([
+							z.object({
+								ssidNumber: z.number(),
+								ssidName: z.string(),
+							}),
+							z.literal("auto"),
+							z.literal("skip"),
+						])
+						.optional(),
+				})
+				.optional(),
 		}),
 	)
 	.handler(async ({ input, context }) => {
@@ -59,6 +93,14 @@ const provision = protectedProcedure
 		// Create Network records
 		const networks = await Promise.all(
 			input.networks.map(async (network) => {
+				// Merge SSID mapping into network config
+				const configWithMapping = {
+					...network.config,
+					...(input.ssidMapping && {
+						ssidMapping: input.ssidMapping,
+					}),
+				};
+
 				// Check if network already exists to avoid unique constraint error
 				const existing = await db.network.findUnique({
 					where: {
@@ -75,7 +117,7 @@ const provision = protectedProcedure
 						where: { id: existing.id },
 						data: {
 							name: network.name,
-							config: network.config,
+							config: configWithMapping,
 							tags: input.tags,
 							provisioningStatus: "active",
 						},
@@ -88,7 +130,7 @@ const provision = protectedProcedure
 						integrationId: input.integrationId,
 						externalId: network.id,
 						name: network.name,
-						config: network.config,
+						config: configWithMapping,
 						tags: input.tags,
 						provisioningStatus: "active",
 					},

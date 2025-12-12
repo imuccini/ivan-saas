@@ -37,6 +37,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
+import { DeployNetworkDialog } from "./deploy-network-dialog";
 import { OnboardingJourneyWizard } from "./onboarding-journey-wizard";
 import { WelcomeEmailEditor } from "./WelcomeEmailEditor";
 
@@ -44,6 +45,7 @@ export function GuestWifiPageContent() {
 	const [wizardOpen, setWizardOpen] = useState(false);
 	const [ssidDialogOpen, setSsidDialogOpen] = useState(false);
 	const [welcomeEmailDialogOpen, setWelcomeEmailDialogOpen] = useState(false);
+	const [deployDialogOpen, setDeployDialogOpen] = useState(false);
 	const [ssidName, setSsidName] = useState("Guest_WiFi_Network");
 	const networksConnected: number = 4;
 	const legacyNetworks: number = 2;
@@ -68,6 +70,57 @@ export function GuestWifiPageContent() {
 		enabled: !!activeWorkspace?.id,
 	});
 
+	// Fetch Guest WiFi stats
+	const { data: stats } = useQuery({
+		...orpc.guestWifi.getStats.queryOptions({
+			input: {
+				workspaceId: activeWorkspace?.id || "",
+			},
+		}),
+		enabled: !!activeWorkspace?.id,
+	});
+
+	// Initialize SSID name from config
+	useEffect(() => {
+		if (guestWifiConfig?.ssidName) {
+			setSsidName(guestWifiConfig.ssidName);
+		}
+	}, [guestWifiConfig]);
+
+	const updateNameMutation = useMutation({
+		mutationFn: (input: { workspaceId: string; ssidName: string }) =>
+			orpcClient.guestWifi.updateName(input),
+		onSuccess: (data) => {
+			toast.success(
+				`Successfully updated SSID name on ${data.updatedCount} networks`,
+			);
+			if (data.errors && data.errors.length > 0) {
+				toast.error(
+					`Failed to update SSID name on ${data.errors.length} networks`,
+				);
+			}
+			queryClient.invalidateQueries({
+				// @ts-expect-error - Type definition mismatch for key generation
+				queryKey: orpc.guestWifi.get.key({
+					workspaceId: activeWorkspace?.id || "",
+					name: "Default",
+				}),
+			});
+			setSsidDialogOpen(false);
+		},
+		onError: (error) => {
+			toast.error(error.message || "Failed to update SSID name");
+		},
+	});
+
+	const handleUpdateSsidName = () => {
+		if (!activeWorkspace?.id) return;
+		updateNameMutation.mutate({
+			workspaceId: activeWorkspace.id,
+			ssidName: ssidName,
+		});
+	};
+
 	return (
 		<div className="space-y-6">
 			{/* Status Card */}
@@ -82,12 +135,16 @@ export function GuestWifiPageContent() {
 							className="flex items-center gap-1"
 						>
 							<CheckCircle2 className="h-3 w-3" />
-							<span>Live in 4 Networks</span>
+							<span>
+								Live in {stats?.activeNetworksCount ?? 0}{" "}
+								Networks
+							</span>
 						</Badge>
 					</div>
 					<Button
 						size="sm"
 						className="gap-2 bg-primary text-primary-foreground hover:bg-primary/90"
+						onClick={() => setDeployDialogOpen(true)}
 					>
 						Deploy to Network <Play className="h-3 w-3" />
 					</Button>
@@ -223,10 +280,12 @@ export function GuestWifiPageContent() {
 									Configuration
 								</div>
 								<p className="text-sm text-muted-foreground">
-									Your branded WiFi Portal is deployed on 4
-									locations, with the SSID “Free Guest WiFi”.
-									Users register with First Name and Email and
-									need to accept T&C and also a Marketing
+									Your branded WiFi Portal is deployed on{" "}
+									{stats?.activeNetworksCount ?? 0} locations,
+									with the SSID “
+									{guestWifiConfig?.ssidName || "Guest WiFi"}
+									”. Users register with First Name and Email
+									and need to accept T&C and also a Marketing
 									Opt-in. Passpoint onboarding is enabled.
 								</p>
 							</div>
@@ -348,6 +407,12 @@ export function GuestWifiPageContent() {
 				onClose={() => setWizardOpen(false)}
 			/>
 
+			{/* Deploy Dialog */}
+			<DeployNetworkDialog
+				open={deployDialogOpen}
+				onOpenChange={setDeployDialogOpen}
+			/>
+
 			{/* SSID Edit Dialog */}
 			<Dialog open={ssidDialogOpen} onOpenChange={setSsidDialogOpen}>
 				<DialogContent>
@@ -378,9 +443,12 @@ export function GuestWifiPageContent() {
 								<p className="text-sm">
 									The name will be applied to{" "}
 									<span className="font-semibold">
-										{networksConnected}
+										{stats?.activeNetworksCount ?? 0}
 									</span>{" "}
-									network{networksConnected !== 1 ? "s" : ""}{" "}
+									network
+									{(stats?.activeNetworksCount ?? 0) !== 1
+										? "s"
+										: ""}{" "}
 									connected to the Workspace.{" "}
 									{legacyNetworks > 0 && (
 										<>
@@ -406,11 +474,12 @@ export function GuestWifiPageContent() {
 							Cancel
 						</Button>
 						<Button
-							onClick={() => {
-								// Handle update logic here
-								setSsidDialogOpen(false);
-							}}
+							onClick={handleUpdateSsidName}
+							disabled={updateNameMutation.isPending}
 						>
+							{updateNameMutation.isPending && (
+								<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+							)}
 							Update
 						</Button>
 					</DialogFooter>

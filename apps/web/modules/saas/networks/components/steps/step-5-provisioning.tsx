@@ -53,6 +53,7 @@ export function Step5Provisioning({
 				config: n,
 			})),
 			tags,
+			...(ssidMapping && { ssidMapping }),
 		});
 	};
 

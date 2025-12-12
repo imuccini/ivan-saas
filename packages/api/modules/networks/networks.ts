@@ -1,7 +1,9 @@
 import { ORPCError } from "@orpc/server";
 import { db } from "@repo/database";
 import { z } from "zod";
+import { decrypt } from "../../lib/encryption";
 import { protectedProcedure } from "../../orpc/procedures";
+import { MerakiAdapter } from "./adapters/meraki-adapter";
 
 const list = protectedProcedure
 	.route({
@@ -66,6 +68,291 @@ const list = protectedProcedure
 		return networks;
 	});
 
+const updateSsidMapping = protectedProcedure
+	.route({
+		method: "PATCH",
+		path: "/networks/{id}/ssid-mapping",
+		tags: ["Networks"],
+		summary: "Update network SSID mapping",
+	})
+	.input(
+		z.object({
+			id: z.string(),
+			workspaceId: z.string(),
+			ssidMapping: z.object({
+				guestWifi: z
+					.union([
+						z.object({
+							ssidNumber: z.number(),
+							ssidName: z.string(),
+						}),
+						z.literal("auto"),
+						z.literal("skip"),
+					])
+					.optional(),
+				iot: z
+					.union([
+						z.object({
+							ssidNumber: z.number(),
+							ssidName: z.string(),
+						}),
+						z.literal("auto"),
+						z.literal("skip"),
+					])
+					.optional(),
+				employees: z
+					.union([
+						z.object({
+							ssidNumber: z.number(),
+							ssidName: z.string(),
+						}),
+						z.literal("auto"),
+						z.literal("skip"),
+					])
+					.optional(),
+			}),
+		}),
+	)
+	.handler(async ({ input, context }) => {
+		const { user } = context;
+
+		// Verify workspace access
+		const workspace = await db.workspace.findUnique({
+			where: { id: input.workspaceId },
+			include: { organization: true },
+		});
+
+		if (!workspace) {
+			throw new ORPCError("NOT_FOUND", {
+				message: "Workspace not found",
+			});
+		}
+
+		const member = await db.member.findUnique({
+			where: {
+				organizationId_userId: {
+					organizationId: workspace.organizationId,
+					userId: user.id,
+				},
+			},
+		});
+
+		if (!member && user.role !== "admin") {
+			throw new ORPCError("FORBIDDEN", {
+				message: "You are not a member of this organization",
+			});
+		}
+
+		const network = await db.network.findUnique({
+			where: { id: input.id },
+		});
+
+		if (!network) {
+			throw new ORPCError("NOT_FOUND", {
+				message: "Network not found",
+			});
+		}
+
+		// Update network config with new SSID mapping
+		// biome-ignore lint/suspicious/noExplicitAny: JSON type
+		const currentConfig = (network.config as any) || {};
+		const newConfig = {
+			...currentConfig,
+			ssidMapping: input.ssidMapping,
+		};
+
+		await db.network.update({
+			where: { id: input.id },
+			data: {
+				config: newConfig,
+			},
+		});
+
+		return { success: true };
+	});
+
 export const networksRouter = {
 	list,
+	updateSsidMapping,
+	sync: protectedProcedure
+		.route({
+			method: "POST",
+			path: "/networks/{id}/sync",
+			tags: ["Networks"],
+			summary: "Sync network data",
+		})
+		.input(
+			z.object({
+				id: z.string(),
+				workspaceId: z.string(),
+			}),
+		)
+		.handler(async ({ input, context }) => {
+			const { user } = context;
+
+			// Verify workspace access
+			const workspace = await db.workspace.findUnique({
+				where: { id: input.workspaceId },
+				include: { organization: true },
+			});
+
+			if (!workspace) {
+				throw new ORPCError("NOT_FOUND", {
+					message: "Workspace not found",
+				});
+			}
+
+			const member = await db.member.findUnique({
+				where: {
+					organizationId_userId: {
+						organizationId: workspace.organizationId,
+						userId: user.id,
+					},
+				},
+			});
+
+			if (!member && user.role !== "admin") {
+				throw new ORPCError("FORBIDDEN", {
+					message: "You are not a member of this organization",
+				});
+			}
+
+			// Get network with integration
+			const network = await db.network.findUnique({
+				where: { id: input.id },
+				include: {
+					integration: true,
+				},
+			});
+
+			if (!network) {
+				throw new ORPCError("NOT_FOUND", {
+					message: "Network not found",
+				});
+			}
+
+			if (!network.integration || !network.integration.credentials) {
+				throw new ORPCError("PRECONDITION_FAILED", {
+					message: "Integration credentials missing",
+				});
+			}
+
+			// Initialize adapter
+			const merakiAdapter = new MerakiAdapter();
+			// biome-ignore lint/suspicious/noExplicitAny: JSON type
+			const credentials = network.integration.credentials as any;
+			const apiKey = decrypt(credentials.apiKey);
+			// biome-ignore lint/suspicious/noExplicitAny: JSON type
+			const networkId = (network.config as any)?.id || network.externalId;
+
+			// Fetch fresh data
+			const [ssids, deviceCount] = await Promise.all([
+				merakiAdapter.getNetworkSSIDs(apiKey, networkId),
+				merakiAdapter.getDeviceCount(apiKey, networkId),
+			]);
+
+			// Update config
+			// biome-ignore lint/suspicious/noExplicitAny: JSON type
+			const currentConfig = (network.config as any) || {};
+			const currentMapping = currentConfig.ssidMapping || {};
+
+			// Update status of mapped SSIDs
+			const updatedMapping = { ...currentMapping };
+			for (const key of ["guestWifi", "iot", "employees"] as const) {
+				const mapping = updatedMapping[key];
+				if (
+					mapping &&
+					typeof mapping === "object" &&
+					"ssidNumber" in mapping
+				) {
+					const freshSsid = ssids.find(
+						(s) => s.number === mapping.ssidNumber,
+					);
+					if (freshSsid) {
+						updatedMapping[key] = {
+							...mapping,
+							ssidName: freshSsid.name,
+							enabled: freshSsid.enabled,
+						};
+					}
+				}
+			}
+
+			const newConfig = {
+				...currentConfig,
+				deviceCount,
+				ssidMapping: updatedMapping,
+				lastSyncedAt: new Date().toISOString(),
+			};
+
+			await db.network.update({
+				where: { id: input.id },
+				data: {
+					config: newConfig,
+				},
+			});
+
+			return { success: true };
+		}),
+	delete: protectedProcedure
+		.route({
+			method: "DELETE",
+			path: "/networks/{id}",
+			tags: ["Networks"],
+			summary: "Delete network",
+		})
+		.input(
+			z.object({
+				id: z.string(),
+				workspaceId: z.string(),
+			}),
+		)
+		.handler(async ({ input, context }) => {
+			const { user } = context;
+
+			// Verify workspace access
+			const workspace = await db.workspace.findUnique({
+				where: { id: input.workspaceId },
+				include: { organization: true },
+			});
+
+			if (!workspace) {
+				throw new ORPCError("NOT_FOUND", {
+					message: "Workspace not found",
+				});
+			}
+
+			const member = await db.member.findUnique({
+				where: {
+					organizationId_userId: {
+						organizationId: workspace.organizationId,
+						userId: user.id,
+					},
+				},
+			});
+
+			if (!member && user.role !== "admin") {
+				throw new ORPCError("FORBIDDEN", {
+					message: "You are not a member of this organization",
+				});
+			}
+
+			// Check if network exists
+			const network = await db.network.findUnique({
+				where: { id: input.id },
+			});
+
+			if (!network) {
+				throw new ORPCError("NOT_FOUND", {
+					message: "Network not found",
+				});
+			}
+
+			// Delete network
+			await db.network.delete({
+				where: { id: input.id },
+			});
+
+			return { success: true };
+		}),
 };

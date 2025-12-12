@@ -34,9 +34,18 @@ interface Step4Props {
 }
 
 export interface SSIDMapping {
-	guestWifi?: { ssidNumber: number; ssidName: string } | "auto" | "skip";
-	iot?: { ssidNumber: number; ssidName: string } | "auto" | "skip";
-	employees?: { ssidNumber: number; ssidName: string } | "auto" | "skip";
+	guestWifi?:
+		| { ssidNumber: number; ssidName: string; enabled?: boolean }
+		| "auto"
+		| "skip";
+	iot?:
+		| { ssidNumber: number; ssidName: string; enabled?: boolean }
+		| "auto"
+		| "skip";
+	employees?:
+		| { ssidNumber: number; ssidName: string; enabled?: boolean }
+		| "auto"
+		| "skip";
 }
 
 const USE_CASES = [
