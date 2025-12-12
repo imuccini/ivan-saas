@@ -24,7 +24,9 @@ import {
 	AlertTriangle,
 	CheckCircle2,
 	ChevronRight,
+	Eye,
 	InfoIcon,
+	RotateCw,
 	Key,
 	Loader2,
 	Mail,
@@ -51,6 +53,7 @@ export function GuestWifiPageContent() {
 	const [welcomeEmailDialogOpen, setWelcomeEmailDialogOpen] = useState(false);
 	const [deployDialogOpen, setDeployDialogOpen] = useState(false);
 	const [ssidName, setSsidName] = useState("Guest_WiFi_Network");
+	const [refreshKey, setRefreshKey] = useState(0);
 	const networksConnected: number = 4;
 	const legacyNetworks: number = 2;
 
@@ -364,8 +367,34 @@ export function GuestWifiPageContent() {
 						activeWorkspace?.id &&
 						guestWifiConfig?.id ? (
 							<>
+								<div className="absolute top-2 right-2 z-10 flex gap-2">
+									<Button
+										size="icon"
+										variant="secondary"
+										className="h-8 w-8 bg-background/80 hover:bg-background shadow-sm"
+										onClick={() => setRefreshKey((prev) => prev + 1)}
+										title="Refresh Preview"
+									>
+										<RotateCw className="h-4 w-4" />
+									</Button>
+									<Button
+										size="icon"
+										variant="secondary"
+										className="h-8 w-8 bg-background/80 hover:bg-background shadow-sm"
+										onClick={() =>
+											window.open(
+												`${process.env.NEXT_PUBLIC_PORTAL_URL || "http://localhost:3001"}/${activeOrganization.id}/${activeWorkspace.id}/${guestWifiConfig.id}`,
+												"_blank",
+											)
+										}
+										title="Open Portal"
+									>
+										<Eye className="h-4 w-4" />
+									</Button>
+								</div>
 								<div className="absolute inset-0 flex items-center justify-center">
 									<iframe
+										key={refreshKey}
 										src={`${process.env.NEXT_PUBLIC_PORTAL_URL || "http://localhost:3001"}/${activeOrganization.id}/${activeWorkspace.id}/${guestWifiConfig.id}`}
 										className="absolute inset-0 w-full h-full origin-top-left pointer-events-none"
 										style={{

@@ -53,8 +53,30 @@ export const DEFAULT_COMMUNICATIONS: Record<
 			},
 		],
 		defaultSubject: "Welcome to Our Guest WiFi Network",
-		defaultBody:
-			"<p>Dear {$; guest_name},</p><p>Welcome to our WiFi network! We're glad to have you connected.</p><p>If you need any assistance, please don't hesitate to contact our support team.</p><p>Best regards,<br/>The Team</p>",
+		defaultBody: `<div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #374151; background-color: #ffffff; border-radius: 8px; overflow: hidden; border: 1px solid #e5e7eb;">
+    <div style="background-color: #000000; padding: 32px 24px;">
+        <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 600; text-align: center; letter-spacing: -0.025em;">Welcome to {$; company_name}</h1>
+    </div>
+    <div style="padding: 32px 24px; background-color: #ffffff;">
+        <p style="font-size: 16px; margin-top: 0; margin-bottom: 24px; line-height: 1.6;">Hi <strong>{$; guest_name}</strong>,</p>
+        <p style="font-size: 16px; margin-bottom: 24px; line-height: 1.6;">We're thrilled to have you with us! You are now successfully connected to our Guest WiFi network.</p>
+        
+        <div style="background-color: #f3f4f6; padding: 20px; border-radius: 8px; margin-bottom: 24px;">
+            <p style="margin: 0; font-size: 14px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">Network Information</p>
+            <div style="margin-top: 12px;">
+                <p style="margin: 4px 0; font-size: 15px;"><strong>Network:</strong> {$; network_name}</p>
+                <p style="margin: 4px 0; font-size: 15px;"><strong>Organization:</strong> {$; company_name}</p>
+            </div>
+        </div>
+
+        <p style="font-size: 16px; margin-bottom: 24px; line-height: 1.6;">Enjoy fast and secure internet access. If you need any assistance, please don't hesitate to reach out to our support team.</p>
+        
+        <p style="margin-top: 32px; font-size: 16px; color: #4b5563;">Best regards,<br/>The {$; company_name} Team</p>
+    </div>
+    <div style="background-color: #f9fafb; padding: 16px; text-align: center; font-size: 12px; color: #9ca3af; border-top: 1px solid #e5e7eb;">
+        <p style="margin: 0;">&copy; {$; company_name}. All rights reserved.</p>
+    </div>
+</div>`,
 	},
 	"byod-invite": {
 		name: "BYOD Invite Email",
