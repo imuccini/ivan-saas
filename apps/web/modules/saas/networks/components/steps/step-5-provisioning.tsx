@@ -1,12 +1,12 @@
 "use client";
 
-import { useActiveWorkspace } from "@saas/workspaces/hooks/use-active-workspace";
 import { useActiveOrganization } from "@saas/organizations/hooks/use-active-organization";
+import { useActiveWorkspace } from "@saas/workspaces/hooks/use-active-workspace";
 import { orpc } from "@shared/lib/orpc-query-utils";
 import { useMutation } from "@tanstack/react-query";
 import { Button } from "@ui/components/button";
 import { CheckCircle, Loader2 } from "lucide-react";
-import { useParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import type { SSIDMapping } from "./step-4-ssid-mapping";
 
@@ -27,7 +27,6 @@ export function Step5Provisioning({
 	ssidMapping,
 }: Step5Props) {
 	const router = useRouter();
-	const params = useParams();
 	const { activeWorkspace } = useActiveWorkspace();
 
 	const { activeOrganization } = useActiveOrganization();
@@ -58,17 +57,13 @@ export function Step5Provisioning({
 	};
 
 	const handleFinish = () => {
-		const orgSlug =
-			(params.organizationSlug as string) ||
-			activeOrganization?.slug;
-		const workspaceSlug =
-			(params.workspaceSlug as string) || activeWorkspace?.slug;
-
-		if (orgSlug && workspaceSlug) {
-			router.push(`/app/${orgSlug}/${workspaceSlug}/manage/networks`);
+		if (activeOrganization?.slug && activeWorkspace?.slug) {
+			router.push(
+				`/app/${activeOrganization.slug}/${activeWorkspace.slug}/manage/networks`,
+			);
 		} else {
 			// Fallback: reload to networks page
-			window.location.href = window.location.pathname.split("/manage")[0] + "/manage/networks";
+			toast.error("Unable to navigate. Please refresh the page.");
 		}
 	};
 

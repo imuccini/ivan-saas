@@ -1,6 +1,7 @@
 "use client";
 
 import { useActiveWorkspace } from "@saas/workspaces/hooks/use-active-workspace";
+import { orpc } from "@shared/lib/orpc-query-utils";
 import { useQuery } from "@tanstack/react-query";
 import { Alert, AlertDescription } from "@ui/components/alert";
 import { Badge } from "@ui/components/badge";
@@ -85,18 +86,13 @@ export function Step4SsidMapping({
 	const firstNetwork = selectedNetworks[0];
 
 	const { data: ssids, isLoading } = useQuery({
-		queryKey: ["meraki-ssids", integrationId, firstNetwork?.id],
-		queryFn: async () => {
-			// This would be a new API endpoint to fetch SSIDs for a network
-			// For now, we'll return mock data
-			return [
-				{ number: 0, name: "Corporate WiFi", enabled: true },
-				{ number: 1, name: "Guest Network", enabled: true },
-				{ number: 2, name: "IoT Network", enabled: false },
-				{ number: 3, name: "Unconfigured SSID 3", enabled: false },
-				{ number: 4, name: "Unconfigured SSID 4", enabled: false },
-			];
-		},
+		...orpc.meraki.getNetworkSSIDs.queryOptions({
+			input: {
+				integrationId,
+				networkId: firstNetwork?.id || "",
+				workspaceId: activeWorkspace?.id || "",
+			},
+		}),
 		enabled:
 			!!firstNetwork &&
 			!!integrationId &&
