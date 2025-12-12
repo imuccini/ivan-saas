@@ -15,12 +15,14 @@ import {
 	DropdownMenuTrigger,
 } from "@ui/components/dropdown-menu";
 import {
+	BotIcon,
 	CheckCircle2Icon,
 	Loader2,
 	MoreVerticalIcon,
 	Pencil,
 	PlusIcon,
 	RadioTowerIcon,
+	ShieldCheckIcon,
 	Trash2,
 	WifiIcon,
 } from "lucide-react";
@@ -404,6 +406,50 @@ export function NetworksPageContent() {
 					))}
 				</div>
 			)}
+
+			{/* Info Section */}
+			<div className="space-y-4 rounded-lg border bg-muted/50 p-6">
+				<h3 className="text-lg font-semibold">Network Management</h3>
+				<p className="text-sm text-muted-foreground">
+					Configure and manage your network services for secure and
+					seamless connectivity.
+				</p>
+
+				<div className="grid gap-6 md:grid-cols-3">
+					<div className="space-y-2">
+						<div className="flex items-center gap-2">
+							<WifiIcon className="size-5" />
+							<h4 className="font-medium">Guest WiFi</h4>
+						</div>
+						<p className="text-sm text-muted-foreground">
+							Deploy branded captive portals and manage guest
+							access with ease.
+						</p>
+					</div>
+
+					<div className="space-y-2">
+						<div className="flex items-center gap-2">
+							<BotIcon className="size-5" />
+							<h4 className="font-medium">IoT Segmentation</h4>
+						</div>
+						<p className="text-sm text-muted-foreground">
+							Isolate and secure IoT devices on dedicated
+							networks with specific policies.
+						</p>
+					</div>
+
+					<div className="space-y-2">
+						<div className="flex items-center gap-2">
+							<ShieldCheckIcon className="size-5" />
+							<h4 className="font-medium">Employee Access</h4>
+						</div>
+						<p className="text-sm text-muted-foreground">
+							Secure 802.1x authentication integrated with
+							your identity provider.
+						</p>
+					</div>
+				</div>
+			</div>
 
 			{/* Add Network Wizard */}
 			{isWizardOpen && (

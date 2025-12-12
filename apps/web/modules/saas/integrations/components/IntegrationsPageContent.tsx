@@ -15,6 +15,11 @@ import {
 import { Input } from "@ui/components/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@ui/components/tabs";
 import {
+	Link2Icon,
+	Settings2Icon,
+	ActivityIcon,
+	MegaphoneIcon,
+	BarChart3Icon,
 	CheckCircle2Icon,
 	MoreVerticalIcon,
 	Pencil,
@@ -484,14 +489,55 @@ export function IntegrationsPageContent() {
 											),
 										)
 									) : (
-										<div className="col-span-full py-12 text-center text-muted-foreground">
-											No integrations found
+										<div className="col-span-full flex flex-col items-center justify-center rounded-lg border border-dashed py-16 text-center">
+											<div className="flex size-12 items-center justify-center rounded-full bg-muted">
+												{category.icon ? (
+													<category.icon className="size-6 text-muted-foreground" />
+												) : (
+													<WifiIcon className="size-6 text-muted-foreground" />
+												)}
+											</div>
+											<h3 className="mt-4 text-lg font-semibold">
+												{searchQuery
+													? "No matching integrations"
+													: `No ${category.label.toLowerCase()} yet`}
+											</h3>
+											<p className="mb-6 mt-2 text-sm text-muted-foreground max-w-sm">
+												{searchQuery
+													? `No results found for "${searchQuery}". Try a different search term.`
+													: category.id === "networks"
+														? "Connect your network infrastructure to start managing Guest WiFi, IoT, and Employee access."
+														: category.id ===
+															  "identity-providers"
+															? "Connect an identity provider to sync users and groups for authentication."
+															: "Connect marketing tools to sync contacts and analytics."}
+											</p>
+											{!searchQuery && (
+												<Button
+													onClick={
+														category.id ===
+														"networks"
+															? handleAddNew
+															: undefined
+													}
+													disabled={
+														category.id !==
+														"networks"
+													}
+												>
+													<PlusIcon className="mr-2 size-4" />
+													Add {getCategoryLabel(
+														category.id,
+													).slice(0, -1)}
+												</Button>
+											)}
 										</div>
 									)}
 								</div>
 							</div>
 
-							{/* Information Section (only for identity providers) */}
+							{/* Information Section */}
+							{/* Identity Providers Info */}
 							{category.id === "identity-providers" && (
 								<div className="space-y-4 rounded-lg border bg-muted/50 p-6">
 									<h3 className="text-lg font-semibold">
@@ -582,6 +628,106 @@ export function IntegrationsPageContent() {
 												Use synced groups to create
 												access rules and manage network
 												permissions
+											</p>
+										</div>
+									</div>
+								</div>
+							)}
+
+							{/* Network Integrations Info */}
+							{category.id === "networks" && (
+								<div className="space-y-4 rounded-lg border bg-muted/50 p-6">
+									<h3 className="text-lg font-semibold">
+										Network Integration
+									</h3>
+									<p className="text-sm text-muted-foreground">
+										Network integrations are required to connect via API to the configuration of the Networks where to deploy the service.
+									</p>
+
+									<div className="grid gap-6 md:grid-cols-3">
+										<div className="space-y-2">
+											<div className="flex items-center gap-2">
+												<Link2Icon className="size-5" />
+												<h4 className="font-medium">
+													API Connectivity
+												</h4>
+											</div>
+											<p className="text-sm text-muted-foreground">
+												Direct API connection to your network controllers for seamless communication.
+											</p>
+										</div>
+
+										<div className="space-y-2">
+											<div className="flex items-center gap-2">
+												<Settings2Icon className="size-5" />
+												<h4 className="font-medium">
+													Proactive Configuration
+												</h4>
+											</div>
+											<p className="text-sm text-muted-foreground">
+												Automatically deploy SSIDs and security settings to your network infrastructure.
+											</p>
+										</div>
+
+										<div className="space-y-2">
+											<div className="flex items-center gap-2">
+												<ActivityIcon className="size-5" />
+												<h4 className="font-medium">
+													Monitoring
+												</h4>
+											</div>
+											<p className="text-sm text-muted-foreground">
+												Monitor the health, status, and client connections of your deployed networks.
+											</p>
+										</div>
+									</div>
+								</div>
+							)}
+
+							{/* Marketing Info */}
+							{category.id === "marketing" && (
+								<div className="space-y-4 rounded-lg border bg-muted/50 p-6">
+									<h3 className="text-lg font-semibold">
+										Marketing Integrations
+									</h3>
+									<p className="text-sm text-muted-foreground">
+										Connect your guest WiFi data with marketing tools to engage with your visitors.
+									</p>
+
+									<div className="grid gap-6 md:grid-cols-3">
+										<div className="space-y-2">
+											<div className="flex items-center gap-2">
+												<MegaphoneIcon className="size-5" />
+												<h4 className="font-medium">
+													Campaigns
+												</h4>
+											</div>
+											<p className="text-sm text-muted-foreground">
+												Sync visitor contacts to your email marketing platforms for targeted campaigns.
+											</p>
+										</div>
+
+										<div className="space-y-2">
+											<div className="flex items-center gap-2">
+												<BarChart3Icon className="size-5" />
+												<h4 className="font-medium">
+													Analytics
+												</h4>
+											</div>
+											<p className="text-sm text-muted-foreground">
+												Export visitor data to analytics platforms for deeper insights and reporting.
+											</p>
+										</div>
+
+										<div className="space-y-2">
+											<div className="flex items-center gap-2">
+												<ZapIcon className="size-5" />
+												<h4 className="font-medium">
+													Automation
+												</h4>
+											</div>
+											<p className="text-sm text-muted-foreground">
+												Trigger automated workflows based on visitor behavior and connections.
 											</p>
 										</div>
 									</div>
