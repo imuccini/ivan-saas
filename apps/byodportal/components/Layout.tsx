@@ -95,7 +95,7 @@ export const Layout: React.FC<LayoutProps> = ({
 								onClick={() =>
 									router.push("/" + AppRoute.ACCOUNT)
 								}
-								className="p-2 rounded-full hover:bg-slate-100 text-slate-500 md:hidden"
+								className="p-2 rounded-full hover:bg-slate-100 text-slate-500"
 							>
 								<UserIcon size={20} />
 							</button>

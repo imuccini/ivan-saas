@@ -3,8 +3,9 @@
 import { useOnboardingStatus } from "@saas/onboarding/hooks/use-onboarding-status";
 import { useActiveOrganization } from "@saas/organizations/hooks/use-active-organization";
 import { useActiveWorkspace } from "@saas/workspaces/hooks/use-active-workspace";
+import { orpcClient } from "@shared/lib/orpc-client";
 import { orpc } from "@shared/lib/orpc-query-utils";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Alert, AlertDescription } from "@ui/components/alert";
 import { Badge } from "@ui/components/badge";
 import { Button } from "@ui/components/button";
@@ -25,7 +26,9 @@ import {
 	ChevronRight,
 	InfoIcon,
 	Key,
+	Loader2,
 	Mail,
+	Pencil,
 	Play,
 	Settings,
 	Shield,
@@ -36,7 +39,8 @@ import {
 	Zap,
 } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { DeployNetworkDialog } from "./deploy-network-dialog";
 import { OnboardingJourneyWizard } from "./onboarding-journey-wizard";
 import { WelcomeEmailEditor } from "./WelcomeEmailEditor";
@@ -49,6 +53,8 @@ export function GuestWifiPageContent() {
 	const [ssidName, setSsidName] = useState("Guest_WiFi_Network");
 	const networksConnected: number = 4;
 	const legacyNetworks: number = 2;
+
+	const queryClient = useQueryClient();
 
 	const { activeOrganization } = useActiveOrganization();
 	const { activeWorkspace } = useActiveWorkspace();
@@ -64,7 +70,6 @@ export function GuestWifiPageContent() {
 		...orpc.guestWifi.get.queryOptions({
 			input: {
 				workspaceId: activeWorkspace?.id || "",
-				name: "Default",
 			},
 		}),
 		enabled: !!activeWorkspace?.id,
@@ -82,8 +87,8 @@ export function GuestWifiPageContent() {
 
 	// Initialize SSID name from config
 	useEffect(() => {
-		if (guestWifiConfig?.ssidName) {
-			setSsidName(guestWifiConfig.ssidName);
+		if (guestWifiConfig?.config?.ssidName) {
+			setSsidName(guestWifiConfig.config.ssidName);
 		}
 	}, [guestWifiConfig]);
 
@@ -101,10 +106,11 @@ export function GuestWifiPageContent() {
 			}
 			queryClient.invalidateQueries({
 				// @ts-expect-error - Type definition mismatch for key generation
-				queryKey: orpc.guestWifi.get.key({
-					workspaceId: activeWorkspace?.id || "",
-					name: "Default",
-				}),
+				queryKey: orpc.guestWifi.get.queryOptions({
+					input: {
+						workspaceId: activeWorkspace?.id || "",
+					},
+				}).queryKey,
 			});
 			setSsidDialogOpen(false);
 		},
@@ -283,7 +289,8 @@ export function GuestWifiPageContent() {
 									Your branded WiFi Portal is deployed on{" "}
 									{stats?.activeNetworksCount ?? 0} locations,
 									with the SSID “
-									{guestWifiConfig?.ssidName || "Guest WiFi"}
+									{guestWifiConfig?.config?.ssidName ||
+										"Guest WiFi"}
 									”. Users register with First Name and Email
 									and need to accept T&C and also a Marketing
 									Opt-in. Passpoint onboarding is enabled.
@@ -313,18 +320,19 @@ export function GuestWifiPageContent() {
 						<button
 							type="button"
 							onClick={() => setWizardOpen(true)}
-							className="w-full flex items-center justify-between rounded-lg border p-3 transition-colors hover:bg-muted/50 text-left"
+							className="w-full flex items-center justify-between rounded-lg border border-primary/20 bg-primary/5 p-3 transition-colors hover:bg-primary/10 text-left"
 						>
 							<div className="flex items-center gap-3">
-								<div className="flex h-8 w-8 flex-none items-center justify-center rounded-md bg-muted text-muted-foreground">
-									<Settings className="h-4 w-4" />
+								<div className="flex h-8 w-8 flex-none items-center justify-center rounded-md bg-primary/10 text-primary">
+									<Pencil className="h-4 w-4" />
 								</div>
 								<div>
 									<div className="text-sm font-medium leading-none">
 										Onboarding Journey
 									</div>
 									<div className="text-xs text-muted-foreground mt-1">
-										Branding, Terms, Languages
+										Customize authentication, design and
+										access control options
 									</div>
 								</div>
 							</div>
@@ -332,14 +340,21 @@ export function GuestWifiPageContent() {
 						</button>
 						<ActionRow
 							icon={Wifi}
-							title="Guest WiFi SSID"
-							description="Security, Bandwidth limits"
+							title={
+								<>
+									Guest WiFi SSID:{" "}
+									<span className="font-bold">
+										{ssidName}
+									</span>
+								</>
+							}
+							description="Change the guest WiFi SSID name"
 							onClick={() => setSsidDialogOpen(true)}
 						/>
 						<ActionRow
 							icon={Mail}
 							title="Welcome Email"
-							description="Template, Delivery settings"
+							description="Personalize email sent to new users"
 							onClick={() => setWelcomeEmailDialogOpen(true)}
 						/>
 					</div>
@@ -503,8 +518,8 @@ function ActionRow({
 	onClick,
 }: {
 	icon: any;
-	title: string;
-	description: string;
+	title: React.ReactNode;
+	description: React.ReactNode;
 	href?: string;
 	onClick?: () => void;
 }) {

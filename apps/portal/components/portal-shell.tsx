@@ -2,8 +2,15 @@
 
 import type { CustomField, Sponsor, Term } from "@repo/portal-shared";
 import { useState } from "react";
+import { PortalAccessCode } from "./portal-access-code";
+import { PortalApprovalPending } from "./portal-approval-pending";
+import { PortalApprovalRequest } from "./portal-approval-request";
+import { PortalBlocked } from "./portal-blocked";
 import { PortalContainer } from "./portal-container";
+import { PortalEasyWifi } from "./portal-easy-wifi";
 import { PortalHome } from "./portal-home";
+import { PortalRegistration } from "./portal-registration";
+import { PortalSuccess } from "./portal-success";
 
 interface PortalShellProps {
 	config: Record<string, unknown>;
@@ -16,8 +23,11 @@ interface PortalShellProps {
 type PortalStep =
 	| "home"
 	| "registration"
-	| "sponsorship"
+	| "access-code"
+	| "approval-request"
+	| "approval-pending"
 	| "easy-wifi"
+	| "blocked"
 	| "success";
 
 export function PortalShell({
@@ -27,25 +37,6 @@ export function PortalShell({
 	sponsors,
 	terms,
 }: PortalShellProps) {
-	const [currentStep, setCurrentStep] = useState<PortalStep>("home");
-
-	// Interfaces for config objects
-	interface FormField {
-		id: string;
-		label: string;
-		placeholder?: string;
-		required: boolean;
-		type: string;
-		isCustom?: boolean;
-		options?: string[];
-	}
-
-	interface SelectedTerm {
-		id: string;
-		termDefinitionId: string;
-		required: boolean;
-	}
-
 	// Extract configuration - matching GuestWifiConfigData structure
 	const wizardConfig = config as {
 		authentication?: {
@@ -62,6 +53,8 @@ export function PortalShell({
 		};
 		journey?: {
 			easyWifiEnabled?: boolean;
+			successRedirectMode?: "external" | "text";
+			successRedirectUrl?: string;
 		};
 		style?: {
 			fontFamily?: string;
@@ -81,6 +74,14 @@ export function PortalShell({
 				description?: string;
 				signupButtonText?: string;
 				loginButtonText?: string;
+				registrationTitle?: string;
+				registrationDescription?: string;
+				registrationSubmitButtonText?: string;
+				sponsorMessage?: string;
+				successMessage?: string;
+				blockedMessage?: string;
+				easyWifiCtaMessage?: string;
+				easyWifiSkipMessage?: string;
 			}
 		>;
 		assets?: {
@@ -93,11 +94,34 @@ export function PortalShell({
 	};
 
 	const auth = wizardConfig.authentication || {};
+	const journey = wizardConfig.journey || {};
 	const style = wizardConfig.style || {};
 	const assets = wizardConfig.assets || {};
 	const defaultLang =
 		wizardConfig.defaultLanguage || wizardConfig.languages?.[0] || "en";
 	const content = wizardConfig.content?.[defaultLang] || {};
+
+	// Initialize step based on Easy WiFi
+	const [currentStep, setCurrentStep] = useState<PortalStep>(
+		journey.easyWifiEnabled ? "easy-wifi" : "home",
+	);
+
+	// Interfaces for config objects
+	interface FormField {
+		id: string;
+		label: string;
+		placeholder?: string;
+		required: boolean;
+		type: string;
+		isCustom?: boolean;
+		options?: string[];
+	}
+
+	interface SelectedTerm {
+		id: string;
+		termDefinitionId: string;
+		required: boolean;
+	}
 
 	// Parse numeric values
 	const baseFontSize = Number.parseInt(style.baseFontSize || "16");
@@ -126,8 +150,18 @@ export function PortalShell({
 		console.log("Login clicked");
 	};
 
-	const handleRegister = () => {
-		setCurrentStep("registration");
+	const handleRegisterStart = () => {
+		if (auth.sponsorshipEnabled) {
+			setCurrentStep("approval-request");
+		} else {
+			setCurrentStep("registration");
+		}
+	};
+
+	const handleRegisterSubmit = (data: Record<string, string>) => {
+		// TODO: Implement registration submission
+		console.log("Registration data:", data);
+		setCurrentStep("success");
 	};
 
 	const handleSocialLogin = (provider: string) => {
@@ -138,6 +172,19 @@ export function PortalShell({
 	const handleAccessCodeSubmit = (code: string) => {
 		// TODO: Implement access code validation
 		console.log("Access code:", code);
+		setCurrentStep("success");
+	};
+
+	const handleSponsorSubmit = (email: string) => {
+		// TODO: Implement sponsor request
+		console.log("Sponsor email:", email);
+		setCurrentStep("approval-pending");
+	};
+
+	const handleEasyWifiConnect = () => {
+		// TODO: Implement easy wifi connection
+		console.log("Easy WiFi connect");
+		setCurrentStep("success");
 	};
 
 	return (
@@ -161,6 +208,24 @@ export function PortalShell({
 			logo={assets.logoUrl || undefined}
 			logoSize={logoSize}
 		>
+			{currentStep === "easy-wifi" && (
+				<PortalEasyWifi
+					title={content.title || "Welcome"}
+					description={
+						content.description || "Connect to our WiFi network"
+					}
+					ctaText={content.easyWifiCtaMessage || "Connect Now"}
+					skipText={
+						content.easyWifiSkipMessage || "I'll take my chances"
+					}
+					primaryColor={style.primaryColor || "#3b82f6"}
+					baseFontSize={style.baseFontSize || "16"}
+					spacing={style.spacing || "balanced"}
+					onConnect={handleEasyWifiConnect}
+					onSkip={() => setCurrentStep("home")}
+				/>
+			)}
+
 			{currentStep === "home" && (
 				<PortalHome
 					title={content.title || "Welcome"}
@@ -186,27 +251,106 @@ export function PortalShell({
 					baseFontSize={style.baseFontSize || "16"}
 					spacing={style.spacing || "balanced"}
 					onLogin={handleLogin}
-					onRegister={handleRegister}
+					onRegister={handleRegisterStart}
 					onSocialLogin={handleSocialLogin}
 					onAccessCodeSubmit={handleAccessCodeSubmit}
 				/>
 			)}
 
 			{currentStep === "registration" && (
-				<div className="text-center">
-					<p>Registration form coming next...</p>
-					<button
-						type="button"
-						onClick={() => setCurrentStep("home")}
-						className="text-blue-500 underline mt-4"
-					>
-						Back to home
-					</button>
-				</div>
+				<PortalRegistration
+					title={content.registrationTitle || "Register"}
+					description={
+						content.registrationDescription ||
+						"Please fill in your details"
+					}
+					submitButtonText={
+						content.registrationSubmitButtonText || "Register"
+					}
+					fields={auth.registrationFields || []}
+					selectedTerms={auth.terms || []}
+					availableTerms={terms}
+					primaryColor={style.primaryColor || "#3b82f6"}
+					baseFontSize={style.baseFontSize || "16"}
+					spacing={style.spacing || "balanced"}
+					onBack={() => setCurrentStep("home")}
+					onSubmit={handleRegisterSubmit}
+				/>
+			)}
+
+			{currentStep === "access-code" && (
+				<PortalAccessCode
+					title="Enter Access Code"
+					description="Please enter the access code provided to you."
+					submitButtonText="Submit"
+					primaryColor={style.primaryColor || "#3b82f6"}
+					baseFontSize={style.baseFontSize || "16"}
+					spacing={style.spacing || "balanced"}
+					onBack={() => setCurrentStep("home")}
+					onSubmit={handleAccessCodeSubmit}
+				/>
+			)}
+
+			{currentStep === "approval-request" && (
+				<PortalApprovalRequest
+					title="Sponsorship Required"
+					description={
+						content.sponsorMessage ||
+						"Please enter your sponsor's email address."
+					}
+					submitButtonText="Request Access"
+					primaryColor={style.primaryColor || "#3b82f6"}
+					baseFontSize={style.baseFontSize || "16"}
+					spacing={style.spacing || "balanced"}
+					onBack={() => setCurrentStep("home")}
+					onSubmit={handleSponsorSubmit}
+				/>
+			)}
+
+			{currentStep === "approval-pending" && (
+				<PortalApprovalPending
+					title="Approval Pending"
+					description="Your request has been sent. Please wait for approval."
+					primaryColor={style.primaryColor || "#3b82f6"}
+					baseFontSize={style.baseFontSize || "16"}
+					spacing={style.spacing || "balanced"}
+					onCheckStatus={() => {
+						// TODO: Check status
+						console.log("Checking status...");
+					}}
+				/>
+			)}
+
+			{currentStep === "blocked" && (
+				<PortalBlocked
+					title="Access Blocked"
+					description={
+						content.blockedMessage ||
+						"You do not have permission to access this network."
+					}
+					primaryColor={style.primaryColor || "#3b82f6"}
+					baseFontSize={style.baseFontSize || "16"}
+					spacing={style.spacing || "balanced"}
+					onRetry={() => setCurrentStep("home")}
+				/>
+			)}
+
+			{currentStep === "success" && (
+				<PortalSuccess
+					title="Success!"
+					description={
+						content.successMessage || "You are now connected."
+					}
+					redirectUrl={journey.successRedirectUrl}
+					redirectMode={journey.successRedirectMode || "text"}
+					primaryColor={style.primaryColor || "#3b82f6"}
+					baseFontSize={style.baseFontSize || "16"}
+					spacing={style.spacing || "balanced"}
+				/>
 			)}
 
 			{/* Debug info */}
-			<div className="mt-4 text-xs text-muted-foreground text-center">
+			<div className="mt-4 text-xs text-muted-foreground text-center opacity-50">
 				Workspace: {workspaceId} | Step: {currentStep}
 			</div>
 		</PortalContainer>
