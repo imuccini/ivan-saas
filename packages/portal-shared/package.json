@@ -8,7 +8,7 @@
 		".": "./index.ts"
 	},
 	"dependencies": {
-		"zod": "^4.1.5"
+		"zod": "^4.1.13"
 	},
 	"devDependencies": {
 		"@repo/tsconfig": "workspace:*",
