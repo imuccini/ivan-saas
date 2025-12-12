@@ -6,6 +6,7 @@ import { useActiveWorkspace } from "@saas/workspaces/hooks/use-active-workspace"
 import { orpc } from "@shared/lib/orpc-query-utils";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@ui/components/button";
+import { NetworkAnimation } from "@saas/networks/lib/network-animation";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -490,13 +491,20 @@ export function IntegrationsPageContent() {
 										)
 									) : (
 										<div className="col-span-full flex flex-col items-center justify-center rounded-lg border border-dashed py-16 text-center">
-											<div className="flex size-12 items-center justify-center rounded-full bg-muted">
-												{category.icon ? (
-													<category.icon className="size-6 text-muted-foreground" />
-												) : (
-													<WifiIcon className="size-6 text-muted-foreground" />
-												)}
-											</div>
+											{category.id === "networks" &&
+											!searchQuery ? (
+												<div className="mb-6 w-full">
+													<NetworkAnimation />
+												</div>
+											) : (
+												<div className="flex size-12 items-center justify-center rounded-full bg-muted">
+													{category.icon ? (
+														<category.icon className="size-6 text-muted-foreground" />
+													) : (
+														<WifiIcon className="size-6 text-muted-foreground" />
+													)}
+												</div>
+											)}
 											<h3 className="mt-4 text-lg font-semibold">
 												{searchQuery
 													? "No matching integrations"
