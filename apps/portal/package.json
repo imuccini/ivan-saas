@@ -52,12 +52,12 @@
 	"devDependencies": {
 		"@repo/tailwind-config": "workspace:*",
 		"@repo/tsconfig": "workspace:*",
-		"@tailwindcss/postcss": "^4.1.12",
-		"@types/node": "24.3.1",
+		"@tailwindcss/postcss": "^4.1.18",
+		"@types/node": "25.0.1",
 		"@types/react": "19.1.12",
 		"@types/react-dom": "19.1.9",
 		"postcss": "8.5.6",
-		"tailwindcss": "4.1.12",
-		"typescript": "^5.8.4"
+		"tailwindcss": "4.1.18",
+		"typescript": "^5.9.3"
 	}
 }
