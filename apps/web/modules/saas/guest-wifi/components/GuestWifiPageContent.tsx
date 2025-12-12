@@ -105,7 +105,6 @@ export function GuestWifiPageContent() {
 				);
 			}
 			queryClient.invalidateQueries({
-				// @ts-expect-error - Type definition mismatch for key generation
 				queryKey: orpc.guestWifi.get.queryOptions({
 					input: {
 						workspaceId: activeWorkspace?.id || "",

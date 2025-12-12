@@ -63,10 +63,11 @@ function NetworkCard({ network, onEdit, onDelete }: NetworkCardProps) {
 			orpcClient.networks.sync(input),
 		onSuccess: () => {
 			queryClient.invalidateQueries({
-				// @ts-expect-error - Type definition mismatch for key generation
-				queryKey: orpc.networks.list.key({
-					workspaceId: activeWorkspace?.id || "",
-				}),
+				queryKey: orpc.networks.list.queryOptions({
+					input: {
+						workspaceId: activeWorkspace?.id || "",
+					},
+				}).queryKey,
 			});
 		},
 	});
@@ -324,10 +325,11 @@ export function NetworksPageContent() {
 		onSuccess: () => {
 			toast.success("Network deleted successfully");
 			queryClient.invalidateQueries({
-				// @ts-expect-error - Type definition mismatch for key generation
-				queryKey: orpc.networks.list.key({
-					workspaceId: activeWorkspace?.id || "",
-				}),
+				queryKey: orpc.networks.list.queryOptions({
+					input: {
+						workspaceId: activeWorkspace?.id || "",
+					},
+				}).queryKey,
 			});
 		},
 		onError: () => {
@@ -335,13 +337,12 @@ export function NetworksPageContent() {
 		},
 	});
 
-	const handleDelete = (id: string) => {
+	const handleDelete = (networkId: string) => {
 		if (!activeWorkspace?.id) return;
 
 		if (confirm("Are you sure you want to delete this network?")) {
-			// @ts-expect-error - Type inference might be lagging for new procedure
 			deleteMutation.mutate({
-				id,
+				id: networkId,
 				workspaceId: activeWorkspace.id,
 			});
 		}

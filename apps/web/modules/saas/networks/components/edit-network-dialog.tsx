@@ -50,10 +50,11 @@ export function EditNetworkDialog({
 
 			toast.success("Network configuration updated");
 			queryClient.invalidateQueries({
-				// @ts-expect-error - Type definition mismatch for key generation
-				queryKey: orpc.networks.list.key({
-					workspaceId: activeWorkspace?.id || "",
-				}),
+				queryKey: orpc.networks.list.queryOptions({
+					input: {
+						workspaceId: activeWorkspace?.id || "",
+					},
+				}).queryKey,
 			});
 			onOpenChange(false);
 		},
@@ -69,7 +70,6 @@ export function EditNetworkDialog({
 	const handleSave = (mapping: SSIDMapping) => {
 		if (!activeWorkspace?.id) return;
 
-		// @ts-expect-error - Type inference might be lagging for new procedure
 		updateSsidMappingMutation.mutate({
 			id: network.id,
 			workspaceId: activeWorkspace.id,

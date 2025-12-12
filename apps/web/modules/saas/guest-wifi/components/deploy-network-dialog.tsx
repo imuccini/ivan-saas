@@ -74,10 +74,11 @@ export function DeployNetworkDialog({
 				);
 			}
 			queryClient.invalidateQueries({
-				// @ts-expect-error - Type definition mismatch for key generation
-				queryKey: orpc.guestWifi.getStats.key({
-					workspaceId: activeWorkspace?.id || "",
-				}),
+				queryKey: orpc.guestWifi.getStats.queryOptions({
+					input: {
+						workspaceId: activeWorkspace?.id || "",
+					},
+				}).queryKey,
 			});
 			onOpenChange(false);
 			setSelectedNetworks([]);

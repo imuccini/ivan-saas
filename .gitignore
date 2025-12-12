@@ -43,3 +43,4 @@ dist/
 .react-email/
 .content-collections/
 google-credentials.json
+.vercel
