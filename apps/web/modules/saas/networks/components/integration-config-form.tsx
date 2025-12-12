@@ -19,6 +19,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@ui/components/select";
+import { Switch } from "@ui/components/switch";
 import { AlertCircle, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -50,9 +51,17 @@ export function IntegrationConfigForm({
 	const [clientId, setClientId] = useState("");
 	const [clientSecret, setClientSecret] = useState("");
 
+	// UniFi fields
+	const [unifiHost, setUnifiHost] = useState("");
+	const [unifiPort, setUnifiPort] = useState("8443");
+	const [unifiUsername, setUnifiUsername] = useState("");
+	const [unifiPassword, setUnifiPassword] = useState("");
+	const [allowSelfSigned, setAllowSelfSigned] = useState(true);
+
 	const vendorInfo = getVendor(vendor);
 	const isEditMode = !!editingIntegration;
 	const isAruba = vendor === "aruba";
+	const isUnifi = vendor === "ubiquiti";
 
 	// Validation mutation to test credentials
 	const validateMutation = useMutation({
@@ -62,6 +71,10 @@ export function IntegrationConfigForm({
 			clientSecret?: string;
 			regionUrl?: string; // regionUrl is not needed for the action, but kept for type compatibility if needed, though regionId is what matters
 			regionId?: string;
+			controllerUrl?: string;
+			username?: string;
+			password?: string;
+			allowSelfSigned?: boolean;
 		}) => {
 			// Import dynamically to avoid top-level server action import issues in some setups, strictly typing
 			const { validateIntegrationCredentials } = await import(
@@ -73,6 +86,10 @@ export function IntegrationConfigForm({
 				clientId: credentials.clientId,
 				clientSecret: credentials.clientSecret,
 				regionId: regionId, // Use state regionId
+				controllerUrl: credentials.controllerUrl,
+				username: credentials.username,
+				password: credentials.password,
+				allowSelfSigned: credentials.allowSelfSigned,
 			});
 
 			if (!result.success) {
@@ -92,6 +109,10 @@ export function IntegrationConfigForm({
 				setClientId("");
 				setClientSecret("");
 				setRegionId("");
+				setUnifiHost("");
+				setUnifiPort("8443");
+				setUnifiUsername("");
+				setUnifiPassword("");
 				setValidationError(null);
 				onComplete(data.id);
 			},
@@ -119,40 +140,86 @@ export function IntegrationConfigForm({
 			return;
 		}
 
+		if (vendor === "ubiquiti" && (!unifiHost || !unifiUsername || !unifiPassword)) {
+			setValidationError("Please fill in all required fields");
+			return;
+		}
+
 		setValidationError(null);
 
 		try {
+			let validationPayload: any = {};
+			let credentialsPayload: any = {};
+
+			if (vendor === "aruba") {
+				validationPayload = {
+					clientId,
+					clientSecret,
+					regionUrl: getArubaRegion(regionId)?.baseUrl,
+				};
+			} else if (vendor === "ubiquiti") {
+				const protocol = unifiHost.startsWith("http") ? "" : "https://";
+				const port = unifiPort ? `:${unifiPort}` : "";
+				// Make sure we don't duplicate protocol if user added it
+				const baseUrl = unifiHost.startsWith("http") ? unifiHost : `${protocol}${unifiHost}`;
+				// Construct URL ensuring port is handled
+				const controllerUrl = baseUrl.includes(":") && !baseUrl.includes("http") ? baseUrl : `${baseUrl}${port}`;
+				
+				// Cleaner Logic:
+				// If host contains http/https, use as is (maybe remove trailing slash)
+				// If not, assume https://HOST:PORT
+				let finalUrl = unifiHost;
+				if (!finalUrl.startsWith("http")) {
+					finalUrl = `https://${finalUrl}`;
+				}
+				finalUrl = finalUrl.replace(/\/$/, "");
+				// Append port if not present in host string
+				if (unifiPort && !finalUrl.split("://")[1].includes(":")) {
+					finalUrl = `${finalUrl}:${unifiPort}`;
+				}
+
+				validationPayload = {
+					controllerUrl: finalUrl,
+					username: unifiUsername,
+					password: unifiPassword,
+					allowSelfSigned,
+				};
+			} else {
+				// Meraki
+				validationPayload = { apiKey };
+			}
+
 			// Validate credentials first
-			const validationResult = await validateMutation.mutateAsync(
-				vendor === "aruba"
-					? {
-							clientId,
-							clientSecret,
-							regionUrl: getArubaRegion(regionId)?.baseUrl,
-						}
-					: { apiKey },
-			);
+			const validationResult = await validateMutation.mutateAsync(validationPayload);
 
 			// Build credentials object based on vendor
-			const credentials: any =
-				vendor === "aruba"
-					? {
-							clientId,
-							clientSecret,
-							accessToken: validationResult.accessToken,
-							refreshToken: validationResult.refreshToken,
-							expiresAt: validationResult.expiresAt,
-							regionUrl: getArubaRegion(regionId)?.baseUrl,
-							regionId,
-						}
-					: { apiKey };
+			if (vendor === "aruba") {
+				credentialsPayload = {
+					clientId,
+					clientSecret,
+					accessToken: validationResult.accessToken,
+					refreshToken: validationResult.refreshToken,
+					expiresAt: validationResult.expiresAt,
+					regionUrl: getArubaRegion(regionId)?.baseUrl,
+					regionId,
+				};
+			} else if (vendor === "ubiquiti") {
+				credentialsPayload = {
+					controllerUrl: validationPayload.controllerUrl,
+					username: unifiUsername,
+					password: unifiPassword,
+					allowSelfSigned,
+				};
+			} else {
+				credentialsPayload = { apiKey };
+			}
 
 			// If validation passes, create the integration
 			createMutation.mutate({
 				workspaceId: activeWorkspace.id,
 				provider: vendor,
 				name,
-				credentials,
+				credentials: credentialsPayload,
 			});
 		} catch (error) {
 			// Show validation error
@@ -272,9 +339,98 @@ export function IntegrationConfigForm({
 					</div>
 				</>
 			)}
+			
+			{/* Ubiquiti UniFi specific fields */}
+			{isUnifi && (
+				<>
+					<div className="grid grid-cols-3 gap-4">
+						<div className="col-span-2 space-y-2">
+							<Label htmlFor="unifiHost">Controller Host/IP</Label>
+							<Input
+								id="unifiHost"
+								placeholder="e.g. 192.168.1.1 or unifi.example.com"
+								value={unifiHost}
+								onChange={(e) => {
+									setUnifiHost(e.target.value);
+									setValidationError(null);
+								}}
+								required
+								disabled={isLoading}
+							/>
+						</div>
+						<div className="space-y-2">
+							<Label htmlFor="unifiPort">Port</Label>
+							<Input
+								id="unifiPort"
+								placeholder="8443"
+								value={unifiPort}
+								onChange={(e) => {
+									setUnifiPort(e.target.value);
+									setValidationError(null);
+								}}
+								required
+								disabled={isLoading}
+							/>
+						</div>
+					</div>
+					<p className="text-xs text-muted-foreground -mt-3">
+						The IP address or hostname of your UniFi Controller
+					</p>
+
+					<div className="space-y-2">
+						<Label htmlFor="unifiUsername">Username</Label>
+						<Input
+							id="unifiUsername"
+							placeholder="Username"
+							value={unifiUsername}
+							onChange={(e) => {
+								setUnifiUsername(e.target.value);
+								setValidationError(null);
+							}}
+							required
+							disabled={isLoading}
+							autoComplete="off"
+						/>
+					</div>
+
+					<div className="space-y-2">
+						<Label htmlFor="unifiPassword">Password</Label>
+						<Input
+							id="unifiPassword"
+							type="password"
+							placeholder="Password"
+							value={unifiPassword}
+							onChange={(e) => {
+								setUnifiPassword(e.target.value);
+								setValidationError(null);
+							}}
+							required
+							disabled={isLoading}
+							autoComplete="new-password"
+						/>
+					</div>
+
+					<div className="flex items-center space-x-2 rounded-lg border p-3">
+						<div className="flex-1 space-y-0.5">
+							<Label htmlFor="allowSelfSigned" className="text-base cursor-pointer">
+								Allow Self-Signed Certificates
+							</Label>
+							<p className="text-xs text-muted-foreground">
+								Enable if your controller uses a default SSL certificate
+							</p>
+						</div>
+						<Switch
+							id="allowSelfSigned"
+							checked={allowSelfSigned}
+							onCheckedChange={setAllowSelfSigned}
+							disabled={isLoading}
+						/>
+					</div>
+				</>
+			)}
 
 			{/* Meraki-specific fields */}
-			{!isAruba && (
+			{!isAruba && !isUnifi && (
 				<div className="space-y-2">
 					<Label htmlFor="apiKey">API Key</Label>
 					<Input
@@ -305,7 +461,7 @@ export function IntegrationConfigForm({
 						<Loader2 className="mr-2 h-4 w-4 animate-spin" />
 					)}
 					{validateMutation.isPending
-						? "Validating..."
+						? "Testing Connection..."
 						: createMutation.isPending
 							? "Creating..."
 							: isEditMode

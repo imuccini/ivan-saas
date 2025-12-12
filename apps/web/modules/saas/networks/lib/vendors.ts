@@ -50,8 +50,8 @@ export const NETWORK_VENDORS: Record<VendorId, NetworkVendor> = {
 	ubiquiti: {
 		id: "ubiquiti",
 		name: "Ubiquiti UniFi",
-		logo: "https://upload.wikimedia.org/wikipedia/commons/7/78/Ubiquiti_Logo_2023.svg",
-		comingSoon: true,
+		logo: "https://help.ui.com/hc/theming_assets/01JZWZNT6D2G975SYDXJ8ZQGPQ",
+		comingSoon: false,
 		description: "UniFi Network Controller",
 	},
 	fortigate: {
