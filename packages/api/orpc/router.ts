@@ -7,6 +7,7 @@ import { contactRouter } from "../modules/contact/router";
 import { customFieldsRouter } from "../modules/custom-fields/router";
 import { guestWifiRouter } from "../modules/guest-wifi/router";
 import { integrationsRouter } from "../modules/networks/integrations";
+import { identityProvidersRouter } from "../modules/identity-providers/router";
 import { merakiProxyRouter } from "../modules/networks/meraki-proxy";
 import { ubiquitiProxyRouter } from "../modules/networks/ubiquiti-proxy";
 import { networkProvisioningRouter } from "../modules/networks/network-provisioning";
@@ -43,6 +44,7 @@ export const router = publicProcedure
 		meraki: merakiProxyRouter,
 		ubiquiti: ubiquitiProxyRouter,
 		onboarding: onboardingRouter,
+		identityProviders: identityProvidersRouter,
 		networks: {
 			...networksRouter,
 			provision: networkProvisioningRouter.provision,

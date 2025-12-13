@@ -6,6 +6,7 @@ import { useActiveWorkspace } from "@saas/workspaces/hooks/use-active-workspace"
 import { orpc } from "@shared/lib/orpc-query-utils";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@ui/components/button";
+import { AddIdpDialog } from "./add-idp-dialog";
 import { NetworkAnimation } from "@saas/networks/lib/network-animation";
 import {
 	DropdownMenu,
@@ -35,18 +36,8 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 // Mock data for identity providers
-const MOCK_IDENTITY_PROVIDERS = [
-	{
-		id: "1",
-		name: "Microsoft Entra ID",
-		category: "identity-providers",
-		logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/Microsoft_logo.svg/512px-Microsoft_logo.svg.png",
-		status: "synced",
-		domain: "@corpornation.com",
-		users: 541,
-		groups: 5,
-	},
-];
+// Mock data removed
+
 
 const CATEGORIES = [
 	{ id: "networks", label: "Network Integrations", icon: WifiIcon },
@@ -286,6 +277,7 @@ export function IntegrationsPageContent() {
 	const [searchQuery, setSearchQuery] = useState("");
 	const [activeCategory, setActiveCategory] = useState("networks");
 	const [isDialogOpen, setIsDialogOpen] = useState(false);
+	const [isIdpDialogOpen, setIsIdpDialogOpen] = useState(false);
 	const [editingIntegration, setEditingIntegration] = useState<{
 		id: string;
 		name: string;
@@ -305,6 +297,18 @@ export function IntegrationsPageContent() {
 			enabled: !!activeWorkspace?.id && activeCategory === "networks",
 		});
 
+
+	
+	// Fetch identity provider integrations
+	const { data: idpIntegrations, isLoading: isLoadingIdps } = useQuery({
+		...orpc.identityProviders.list.queryOptions({
+			input: {
+				workspaceId: activeWorkspace?.id || "",
+			},
+		}),
+		enabled: !!activeWorkspace?.id && activeCategory === "identity-providers",
+	});
+
 	// Delete mutation
 	const deleteMutation = useMutation(
 		orpc.integrations.delete.mutationOptions({
@@ -314,6 +318,13 @@ export function IntegrationsPageContent() {
 				);
 				queryClient.invalidateQueries({
 					queryKey: orpc.integrations.list.queryKey({
+						input: {
+							workspaceId: activeWorkspace?.id || "",
+						},
+					}),
+				});
+				queryClient.invalidateQueries({
+					queryKey: orpc.identityProviders.list.queryKey({
 						input: {
 							workspaceId: activeWorkspace?.id || "",
 						},
@@ -334,7 +345,13 @@ export function IntegrationsPageContent() {
 					category: "networks",
 				}))
 			: activeCategory === "identity-providers"
-				? MOCK_IDENTITY_PROVIDERS
+				? (idpIntegrations || []).map((idp) => ({
+                    ...idp,
+                    category: "identity-providers",
+                    // Map config to stats if needed
+                    users: 0, // Mock or derived
+                    groups: 0, // Mock or derived
+                  }))
 				: [];
 
 	const filteredIntegrations = allIntegrations.filter((integration) => {
@@ -351,9 +368,17 @@ export function IntegrationsPageContent() {
 
 	const handleIntegrationCreated = () => {
 		setIsDialogOpen(false);
+		setIsIdpDialogOpen(false);
 		setEditingIntegration(null);
 		queryClient.invalidateQueries({
 			queryKey: orpc.integrations.list.queryKey({
+				input: {
+					workspaceId: activeWorkspace?.id || "",
+				},
+			}),
+		});
+		queryClient.invalidateQueries({
+			queryKey: orpc.identityProviders.list.queryKey({
 				input: {
 					workspaceId: activeWorkspace?.id || "",
 				},
@@ -391,7 +416,11 @@ export function IntegrationsPageContent() {
 
 	const handleAddNew = () => {
 		setEditingIntegration(null);
-		setIsDialogOpen(true);
+		if (activeCategory === "networks") {
+			setIsDialogOpen(true);
+		} else if (activeCategory === "identity-providers") {
+			setIsIdpDialogOpen(true);
+		}
 	};
 
 	return (
@@ -450,7 +479,14 @@ export function IntegrationsPageContent() {
 											Add Integration
 										</Button>
 									)}
-									{category.id !== "networks" && (
+
+									{category.id === "identity-providers" && (
+										<Button onClick={handleAddNew}>
+											<PlusIcon className="mr-2 size-4" />
+											Add Integration
+										</Button>
+									)}
+									{category.id !== "networks" && category.id !== "identity-providers" && (
 										<Button>
 											<PlusIcon className="mr-2 size-4" />
 											Add{" "}
@@ -758,6 +794,14 @@ export function IntegrationsPageContent() {
 				onSuccess={handleIntegrationCreated}
 				editingIntegration={editingIntegration}
 			/>
+
+			{/* Identity Provider Dialog */}
+			<AddIdpDialog
+				open={isIdpDialogOpen}
+				onOpenChange={setIsIdpDialogOpen}
+				onSuccess={handleIntegrationCreated}
+			/>
 		</div>
 	);
 }
+

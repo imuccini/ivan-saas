@@ -186,7 +186,7 @@ export type TermScalarFieldEnum = z.infer<typeof TermScalarFieldEnumSchema>;
 
 // File: IntegrationScalarFieldEnum.schema.ts
 
-export const IntegrationScalarFieldEnumSchema = z.enum(['id', 'workspaceId', 'provider', 'name', 'credentials', 'createdAt', 'updatedAt'])
+export const IntegrationScalarFieldEnumSchema = z.enum(['id', 'workspaceId', 'provider', 'name', 'credentials', 'config', 'createdAt', 'updatedAt'])
 
 export type IntegrationScalarFieldEnum = z.infer<typeof IntegrationScalarFieldEnumSchema>;
 
@@ -195,6 +195,24 @@ export type IntegrationScalarFieldEnum = z.infer<typeof IntegrationScalarFieldEn
 export const NetworkScalarFieldEnumSchema = z.enum(['id', 'workspaceId', 'integrationId', 'externalId', 'name', 'config', 'tags', 'provisioningStatus', 'createdAt', 'updatedAt'])
 
 export type NetworkScalarFieldEnum = z.infer<typeof NetworkScalarFieldEnumSchema>;
+
+// File: ByodUserScalarFieldEnum.schema.ts
+
+export const ByodUserScalarFieldEnumSchema = z.enum(['id', 'workspaceId', 'integrationId', 'externalId', 'email', 'name', 'status', 'createdAt', 'updatedAt'])
+
+export type ByodUserScalarFieldEnum = z.infer<typeof ByodUserScalarFieldEnumSchema>;
+
+// File: ByodUserGroupScalarFieldEnum.schema.ts
+
+export const ByodUserGroupScalarFieldEnumSchema = z.enum(['id', 'workspaceId', 'integrationId', 'externalId', 'name', 'description', 'createdAt', 'updatedAt'])
+
+export type ByodUserGroupScalarFieldEnum = z.infer<typeof ByodUserGroupScalarFieldEnumSchema>;
+
+// File: ByodUserGroupMemberScalarFieldEnum.schema.ts
+
+export const ByodUserGroupMemberScalarFieldEnumSchema = z.enum(['userId', 'groupId'])
+
+export type ByodUserGroupMemberScalarFieldEnum = z.infer<typeof ByodUserGroupMemberScalarFieldEnumSchema>;
 
 // File: SortOrder.schema.ts
 
@@ -713,6 +731,7 @@ export const IntegrationSchema = z.object({
   provider: z.string(),
   name: z.string(),
   credentials: z.unknown().refine((val) => { const getDepth = (obj: unknown, depth: number = 0): number => { if (depth > 10) return depth; if (obj === null || typeof obj !== 'object') return depth; const values = Object.values(obj as Record<string, unknown>); if (values.length === 0) return depth; return Math.max(...values.map(v => getDepth(v, depth + 1))); }; return getDepth(val) <= 10; }, "JSON nesting depth exceeds maximum of 10"),
+  config: z.unknown().refine((val) => { const getDepth = (obj: unknown, depth: number = 0): number => { if (depth > 10) return depth; if (obj === null || typeof obj !== 'object') return depth; const values = Object.values(obj as Record<string, unknown>); if (values.length === 0) return depth; return Math.max(...values.map(v => getDepth(v, depth + 1))); }; return getDepth(val) <= 10; }, "JSON nesting depth exceeds maximum of 10").nullish(),
   createdAt: z.date(),
   updatedAt: z.date(),
 });
@@ -736,4 +755,47 @@ export const NetworkSchema = z.object({
 });
 
 export type NetworkType = z.infer<typeof NetworkSchema>;
+
+
+// File: ByodUser.schema.ts
+
+export const ByodUserSchema = z.object({
+  id: z.string(),
+  workspaceId: z.string(),
+  integrationId: z.string(),
+  externalId: z.string(),
+  email: z.string(),
+  name: z.string().nullish(),
+  status: z.string().default("active"),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
+export type ByodUserType = z.infer<typeof ByodUserSchema>;
+
+
+// File: ByodUserGroup.schema.ts
+
+export const ByodUserGroupSchema = z.object({
+  id: z.string(),
+  workspaceId: z.string(),
+  integrationId: z.string(),
+  externalId: z.string(),
+  name: z.string(),
+  description: z.string().nullish(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
+export type ByodUserGroupType = z.infer<typeof ByodUserGroupSchema>;
+
+
+// File: ByodUserGroupMember.schema.ts
+
+export const ByodUserGroupMemberSchema = z.object({
+  userId: z.string(),
+  groupId: z.string(),
+});
+
+export type ByodUserGroupMemberType = z.infer<typeof ByodUserGroupMemberSchema>;
 
