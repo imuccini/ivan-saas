@@ -29,7 +29,7 @@ const nextConfig: NextConfig = {
 							"img-src 'self' data: https:",
 							"font-src 'self' data:",
 							"connect-src 'self'",
-							"frame-ancestors 'self' http://localhost:3000 https://localhost:3000",
+							"frame-ancestors 'self' http://localhost:3000 https://localhost:3000 https://ivan-saas-web.vercel.app https://*.vercel.app",
 						].join("; "),
 					},
 					{ key: "X-Content-Type-Options", value: "nosniff" },

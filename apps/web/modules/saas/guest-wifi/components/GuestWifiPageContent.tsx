@@ -129,6 +129,13 @@ export function GuestWifiPageContent() {
 		});
 	};
 
+	// Determine portal URL
+	const portalBaseUrl =
+		process.env.NEXT_PUBLIC_PORTAL_URL ||
+		(process.env.NODE_ENV === "production"
+			? "https://ivan-saas-portal-gu4vauvxo-ivans-projects-455eee57.vercel.app"
+			: "http://localhost:3001");
+
 	return (
 		<div className="space-y-6">
 			{/* Status Card */}
@@ -383,7 +390,7 @@ export function GuestWifiPageContent() {
 										className="h-8 w-8 bg-background/80 hover:bg-background shadow-sm"
 										onClick={() =>
 											window.open(
-												`${process.env.NEXT_PUBLIC_PORTAL_URL || "http://localhost:3001"}/${activeOrganization.id}/${activeWorkspace.id}/${guestWifiConfig.id}`,
+												`${portalBaseUrl}/${activeOrganization.id}/${activeWorkspace.id}/${guestWifiConfig.id}`,
 												"_blank",
 											)
 										}
@@ -395,7 +402,7 @@ export function GuestWifiPageContent() {
 								<div className="absolute inset-0 flex items-center justify-center">
 									<iframe
 										key={refreshKey}
-										src={`${process.env.NEXT_PUBLIC_PORTAL_URL || "http://localhost:3001"}/${activeOrganization.id}/${activeWorkspace.id}/${guestWifiConfig.id}`}
+										src={`${portalBaseUrl}/${activeOrganization.id}/${activeWorkspace.id}/${guestWifiConfig.id}`}
 										className="absolute inset-0 w-full h-full origin-top-left pointer-events-none"
 										style={{
 											transform: "scale(0.335)",
