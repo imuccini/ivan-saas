@@ -133,7 +133,7 @@ export function GuestWifiPageContent() {
 	const portalBaseUrl =
 		process.env.NEXT_PUBLIC_PORTAL_URL ||
 		(process.env.NODE_ENV === "production"
-			? "https://ivan-saas-portal-gu4vauvxo-ivans-projects-455eee57.vercel.app"
+			? "https://ivan-saas-portal.vercel.app"
 			: "http://localhost:3001");
 
 	return (
